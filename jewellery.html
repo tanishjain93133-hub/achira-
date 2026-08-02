@@ -473,8 +473,8 @@
                     <li class="nav-item active"><a href="jewellery.html" class="nav-link">Jewellery</a></li>
                     
                     <li class="nav-item"><a href="collections.html" class="nav-link">Products</a></li>
-
-                    <li class="nav-item"><a href="#contact" class="nav-link">Contact</a></li>
+                    <li class="nav-item"><a href="index.html#contact" class="nav-link">Contact</a></li>
+                    <li class="nav-item"><a href="admin.html" class="nav-link" style="color: #B88A44; font-weight: 700;">👑 Admin Portal</a></li>
                 </ul>
             </nav>
 
@@ -904,7 +904,7 @@
                                 <span class="price">₹${p.price.toLocaleString('en-IN')}</span>
                             </div>
                             <div class="jewellery-card-buttons">
-                                <button class="btn-add-cart-solid" onclick="addToCart('${p.name}', '${p.price.toLocaleString()}')">Add to Bag</button>
+                                <button class="btn-add-cart-solid" onclick="buyNowWithName('${p.name}', '${p.price.toLocaleString()}')" style="background: var(--color-gold-gradient); color: var(--color-black-text); font-weight: 700;">BUY NOW</button>
                                 <button class="btn-view-details" onclick="alert('Displaying Atelier details for ${p.name}')">View Details</button>
                             </div>
                         </div>

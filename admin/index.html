@@ -532,11 +532,12 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Order ID</th>
-                                <th>Customer Name</th>
-                                <th>Items Ordered</th>
-                                <th>Amount</th>
-                                <th>Payment</th>
+                                <th>Order ID &amp; Date</th>
+                                <th>Customer Details</th>
+                                <th>Delivery Address</th>
+                                <th>Purchased Products</th>
+                                <th>Total Amount</th>
+                                <th>Payment Method</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
@@ -738,9 +739,9 @@
         ];
 
         let orders = [
-            { id: "ORD-9021", customer: "Priya Sharma", items: "Royal Velvet Gown x 1", total: 8900, status: "Delivered", date: "2026-08-01" },
-            { id: "ORD-9022", customer: "Ananya Roy", items: "Banarasi Silk Saree x 1", total: 8500, status: "Processing", date: "2026-08-02" },
-            { id: "ORD-9023", customer: "Kavita Verma", items: "Lucknowi Chikankari Tunic x 2", total: 5800, status: "Shipped", date: "2026-08-02" }
+            { id: "ACH-9021", userName: "Priya Sharma", userEmail: "priya@gmail.com", userPhone: "+91 98765 43210", userAddress: "Flat 402, Royal Palms, Bandra West, Mumbai - 400050", itemsSummary: "Royal Heritage Velvet Gown (x1)", grandTotal: 8900, paymentMode: "UPI (QR)", status: "Delivered", date: "2026-08-01" },
+            { id: "ACH-9022", userName: "Ananya Roy", userEmail: "ananya.roy@yahoo.com", userPhone: "+91 98123 45678", userAddress: "B-12, Green Park Main, New Delhi - 110016", itemsSummary: "Avani Banarasi Silk Saree (x1)", grandTotal: 8500, paymentMode: "UPI (QR)", status: "Processing", date: "2026-08-02" },
+            { id: "ACH-9023", userName: "Kavita Verma", userEmail: "kavita.v@outlook.com", userPhone: "+91 97654 32109", userAddress: "House 88, Sector 15, Chandigarh - 160015", itemsSummary: "Atelier Lucknowi Chikankari Tunic (x2)", grandTotal: 5800, paymentMode: "COD", status: "Shipped", date: "2026-08-02" }
         ];
 
         let customers = [
@@ -808,6 +809,19 @@
             }
         }
 
+        function updateOrderStatus(orderId, newStatus) {
+            let localOrders = getDB('orders');
+            let matched = localOrders.find(o => o.id === orderId);
+            if (matched) {
+                matched.status = newStatus;
+                localStorage.setItem('orders', JSON.stringify(localOrders));
+            } else {
+                let def = orders.find(o => o.id === orderId);
+                if (def) def.status = newStatus;
+            }
+            renderAllData();
+        }
+
         function renderAllData() {
             const localOrders = getDB('orders');
             let combinedOrders = [...localOrders, ...orders];
@@ -838,13 +852,42 @@
             const allOrdersBody = document.getElementById('allOrdersBody');
             const orderRows = uniqueOrders.map(o => `
                 <tr>
-                    <td><strong>${o.id}</strong></td>
-                    <td>${o.userName || o.customer || "Valued Patron"}</td>
-                    <td>${o.itemsSummary || o.items || "Couture Product"}</td>
-                    <td>₹${(o.grandTotal || o.total || 0).toLocaleString('en-IN')}</td>
-                    <td>${o.paymentMode || "Prepaid"}</td>
-                    <td><span class="badge ${o.status === 'Delivered' ? 'badge-success' : 'badge-warning'}">${o.status || 'Processing'}</span></td>
-                    <td><button class="btn-action btn-edit" onclick="alert('Order ID ${o.id} status updated')">Update</button></td>
+                    <td>
+                        <strong style="color: var(--primary);">${o.id}</strong><br>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">${o.date || 'Today'}</span>
+                    </td>
+                    <td>
+                        <strong>${o.userName || o.customer || "Valued Patron"}</strong><br>
+                        <span style="font-size: 0.78rem; color: var(--text-muted);">${o.userEmail || ''}<br>${o.userPhone || ''}</span>
+                    </td>
+                    <td style="max-width: 180px; font-size: 0.8rem; line-height: 1.4;">
+                        ${o.userAddress || 'Standard Delivery Address'}
+                    </td>
+                    <td style="max-width: 220px; font-weight: 500;">
+                        ${o.itemsSummary || o.items || "Couture Product"}
+                    </td>
+                    <td>
+                        <strong style="color: var(--gold); font-size: 1rem;">₹${(o.grandTotal || o.total || 0).toLocaleString('en-IN')}</strong>
+                    </td>
+                    <td>
+                        <span class="badge ${o.paymentMode === 'UPI' || o.paymentMode === 'UPI (QR)' ? 'badge-success' : 'badge-info'}">
+                            ${o.paymentMode === 'UPI' || o.paymentMode === 'UPI (QR)' ? '📱 UPI (QR Paid)' : (o.paymentMode || 'Prepaid')}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge ${o.status === 'Delivered' ? 'badge-success' : (o.status === 'Cancelled' ? 'badge-danger' : 'badge-warning')}">
+                            ${o.status || 'Processing'}
+                        </span>
+                    </td>
+                    <td>
+                        <select onchange="updateOrderStatus('${o.id}', this.value)" style="padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; border: 1px solid var(--border-color); cursor: pointer;">
+                            <option value="Processing" ${o.status === 'Processing' ? 'selected' : ''}>Processing</option>
+                            <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                            <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                            <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                            <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                        </select>
+                    </td>
                 </tr>
             `).join('');
 

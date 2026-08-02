@@ -742,15 +742,27 @@ function handleApplyCoupon() {
     }
 }
 
+function buyNow(productId) {
+    addItemToCart(productId);
+    openCheckoutModal();
+}
+
+function buyNowWithName(itemName, itemPrice) {
+    addToCart(itemName, itemPrice);
+    openCheckoutModal();
+}
+
 function handlePlaceOrder(e) {
     e.preventDefault();
+    const nameInput = document.getElementById('checkoutName');
     const phoneInput = document.getElementById('checkoutPhone');
     const addressInput = document.getElementById('checkoutAddress');
     const payModeRadio = document.querySelector('input[name="paymentMethod"]:checked');
     
-    const phone = phoneInput ? phoneInput.value : "+91 98765 43210";
-    const address = addressInput ? addressInput.value : "Standard Address, India";
-    const payMode = payModeRadio ? payModeRadio.value : "Prepaid";
+    const customerName = nameInput && nameInput.value.trim() ? nameInput.value.trim() : (currentUser ? currentUser.name : "Valued Patron");
+    const phone = phoneInput && phoneInput.value.trim() ? phoneInput.value.trim() : "+91 98765 43210";
+    const address = addressInput && addressInput.value.trim() ? addressInput.value.trim() : "Standard Delivery Address, India";
+    const payMode = payModeRadio ? payModeRadio.value : "UPI (QR)";
     const userToken = localStorage.getItem('userToken');
     
     const cart = getDB('cart');
@@ -776,8 +788,8 @@ function handlePlaceOrder(e) {
     const orderId = "ACH-" + Math.floor(100000 + Math.random() * 900000);
     const formattedOrder = {
         id: orderId,
-        userEmail: currentUser ? currentUser.email : "guest@achira.com",
-        userName: currentUser ? currentUser.name : "Valued Patron",
+        userEmail: currentUser ? currentUser.email : (customerName.toLowerCase().replace(/\s+/g, '') + "@gmail.com"),
+        userName: customerName,
         userPhone: phone,
         userAddress: address,
         paymentMode: payMode,
@@ -799,6 +811,7 @@ function handlePlaceOrder(e) {
             'Authorization': `Bearer ${userToken}`
         },
         body: JSON.stringify({
+            name: customerName,
             phone,
             address,
             paymentMethod: payMode,
