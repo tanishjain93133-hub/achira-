@@ -1671,7 +1671,7 @@ body::before {
 }
 
 /* Custom Gold Checked Checkboxes */
-.featured-sidebar .checkbox-label {
+.checkbox-label {
     display: flex;
     align-items: center;
     font-family: var(--font-body);
@@ -1680,10 +1680,12 @@ body::before {
     cursor: pointer;
     position: relative;
     padding-left: 28px;
+    margin-bottom: 10px;
     user-select: none;
+    width: 100%;
 }
 
-.featured-sidebar .checkbox-label input {
+.checkbox-label input {
     position: absolute;
     opacity: 0;
     cursor: pointer;
@@ -1691,38 +1693,31 @@ body::before {
     width: 0;
 }
 
-.featured-sidebar .checkmark {
+.checkmark {
     position: absolute;
     top: 2px;
     left: 0;
     height: 18px;
     width: 18px;
     background-color: #FFFFFF;
-    border: 1px solid rgba(184, 138, 68, 0.3);
+    border: 1px solid rgba(184, 138, 68, 0.4);
     border-radius: 3px;
     transition: var(--transition-fast);
 }
 
-.featured-sidebar .checkbox-label:hover input ~ .checkmark {
+.checkbox-label:hover input ~ .checkmark {
     border-color: #B88A44;
 }
 
-.featured-sidebar .checkbox-label input:checked ~ .checkmark {
+.checkbox-label input:checked ~ .checkmark {
     background-color: #B88A44;
     border-color: #B88A44;
 }
 
-.featured-sidebar .checkmark::after {
+.checkmark::after {
     content: "";
     position: absolute;
     display: none;
-}
-
-.featured-sidebar .checkbox-label input:checked ~ .checkmark::after {
-    display: block;
-}
-
-.featured-sidebar .checkmark::after {
     left: 6px;
     top: 2px;
     width: 4px;
@@ -1730,6 +1725,10 @@ body::before {
     border: solid #FFFFFF;
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
+}
+
+.checkbox-label input:checked ~ .checkmark::after {
+    display: block;
 }
 
 .featured-sidebar .filter-search-input {
