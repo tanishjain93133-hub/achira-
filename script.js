@@ -758,16 +758,53 @@ function handlePlaceOrder(e) {
     const phoneInput = document.getElementById('checkoutPhone');
     const addressInput = document.getElementById('checkoutAddress');
     const payModeRadio = document.querySelector('input[name="paymentMethod"]:checked');
+    const errBox = document.getElementById('checkoutErrorMsg');
     
-    const customerName = nameInput && nameInput.value.trim() ? nameInput.value.trim() : (currentUser ? currentUser.name : "Valued Patron");
-    const phone = phoneInput && phoneInput.value.trim() ? phoneInput.value.trim() : "+91 98765 43210";
-    const address = addressInput && addressInput.value.trim() ? addressInput.value.trim() : "Standard Delivery Address, India";
+    if (errBox) errBox.style.display = 'none';
+
+    const customerName = nameInput ? nameInput.value.trim() : "";
+    const phoneRaw = phoneInput ? phoneInput.value.trim() : "";
+    const address = addressInput ? addressInput.value.trim() : "";
+
+    function showCheckoutError(msg, targetEl) {
+        if (errBox) {
+            errBox.innerHTML = `⚠️ ${msg}`;
+            errBox.style.display = 'block';
+        } else {
+            alert(`⚠️ ${msg}`);
+        }
+        if (targetEl) targetEl.focus();
+    }
+
+    // 1. Validate Full Name
+    if (!customerName || customerName.length < 3) {
+        showCheckoutError("Please enter your complete Full Name (at least 3 characters).", nameInput);
+        return;
+    }
+
+    // 2. Validate Phone Number (Strict 10-digit Mobile Number)
+    const cleanPhone = phoneRaw.replace(/[\s\-\+\(\)]/g, '');
+    const phoneDigitsOnly = cleanPhone.startsWith('91') && cleanPhone.length === 12 ? cleanPhone.slice(2) : cleanPhone;
+    const phoneRegex = /^[6-9]\d{9}$/;
+    
+    if (!phoneRegex.test(phoneDigitsOnly)) {
+        showCheckoutError("Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9 (e.g. 9876543210).", phoneInput);
+        return;
+    }
+
+    // 3. Validate Delivery Address
+    if (!address || address.length < 10) {
+        showCheckoutError("Please enter a complete delivery address with House/Flat No, Street, City, and Pincode (at least 10 characters).", addressInput);
+        return;
+    }
+
+    const formattedPhone = "+91 " + phoneDigitsOnly.slice(0, 5) + " " + phoneDigitsOnly.slice(5);
     const payMode = payModeRadio ? payModeRadio.value : "UPI (QR)";
     const userToken = localStorage.getItem('userToken');
     
     const cart = getDB('cart');
     if (cart.length === 0) {
-        alert("Your shopping bag is empty!");
+        showCheckoutError("Your shopping bag is empty! Please add items to proceed.", null);
         return;
     }
 
@@ -790,7 +827,7 @@ function handlePlaceOrder(e) {
         id: orderId,
         userEmail: currentUser ? currentUser.email : (customerName.toLowerCase().replace(/\s+/g, '') + "@gmail.com"),
         userName: customerName,
-        userPhone: phone,
+        userPhone: formattedPhone,
         userAddress: address,
         paymentMode: payMode,
         subtotal: subtotal,
