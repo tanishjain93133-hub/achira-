@@ -776,25 +776,22 @@ function handlePlaceOrder(e) {
         if (targetEl) targetEl.focus();
     }
 
-    // 1. Validate Full Name
-    if (!customerName || customerName.length < 3) {
-        showCheckoutError("Please enter your complete Full Name (at least 3 characters).", nameInput);
-        return;
-    }
+    // 1. Full Name (Optional or validated if entered)
+    const customerName = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : (currentUser ? currentUser.name : "Valued Patron");
 
-    // 2. Validate Phone Number (Strict 10-digit Mobile Number)
+    // 2. Validate Phone Number (10-digit Indian Mobile Number)
     const cleanPhone = phoneRaw.replace(/[\s\-\+\(\)]/g, '');
     const phoneDigitsOnly = cleanPhone.startsWith('91') && cleanPhone.length === 12 ? cleanPhone.slice(2) : cleanPhone;
     const phoneRegex = /^[6-9]\d{9}$/;
     
     if (!phoneRegex.test(phoneDigitsOnly)) {
-        showCheckoutError("Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9 (e.g. 9876543210).", phoneInput);
+        showCheckoutError("Please enter a valid 10-digit mobile number (e.g. 7049845357).", phoneInput);
         return;
     }
 
     // 3. Validate Delivery Address
-    if (!address || address.length < 10) {
-        showCheckoutError("Please enter a complete delivery address with House/Flat No, Street, City, and Pincode (at least 10 characters).", addressInput);
+    if (!address || address.length < 5) {
+        showCheckoutError("Please enter your complete delivery address.", addressInput);
         return;
     }
 
@@ -1552,34 +1549,51 @@ function injectModalsHTML() {
             <h3 class="modal-title-serif">Secure Luxury Checkout</h3>
             <div class="checkout-grid">
                 <form id="checkoutForm" onsubmit="handlePlaceOrder(event)">
-                    <h4>1. Delivery Address</h4>
-                    <div class="input-row">
+                    <h4>1. Customer Details &amp; Address</h4>
+                    <div class="input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                        <div class="input-group">
+                            <label>Full Name</label>
+                            <input type="text" placeholder="e.g. Ananya Sharma" id="checkoutName">
+                        </div>
                         <div class="input-group">
                             <label>Phone Number</label>
                             <input type="text" placeholder="+91 98765 43210" id="checkoutPhone" required>
                         </div>
                     </div>
-                    <div class="input-group">
+                    <div class="input-group" style="margin-bottom: 16px;">
                         <label>Delivery Address</label>
-                        <textarea placeholder="Suite No, Building Name, Street Address, City, Pincode" id="checkoutAddress" required></textarea>
+                        <textarea placeholder="House/Flat No, Street, Landmark, City, Pincode" id="checkoutAddress" required style="height: 60px;"></textarea>
                     </div>
 
-                    <h4 style="margin-top: 30px;">2. Payment Method</h4>
+                    <h4 style="margin-top: 20px; margin-bottom: 10px;">2. Select Payment Method</h4>
                     <div class="payment-methods-grid">
                         <label class="pay-option">
-                            <input type="radio" name="paymentMethod" value="COD" checked>
+                            <input type="radio" name="paymentMethod" value="UPI (QR)" checked onchange="document.getElementById('upiQrBox').style.display='block';">
+                            <span class="pay-label">📱 Scan UPI QR Code (GPay / PhonePe / Paytm)</span>
+                        </label>
+                        <label class="pay-option">
+                            <input type="radio" name="paymentMethod" value="COD" onchange="document.getElementById('upiQrBox').style.display='none';">
                             <span class="pay-label">💵 Cash on Delivery</span>
                         </label>
                         <label class="pay-option">
-                            <input type="radio" name="paymentMethod" value="UPI">
-                            <span class="pay-label">📱 UPI Payments</span>
-                        </label>
-                        <label class="pay-option">
-                            <input type="radio" name="paymentMethod" value="Razorpay">
-                            <span class="pay-label">💳 Credit Card / Razorpay</span>
+                            <input type="radio" name="paymentMethod" value="NetBanking" onchange="document.getElementById('upiQrBox').style.display='none';">
+                            <span class="pay-label">💳 Credit Card / Net Banking</span>
                         </label>
                     </div>
-                    <button type="submit" class="place-order-submit-btn">CONFIRM &amp; PLACE ORDER</button>
+
+                    <!-- Dynamic UPI QR Display -->
+                    <div id="upiQrBox" style="background: rgba(184,138,68,0.06); border: 1.5px dashed #B88A44; padding: 16px; border-radius: 12px; text-align: center; margin-top: 15px;">
+                        <span style="font-size: 0.8rem; font-weight: 700; color: #3C0008; display: block; margin-bottom: 8px;">Scan QR Code using GPay, PhonePe, Paytm, or BHIM UPI</span>
+                        <div style="background: #FFF; padding: 10px; display: inline-block; border-radius: 10px; border: 1px solid rgba(184,138,68,0.3);">
+                            <img id="upiQrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=achiracouture@upi%26pn=Achira%20Couture" alt="UPI QR Code" style="width: 150px; height: 150px; display: block;">
+                        </div>
+                        <div style="font-size: 0.8rem; color: #2C2C2C; margin-top: 8px;">UPI ID: <strong style="color: #3C0008;">achiracouture@upi</strong></div>
+                    </div>
+
+                    <!-- Validation Error Box -->
+                    <div id="checkoutErrorMsg" style="color: #800020; font-size: 0.82rem; font-weight: 700; margin-top: 12px; display: none; background: rgba(128,0,32,0.08); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(128,0,32,0.2); text-align: left;"></div>
+
+                    <button type="submit" class="place-order-submit-btn" style="margin-top: 15px;">CONFIRM &amp; PLACE ORDER</button>
                 </form>
 
                 <div class="checkout-summary-box">
