@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dresses Collection | ACHIRA Luxury Indian Ethnic Wear</title>
+    <meta name="description" content="Discover handcrafted elegance with ACHIRA's premium collections of Cotton, Lucknowi, Anarkali, and designer Dresses. Handcrafted luxury since 1960.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600;700&family=Cinzel:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <style>
+        /* Collection Page Specific Styles */
+        .collection-header-banner {
+            padding: 60px 0 40px;
+            background: linear-gradient(180deg, rgba(200, 164, 93, 0.05) 0%, transparent 100%);
+            border-bottom: 1px solid var(--color-border-light);
+            text-align: center;
+        }
+
+        .breadcrumb {
+            font-size: 0.78rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--color-muted-gold);
+            margin-bottom: 16px;
+        }
+
+        .breadcrumb a {
+            transition: var(--transition-fast);
+        }
+
+        .breadcrumb a:hover {
+            color: var(--color-black-text);
+        }
+
+        .breadcrumb .separator {
+            margin: 0 8px;
+            color: rgba(200, 164, 93, 0.4);
+        }
+
+        .collection-title-wrap h2 {
+            font-family: var(--font-heading);
+            font-size: 3rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            color: var(--color-black-text);
+            margin-bottom: 8px;
+        }
+
+        .product-count-bar {
+            max-width: var(--container-max-width);
+            margin: 0 auto;
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--color-border-light);
+        }
+
+        .product-count {
+            font-size: 0.9rem;
+            color: var(--color-charcoal-body);
+            font-weight: 500;
+        }
+
+        .sort-dropdown select {
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            padding: 8px 16px;
+            border: 1px solid var(--color-border-light);
+            background: var(--color-white);
+            color: var(--color-black-text);
+            outline: none;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: var(--transition-fast);
+        }
+
+        .sort-dropdown select:hover {
+            border-color: var(--color-gold-primary);
+        }
+
+        /* Layout Grid */
+        .collection-layout {
+            max-width: var(--container-max-width);
+            margin: 0 auto;
+            padding: 40px 32px 80px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 40px;
+        }
+
+        /* Sidebar Filters */
+        .filter-sidebar {
+            background: var(--color-cream-card);
+            border: 1px solid var(--color-border-light);
+            border-radius: var(--radius-card);
+            padding: 28px;
+            height: fit-content;
+            position: sticky;
+            top: 130px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+        }
+
+        .filter-header {
+            font-family: var(--font-heading);
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: var(--color-black-text);
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--color-gold-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .clear-filters-btn {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--color-gold-dark);
+            text-decoration: underline;
+        }
+
+        .filter-group {
+            margin-bottom: 24px;
+            border-bottom: 1px solid rgba(200, 164, 93, 0.15);
+            padding-bottom: 20px;
+        }
+
+        .filter-group:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+
+        .filter-title {
+            font-family: var(--font-heading);
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--color-black-text);
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .filter-title::after {
+            content: '▾';
+            font-size: 0.8rem;
+            color: var(--color-gold-primary);
+            transition: var(--transition-fast);
+        }
+
+        .filter-title.collapsed::after {
+            transform: rotate(-90deg);
+        }
+
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: var(--transition-smooth);
+            max-height: 500px;
+            overflow: hidden;
+        }
+
+        .filter-options.collapsed {
+            max-height: 0;
+            padding: 0;
+            margin: 0;
+            opacity: 0;
+        }
+
+        /* Search Filter */
+        .filter-search-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--color-border-light);
+            background: var(--color-white);
+            border-radius: 4px;
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            color: var(--color-black-text);
+            outline: none;
+            transition: var(--transition-fast);
+        }
+
+        .filter-search-input:focus {
+            border-color: var(--color-gold-primary);
+            box-shadow: 0 0 0 3px var(--color-gold-glow);
+        }
+
+        /* Custom Checkbox */
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            font-size: 0.88rem;
+            color: var(--color-charcoal-body);
+            cursor: pointer;
+            position: relative;
+            padding-left: 28px;
+            user-select: none;
+        }
+
+        .checkbox-label input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 2px;
+            left: 0;
+            height: 18px;
+            width: 18px;
+            background-color: var(--color-white);
+            border: 1px solid var(--color-border-light);
+            border-radius: 3px;
+            transition: var(--transition-fast);
+        }
+
+        .checkbox-label:hover input ~ .checkmark {
+            border-color: var(--color-gold-primary);
+        }
+
+        .checkbox-label input:checked ~ .checkmark {
+            background-color: var(--color-gold-primary);
+            border-color: var(--color-gold-primary);
+        }
+
+        .checkmark::after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+
+        .checkbox-label input:checked ~ .checkmark::after {
+            display: block;
+        }
+
+        .checkbox-label .checkmark::after {
+            left: 6px;
+            top: 2px;
+            width: 4px;
+            height: 9px;
+            border: solid var(--color-white);
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        /* Price Slider */
+        .price-slider-wrap {
+            padding: 10px 5px;
+        }
+
+        .slider-inputs {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+            font-size: 0.85rem;
+            color: var(--color-charcoal-body);
+        }
+
+        .price-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--color-border-light);
+            outline: none;
+            transition: var(--transition-fast);
+        }
+
+        .price-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--color-gold-gradient);
+            border: 1px solid var(--color-gold-dark);
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .price-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            box-shadow: 0 0 10px var(--color-gold-glow);
+        }
+
+        /* Product Grid Right */
+        .products-grid-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+
+        @media (max-width: 1400px) {
+            .products-grid-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .products-grid-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .collection-layout {
+                grid-template-columns: 1fr;
+            }
+            .filter-sidebar {
+                position: static;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .products-grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Announcement Bar -->
+    <div class="announcement-bar">
+        <div class="announcement-content">
+            <span>✨ Complimenting Express Global Shipping on All Couture Orders</span>
+            <span class="divider">•</span>
+            <span>Handcrafted in India Since 1960</span>
+            <span class="divider">•</span>
+            <span>Book a Private Bridal Consultation: +91 98765 43210</span>
+        </div>
+    </div>
+
+    <!-- Glassmorphism Header & Navigation -->
+    <header class="luxury-header scrolled" id="mainHeader">
+        <div class="header-container">
+            
+            <!-- Mobile Menu Toggle Button -->
+            <button class="mobile-toggle" id="mobileMenuBtn" aria-label="Toggle Navigation">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+
+            <!-- Brand Logo -->
+            <a href="index.html" class="brand-logo">
+                <span class="logo-mark">⚜</span>
+                <div class="logo-text-wrapper">
+                    <span class="logo-title" style="font-size: 1.8rem;">ACHIRA</span>
+                    <span class="logo-subtitle">EST. 1960 • NEW DELHI</span>
+                </div>
+            </a>
+
+            <!-- Primary Navigation Bar -->
+            <nav class="nav-menu" id="navMenu">
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="index.html#home" class="nav-link">Home</a></li>
+                    <li class="nav-item"><a href="index.html#about" class="nav-link">About</a></li>
+                    <li class="nav-item"><a href="index.html#women" class="nav-link">Women</a></li>
+                    <li class="nav-item"><a href="jewellery.html" class="nav-link">Jewellery</a></li>
+                    
+                    <!-- Mega Menu Parent Item -->
+                    <li class="nav-item has-megamenu active" id="productsMegaItem">
+                        <a href="index.html#products" class="nav-link">
+                            Products
+                            <svg class="dropdown-icon" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M1 1L5 5L9 1" />
+                            </svg>
+                        </a>
+                        
+                        <!-- Mega Menu Container -->
+                        <div class="mega-menu" id="megaMenu">
+                            <div class="mega-menu-wrapper">
+                                <div class="mega-column">
+                                    <h4 class="mega-title">Dresses</h4>
+                                    <ul class="mega-links">
+                                        <li><a href="collections.html#cotton-kurti"><span class="link-bullet">❖</span> Cotton Dresses</a></li>
+                                        <li><a href="collections.html#lucknowi-kurti"><span class="link-bullet">❖</span> Lucknowi Dresses</a></li>
+                                        <li><a href="collections.html#straight-kurti"><span class="link-bullet">❖</span> Straight Dresses</a></li>
+                                        <li><a href="collections.html#anarkali-kurti"><span class="link-bullet">❖</span> Anarkali Dresses</a></li>
+                                        <li><a href="collections.html#indo-western-kurti"><span class="link-bullet">❖</span> Indo Western Dresses</a></li>
+                                        <li><a href="collections.html#a-line-kurti"><span class="link-bullet">❖</span> A-Line Dresses</a></li>
+                                        <li><a href="collections.html#printed-kurti"><span class="link-bullet">❖</span> Printed Dresses</a></li>
+                                        <li><a href="collections.html#embroidered-kurti"><span class="link-bullet">❖</span> Embroidered Dresses</a></li>
+                                        <li><a href="collections.html#party-wear-kurti"><span class="link-bullet">❖</span> Party Wear Dresses</a></li>
+                                    </ul>
+                                </div>
+                                <div class="mega-column">
+                                    <h4 class="mega-title">Lehenga</h4>
+                                    <ul class="mega-links">
+                                        <li><a href="#bridal-lehenga"><span class="link-bullet">❖</span> Bridal Lehenga</a></li>
+                                        <li><a href="#party-wear-lehenga"><span class="link-bullet">❖</span> Party Wear Lehenga</a></li>
+                                        <li><a href="#designer-lehenga"><span class="link-bullet">❖</span> Designer Lehenga</a></li>
+                                        <li><a href="#silk-lehenga"><span class="link-bullet">❖</span> Silk Lehenga</a></li>
+                                        <li><a href="#velvet-lehenga"><span class="link-bullet">❖</span> Velvet Lehenga</a></li>
+                                        <li><a href="#georgette-lehenga"><span class="link-bullet">❖</span> Georgette Lehenga</a></li>
+                                        <li><a href="#net-lehenga"><span class="link-bullet">❖</span> Net Lehenga</a></li>
+                                        <li><a href="#printed-lehenga"><span class="link-bullet">❖</span> Printed Lehenga</a></li>
+                                    </ul>
+                                </div>
+                                <div class="mega-column">
+                                    <h4 class="mega-title">Saree</h4>
+                                    <ul class="mega-links">
+                                        <li><a href="#cotton-saree"><span class="link-bullet">❖</span> Cotton Saree</a></li>
+                                        <li><a href="#silk-saree"><span class="link-bullet">❖</span> Silk Saree</a></li>
+                                        <li><a href="#banarasi-saree"><span class="link-bullet">❖</span> Banarasi Saree</a></li>
+                                        <li><a href="#chiffon-saree"><span class="link-bullet">❖</span> Chiffon Saree</a></li>
+                                        <li><a href="#georgette-saree"><span class="link-bullet">❖</span> Georgette Saree</a></li>
+                                        <li><a href="#organza-saree"><span class="link-bullet">❖</span> Organza Saree</a></li>
+                                        <li><a href="#linen-saree"><span class="link-bullet">❖</span> Linen Saree</a></li>
+                                        <li><a href="#party-wear-saree"><span class="link-bullet">❖</span> Party Wear Saree</a></li>
+                                        <li><a href="#bridal-saree"><span class="link-bullet">❖</span> Bridal Saree</a></li>
+                                    </ul>
+                                </div>
+                                <div class="mega-column mega-featured">
+                                    <div class="featured-card">
+                                        <div class="featured-img-wrap">
+                                            <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80" alt="Royal Wedding Collection" loading="lazy">
+                                            <div class="featured-badge">NEW ARRIVAL</div>
+                                        </div>
+                                        <div class="featured-content">
+                                            <h5>The Royal Heritage '26</h5>
+                                            <p>Hand-woven Zardozi & Pure Gold Plated Necklaces</p>
+                                            <a href="#explore-featured" class="featured-link">Discover Atelier &rarr;</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+
+                    <li class="nav-item"><a href="#contact" class="nav-link">Contact</a></li>
+                </ul>
+            </nav>
+
+            <!-- Header Actions / Icons -->
+            <div class="header-actions">
+                <button class="action-btn" id="searchBtn" title="Search Collections">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+                <button class="action-btn" id="accountBtn" title="My Account">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </button>
+                <button class="action-btn badge-btn" id="wishlistBtn" title="Wishlist">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.78-8.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                    <span class="action-badge" id="wishlistCount">2</span>
+                </button>
+                <button class="action-btn badge-btn" id="cartBtn" title="Shopping Cart">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    <span class="action-badge" id="cartCount">1</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- COLLECTION HEADER BANNER -->
+    <section class="collection-header-banner">
+        <div class="breadcrumb">
+            <a href="index.html">Home</a>
+            <span class="separator">/</span>
+            <a href="#">Collections</a>
+            <span class="separator">/</span>
+            <span style="color: var(--color-black-text); font-weight: 600;">Dresses</span>
+        </div>
+        <div class="collection-title-wrap">
+            <h2>Designer Dresses &amp; Tunics</h2>
+            <div class="gold-ornament" style="margin-top: 5px;">❖ ⚜ ❖</div>
+        </div>
+    </section>
+
+    <!-- PRODUCT COUNT & SORT BAR -->
+    <div class="product-count-bar">
+        <div class="product-count">
+            Showing <span id="displayedCount">12</span> of 120 Products
+        </div>
+        <div class="sort-dropdown">
+            <select id="sortBy" onchange="sortProducts()">
+                <option value="featured">Featured Selection</option>
+                <option value="low-high">Price: Low to High</option>
+                <option value="high-low">Price: High to Low</option>
+                <option value="newest">New Arrivals</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- MAIN LAYOUT -->
+    <div class="collection-layout">
+        
+        <!-- SIDEBAR FILTERS -->
+        <aside class="filter-sidebar">
+            <div class="filter-header">
+                <span>Filters</span>
+                <button class="clear-filters-btn" onclick="clearAllFilters()">Clear All</button>
+            </div>
+
+            <!-- Search Filter -->
+            <div class="filter-group">
+                <h5 class="filter-title" onclick="toggleFilterGroup(this)">Search</h5>
+                <div class="filter-options">
+                    <input type="text" class="filter-search-input" id="filterSearch" placeholder="Search Dresses..." onkeyup="applyFilters()">
+                </div>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="filter-group">
+                <h5 class="filter-title" onclick="toggleFilterGroup(this)">Category</h5>
+                <div class="filter-options" id="filterCategory">
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="Gown" onchange="applyFilters()"> Gown
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="checkbox-label">
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="Straight Kurti" onchange="applyFilters()"> Straight
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="Lucknowi Kurti" onchange="applyFilters()"> Lucknowi
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="Indo Western Kurti" onchange="applyFilters()"> Indo-Western
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="A-Line Kurti" onchange="applyFilters()"> A-Line
+                        <span class="checkmark"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Size Filter -->
+            <div class="filter-group">
+                <h5 class="filter-title" onclick="toggleFilterGroup(this)">Size</h5>
+                <div class="filter-options" id="filterSize">
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="S" onchange="applyFilters()"> S
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="M" onchange="applyFilters()"> M
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="L" onchange="applyFilters()"> L
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="XL" onchange="applyFilters()"> XL
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="XXL" onchange="applyFilters()"> XXL
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="XXXXL" onchange="applyFilters()"> XXXXL
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="XXXXXL" onchange="applyFilters()"> XXXXXL
+                        <span class="checkmark"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Price Slider Filter -->
+            <div class="filter-group">
+                <h5 class="filter-title" onclick="toggleFilterGroup(this)">Price Range</h5>
+                <div class="filter-options">
+                    <div class="price-slider-wrap">
+                        <input type="range" class="price-slider" id="priceRange" min="500" max="25000" value="25000" oninput="updatePriceLabel(this.value)">
+                        <div class="slider-inputs">
+                            <span>₹500</span>
+                            <span style="font-weight: 700; color: var(--color-gold-dark);">Max: ₹<span id="maxPriceLabel">25,000</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Availability Filter -->
+            <div class="filter-group">
+                <h5 class="filter-title" onclick="toggleFilterGroup(this)">Availability</h5>
+                <div class="filter-options" id="filterAvailability">
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="In Stock" onchange="applyFilters()"> In Stock
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="New Arrival" onchange="applyFilters()"> New Arrival
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="Best Seller" onchange="applyFilters()"> Best Seller
+                        <span class="checkmark"></span>
+                    </label>
+                </div>
+            </div>
+        </aside>
+
+        <!-- PRODUCT GRID (4 COLUMNS TARGET / DYNAMIC) -->
+        <main class="products-grid-container" id="productsGrid">
+            <!-- Products will be dynamically populated here via JS to allow smooth filters -->
+        </main>
+    </div>
+
+    <!-- LUXURY FOOTER -->
+    <footer class="luxury-footer" id="contact">
+        <div class="footer-container">
+            <div class="footer-col brand-col">
+                <h3 class="footer-logo">ACHIRA</h3>
+                <p>Luxury Indian Ethnic Wear & Fine Heritage Jewellery. Crafted with passion, worn with pride.</p>
+                <div class="footer-socials">
+                    <a href="#" aria-label="Instagram">IG</a>
+                    <a href="#" aria-label="Facebook">FB</a>
+                    <a href="#" aria-label="Pinterest">PIN</a>
+                    <a href="#" aria-label="YouTube">YT</a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4>Collections</h4>
+                <ul>
+                    <li><a href="collections.html">Designer Dresses</a></li>
+                    <li><a href="index.html#sarees">Heritage Sarees</a></li>
+                    <li><a href="index.html#lehengas">Bridal Lehengas</a></li>
+                    <li><a href="index.html#jewellery">Polki &amp; Kundan</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Atelier Services</h4>
+                <ul>
+                    <li><a href="#bespoke">Bespoke Bridal Fitting</a></li>
+                    <li><a href="#consultation">Virtual Stylist Consultation</a></li>
+                    <li><a href="#care">Jewellery Care &amp; Guarantee</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col newsletter-col">
+                <h4>Join the Achira Circle</h4>
+                <p>Subscribe for exclusive previews of private couture launches and VIP trunk shows.</p>
+                <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Subscribed to Achira newsletter.');">
+                    <input type="email" placeholder="Enter your email address" required>
+                    <button type="submit">JOIN</button>
+                </form>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 ACHIRA Couture &amp; Fine Jewellery. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Cart Drawer -->
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="drawer-header">
+            <h3>Your Shopping Bag (<span id="cartDrawerCount">1</span>)</h3>
+            <button class="close-drawer" id="closeCartBtn">&times;</button>
+        </div>
+        <div class="drawer-body" id="cartItemsList">
+            <div class="cart-item">
+                <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=200&q=80" alt="Noor Polki Set">
+                <div class="item-details">
+                    <h5>Noor Polki Choker Set</h5>
+                    <span class="item-price">₹1,25,000</span>
+                    <div class="item-qty">
+                        <button onclick="updateQty(-1)">-</button>
+                        <span>1</span>
+                        <button onclick="updateQty(1)">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="drawer-footer">
+            <div class="subtotal-row">
+                <span>Subtotal:</span>
+                <span class="subtotal-amount" id="cartSubtotal">₹1,25,000</span>
+            </div>
+            <button class="checkout-btn" onclick="alert('Checkout...')">Proceed to Checkout</button>
+        </div>
+    </div>
+
+    <!-- Search Overlay -->
+    <div class="search-modal" id="searchModal">
+        <button class="close-search" id="closeSearchBtn">&times;</button>
+        <div class="search-modal-content">
+            <h3>Search ACHIRA Atelier</h3>
+            <div class="search-input-wrapper">
+                <input type="text" placeholder="Search..." id="searchInput" autofocus>
+                <button class="search-submit">&rarr;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-notification" id="toast">Item added to your shopping bag!</div>
+
+    <!-- Dynamic JavaScript -->
+    <script src="script.js"></script>
+    
+    <script>
+        // Collection Products Data
+        const productsData = [
+            {
+                id: 1,
+                name: "Maharani Zardozi Anarkali Dress",
+                category: "Anarkali Kurti",
+                fabric: "Silk",
+                size: ["M", "L", "XL"],
+                color: "Red",
+                price: 4500,
+                availability: "New Arrival",
+                image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 2,
+                name: "Kashmiri Arayan Embroidered Dress",
+                category: "Embroidered Kurti",
+                fabric: "Chanderi",
+                size: ["S", "M", "L"],
+                color: "Black",
+                price: 3200,
+                availability: "In Stock",
+                image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 3,
+                name: "Gulbahar Handblock Cotton Dress",
+                category: "Cotton Kurti",
+                fabric: "Cotton",
+                size: ["XS", "S", "M", "L", "XL"],
+                color: "Pink",
+                price: 1800,
+                availability: "Best Seller",
+                image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 4,
+                name: "Atelier Lucknowi Chikankari Tunic",
+                category: "Lucknowi Kurti",
+                fabric: "Muslin",
+                size: ["S", "M", "L", "XXL"],
+                color: "White",
+                price: 2900,
+                availability: "In Stock",
+                image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 5,
+                name: "Noor Indigo Straight Dress",
+                category: "Straight Kurti",
+                fabric: "Linen",
+                size: ["M", "L", "XL"],
+                color: "Blue",
+                price: 2200,
+                availability: "New Arrival",
+                image: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 6,
+                name: "Avanti A-Line Banarasi Tunic",
+                category: "A-Line Kurti",
+                fabric: "Silk",
+                size: ["S", "M", "L"],
+                color: "Green",
+                price: 4900,
+                availability: "Best Seller",
+                image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 7,
+                name: "Zoya Indo-Western Palazzo Set",
+                category: "Indo Western Kurti",
+                fabric: "Rayon",
+                size: ["M", "L", "XL", "XXL"],
+                color: "Yellow",
+                price: 3800,
+                availability: "In Stock",
+                image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 8,
+                name: "Vasant Floral Printed Dress",
+                category: "Printed Kurti",
+                fabric: "Cotton",
+                size: ["XS", "S", "M", "L"],
+                color: "Pink",
+                price: 1500,
+                availability: "In Stock",
+                image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 9,
+                name: "Darbar Velvet Straight Dress",
+                category: "Straight Kurti",
+                fabric: "Velvet",
+                size: ["M", "L", "XL"],
+                color: "Black",
+                price: 4800,
+                availability: "New Arrival",
+                image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 10,
+                name: "Rania Chanderi A-Line Dress",
+                category: "A-Line Kurti",
+                fabric: "Chanderi",
+                size: ["XS", "S", "M"],
+                color: "Yellow",
+                price: 3400,
+                availability: "In Stock",
+                image: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 11,
+                name: "Meera Lucknowi Georgette Dress",
+                category: "Lucknowi Kurti",
+                fabric: "Rayon",
+                size: ["S", "M", "L", "XL"],
+                color: "Pink",
+                price: 4100,
+                availability: "Best Seller",
+                image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 12,
+                name: "Kiran Cotton Straight Tunic",
+                category: "Cotton Kurti",
+                fabric: "Cotton",
+                size: ["M", "L", "XL", "XXL"],
+                color: "Green",
+                price: 1600,
+                availability: "In Stock",
+                image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 13,
+                name: "Royal Heritage Zardozi Gown",
+                category: "Gown",
+                fabric: "Silk",
+                size: ["M", "L", "XL", "XXL", "XXXXL", "XXXXXL"],
+                color: "Maroon",
+                price: 4900,
+                availability: "New Arrival",
+                image: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=600&q=80"
+            }
+        ];
+
+        // Toggle filters category accordions
+        function toggleFilterGroup(element) {
+            element.classList.toggle('collapsed');
+            element.nextElementSibling.classList.toggle('collapsed');
+        }
+
+        // Update price range slider label
+        function updatePriceLabel(value) {
+            document.getElementById('maxPriceLabel').textContent = parseInt(value).toLocaleString('en-IN');
+            applyFilters();
+        }
+
+        // Render products into the grid
+        function renderProducts(products) {
+            const grid = document.getElementById('productsGrid');
+            const displayedCount = document.getElementById('displayedCount');
+            
+            grid.innerHTML = '';
+            displayedCount.textContent = products.length;
+
+            if (products.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; font-family: var(--font-heading); font-size: 1.5rem; color: var(--color-gold-dark);">No products matches the selected criteria.</div>`;
+                return;
+            }
+
+            products.forEach(p => {
+                const card = `
+                    <div class="collection-card" style="animation: fadeIn 0.5s ease;">
+                        <div class="card-image-wrap" style="height: 340px;">
+                            <img src="${p.image}" alt="${p.name}">
+                            <button class="wishlist-toggle" aria-label="Add to Wishlist">♥</button>
+                            <span class="featured-badge" style="position: absolute; top: 12px; left: 12px; background: var(--color-gold-gradient); color: var(--color-black-text); font-size: 0.65rem; font-weight: 700; padding: 3px 8px; border-radius: 10px;">${p.availability}</span>
+                        </div>
+                        <div class="card-content">
+                            <span class="card-cat">${p.category.toUpperCase()} • ${p.fabric.toUpperCase()}</span>
+                            <h4 style="font-size: 1.15rem; min-height: 48px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${p.name}</h4>
+                            <div class="card-price" style="margin-bottom: 12px;">
+                                <span class="price">₹${p.price.toLocaleString('en-IN')}</span>
+                            </div>
+                            <button class="add-cart-btn" onclick="addToCart('${p.name}', '${p.price.toLocaleString()}')">Add to Bag</button>
+                        </div>
+                    </div>
+                `;
+                grid.insertAdjacentHTML('beforeend', card);
+            });
+
+            // Re-apply wishlist triggers to new cards
+            initWishlistTriggers();
+        }
+
+        // Apply filters dynamically
+        function applyFilters() {
+            const searchQuery = document.getElementById('filterSearch').value.toLowerCase();
+            const maxPrice = parseInt(document.getElementById('priceRange').value);
+
+            // Get selected categories
+            const selectedCategories = Array.from(document.querySelectorAll('#filterCategory input:checked')).map(el => el.value);
+            // Get selected sizes
+            const selectedSizes = Array.from(document.querySelectorAll('#filterSize input:checked')).map(el => el.value);
+            // Get selected availability
+            const selectedAvailability = Array.from(document.querySelectorAll('#filterAvailability input:checked')).map(el => el.value);
+
+            let filtered = productsData.filter(p => {
+                // Search query filter
+                if (searchQuery && !p.name.toLowerCase().includes(searchQuery)) return false;
+                
+                // Price filter
+                if (p.price > maxPrice) return false;
+
+                // Category filter
+                if (selectedCategories.length > 0 && !selectedCategories.includes(p.category)) return false;
+
+                // Size filter
+                if (selectedSizes.length > 0 && !p.size.some(s => selectedSizes.includes(s))) return false;
+
+                // Availability filter
+                if (selectedAvailability.length > 0 && !selectedAvailability.includes(p.availability)) return false;
+
+                return true;
+            });
+
+            // Sort products
+            const sortBy = document.getElementById('sortBy').value;
+            if (sortBy === 'low-high') {
+                filtered.sort((a, b) => a.price - b.price);
+            } else if (sortBy === 'high-low') {
+                filtered.sort((a, b) => b.price - a.price);
+            } else if (sortBy === 'newest') {
+                filtered = filtered.filter(p => p.availability === 'New Arrival').concat(filtered.filter(p => p.availability !== 'New Arrival'));
+            }
+
+            renderProducts(filtered);
+        }
+
+        // Sort trigger wrapper
+        function sortProducts() {
+            applyFilters();
+        }
+
+        // Clear all filters
+        function clearAllFilters() {
+            document.getElementById('filterSearch').value = '';
+            document.getElementById('priceRange').value = 25000;
+            document.getElementById('maxPriceLabel').textContent = '25,000';
+            
+            document.querySelectorAll('.filter-sidebar input[type="checkbox"]').forEach(cb => cb.checked = false);
+            applyFilters();
+        }
+
+        // Wishlist trigger setup
+        function initWishlistTriggers() {
+            const wishlistToggles = document.querySelectorAll('.wishlist-toggle');
+            const wishlistCountBadge = document.getElementById('wishlistCount');
+            
+            wishlistToggles.forEach(toggle => {
+                // Remove previous click events to avoid double bindings
+                const newToggle = toggle.cloneNode(true);
+                toggle.parentNode.replaceChild(newToggle, toggle);
+                
+                newToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    this.classList.toggle('active');
+                    let current = parseInt(wishlistCountBadge.textContent) || 0;
+                    if (this.classList.contains('active')) {
+                        current++;
+                        showToast('Item saved to your Wishlist ♥');
+                    } else {
+                        current = Math.max(0, current - 1);
+                    }
+                    wishlistCountBadge.textContent = current;
+                });
+            });
+        }
+
+        // Initial execution
+        renderProducts(productsData);
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
