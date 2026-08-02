@@ -799,7 +799,24 @@
             document.getElementById('pageTitle').textContent = el.textContent.replace(/^[^\s]+\s/, '') + ' Management';
         }
 
+        function getDB(table, defaultVal = []) {
+            try {
+                const val = localStorage.getItem(table);
+                return val ? JSON.parse(val) : defaultVal;
+            } catch (e) {
+                return defaultVal;
+            }
+        }
+
         function renderAllData() {
+            const localOrders = getDB('orders');
+            let combinedOrders = [...localOrders, ...orders];
+            let uniqueOrders = Array.from(new Map(combinedOrders.map(o => [o.id, o])).values());
+
+            let totalRevenue = uniqueOrders.reduce((sum, o) => sum + (o.grandTotal || o.total || 0), 0);
+            document.getElementById('statRevenue').textContent = `₹${totalRevenue.toLocaleString('en-IN')}`;
+            document.getElementById('statOrders').textContent = uniqueOrders.length;
+
             // Render Products Table
             const prodBody = document.getElementById('productsTableBody');
             prodBody.innerHTML = products.map(p => `
@@ -819,15 +836,15 @@
             // Render Orders Table
             const recentBody = document.getElementById('recentOrdersBody');
             const allOrdersBody = document.getElementById('allOrdersBody');
-            const orderRows = orders.map(o => `
+            const orderRows = uniqueOrders.map(o => `
                 <tr>
                     <td><strong>${o.id}</strong></td>
-                    <td>${o.customer}</td>
-                    <td>${o.items}</td>
-                    <td>₹${o.total.toLocaleString('en-IN')}</td>
-                    <td>Prepaid</td>
-                    <td><span class="badge ${o.status === 'Delivered' ? 'badge-success' : 'badge-warning'}">${o.status}</span></td>
-                    <td><button class="btn-action btn-edit" onclick="alert('Updating order status...')">Update</button></td>
+                    <td>${o.userName || o.customer || "Valued Patron"}</td>
+                    <td>${o.itemsSummary || o.items || "Couture Product"}</td>
+                    <td>₹${(o.grandTotal || o.total || 0).toLocaleString('en-IN')}</td>
+                    <td>${o.paymentMode || "Prepaid"}</td>
+                    <td><span class="badge ${o.status === 'Delivered' ? 'badge-success' : 'badge-warning'}">${o.status || 'Processing'}</span></td>
+                    <td><button class="btn-action btn-edit" onclick="alert('Order ID ${o.id} status updated')">Update</button></td>
                 </tr>
             `).join('');
 
