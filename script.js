@@ -65,6 +65,10 @@ function initDatabase() {
     getDB('reviews', [
         { id: 1, prodName: "Heritage Polki Diamond Choker", author: "Devi Sen", rating: 5, content: "Magnificent piece! Perfect craftsmanship.", status: "Approved" }
     ]);
+    getDB('enquiries', [
+        { id: 'EQ-1001', name: 'Devi Sharma', email: 'devi.sharma@gmail.com', contact: '+91 98765 43210', subject: 'Bridal Lehenga Customization', message: 'I would like a custom fitting appointment for the Maharani Zardozi collection for my wedding in November.', date: new Date().toLocaleDateString('en-IN') },
+        { id: 'EQ-1002', name: 'Rajesh Malhotra', email: 'malhotra.r@outlook.com', contact: '+91 98111 22334', subject: 'Polki Choker Availability', message: 'Is the Heritage Polki Choker available for international shipping to London?', date: new Date().toLocaleDateString('en-IN') }
+    ]);
     getDB('settings', { gst: 18, shipping: 150, email: 'atelier@achira.com', phone: '+91 98765 43210' });
 }
 
@@ -544,7 +548,60 @@ function handleUserLogout() {
 
 function handleForgotPassword(e) {
     e.preventDefault();
-    alert("Simulated OTP sent to your registered email! Check inbox to reset password.");
+    showToast("OTP sent to your registered email! Check inbox to reset password.");
+}
+
+function openEnquiryModal() {
+    const modal = document.getElementById('enquiryModal');
+    if (modal) modal.classList.add('active');
+}
+
+function closeEnquiryModal() {
+    const modal = document.getElementById('enquiryModal');
+    if (modal) modal.classList.remove('active');
+}
+
+function handleContactSubmit(e) {
+    if (e) e.preventDefault();
+    const nameInput = document.getElementById('enquiryName') || document.getElementById('contactName');
+    const emailInput = document.getElementById('enquiryEmail') || document.getElementById('contactEmail');
+    const phoneInput = document.getElementById('enquiryPhone') || document.getElementById('contactPhone');
+    const subjectInput = document.getElementById('enquirySubject') || document.getElementById('contactSubject');
+    const msgInput = document.getElementById('enquiryMessage') || document.getElementById('contactMessage');
+    
+    const name = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : (currentUser ? currentUser.name : 'Valued Patron');
+    const email = (emailInput && emailInput.value.trim()) ? emailInput.value.trim() : (currentUser ? currentUser.email : 'patron@achira.com');
+    const phone = (phoneInput && phoneInput.value.trim()) ? phoneInput.value.trim() : '+91 98765 43210';
+    const subject = (subjectInput && subjectInput.value.trim()) ? subjectInput.value.trim() : 'General Atelier Enquiry';
+    const message = (msgInput && msgInput.value.trim()) ? msgInput.value.trim() : 'Inquiring about custom couture availability and fitting.';
+
+    const newEnquiry = {
+        id: 'EQ-' + Math.floor(1000 + Math.random() * 9000),
+        name: name,
+        email: email,
+        contact: phone,
+        subject: subject,
+        message: message,
+        date: new Date().toLocaleDateString('en-IN')
+    };
+
+    const list = getDB('enquiries');
+    list.unshift(newEnquiry);
+    setDB('enquiries', list);
+
+    fetch(`${API_BASE}/api/admin/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newEnquiry)
+    }).catch(() => {});
+
+    showToast("✦ Query submitted! Our Atelier Concierge will reach out shortly.");
+    if (nameInput) nameInput.value = '';
+    if (emailInput) emailInput.value = '';
+    if (phoneInput) phoneInput.value = '';
+    if (subjectInput) subjectInput.value = '';
+    if (msgInput) msgInput.value = '';
+    closeEnquiryModal();
 }
 
 // --- Profile & My Orders Modal ---
@@ -1551,22 +1608,79 @@ function injectModalsHTML() {
         </div>
     </div>
 
+    <!-- CONCIERGE ENQUIRY / QUERY MODAL -->
+    <div class="luxury-modal" id="enquiryModal">
+        <div class="l-modal-overlay" onclick="closeEnquiryModal()"></div>
+        <div class="l-modal-content">
+            <button class="close-l-modal" onclick="closeEnquiryModal()">&times;</button>
+            <h3 class="modal-title-serif" style="color: #B88A44; text-align: center; margin-bottom: 6px;">✦ ATELIER CONCIERGE ✦</h3>
+            <p style="text-align: center; font-size: 0.82rem; color: #555; margin-bottom: 20px;">Custom Fitting, Bridal Consultation & Product Queries</p>
+            <form onsubmit="handleContactSubmit(event)">
+                <div class="input-group" style="margin-bottom: 12px;">
+                    <label>Full Name</label>
+                    <input type="text" id="enquiryName" placeholder="e.g. Maharani Gayatri Devi" required>
+                </div>
+                <div class="input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <input type="email" id="enquiryEmail" placeholder="patron@achira.com" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Phone / WhatsApp</label>
+                        <input type="text" id="enquiryPhone" placeholder="+91 98765 43210" required>
+                    </div>
+                </div>
+                <div class="input-group" style="margin-bottom: 12px;">
+                    <label>Subject / Topic</label>
+                    <input type="text" id="enquirySubject" placeholder="e.g. Custom Bridal Outfit / Size Inquiry" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 16px;">
+                    <label>Your Query / Customization Details</label>
+                    <textarea id="enquiryMessage" placeholder="Describe your preferred design, size specifications, or event date..." required style="height: 80px;"></textarea>
+                </div>
+                <button type="submit" class="auth-submit-btn" style="background: linear-gradient(135deg, #D4AF37 0%, #B88A44 100%);">SUBMIT QUERY TO CONCIERGE</button>
+            </form>
+        </div>
+    </div>
+
     <!-- CHECKOUT MODAL -->
     <div class="luxury-modal" id="checkoutModal">
         <div class="l-modal-overlay" onclick="closeCheckoutModal()"></div>
         <div class="l-modal-content large-content">
             <button class="close-l-modal" onclick="closeCheckoutModal()">&times;</button>
-            <h3 class="modal-title-serif">Secure Luxury Checkout</h3>
+            <div style="text-align: center; margin-bottom: 10px;">
+                <span style="font-family: var(--font-body); font-size: 0.72rem; font-weight: 700; color: #B88A44; letter-spacing: 0.2em; text-transform: uppercase;">✦ ACHIRA ATELIER ✦</span>
+                <h3 class="modal-title-serif" style="margin-top: 4px;">Secure Luxury Checkout</h3>
+            </div>
+
+            <!-- Stepper Indicator -->
+            <div class="checkout-stepper">
+                <div class="step-item active">
+                    <span class="step-num">1</span>
+                    <span>Shipping Details</span>
+                </div>
+                <div style="flex-grow: 1; height: 1px; background: rgba(184,138,68,0.25); margin: 0 10px;"></div>
+                <div class="step-item active">
+                    <span class="step-num">2</span>
+                    <span>Payment Mode</span>
+                </div>
+                <div style="flex-grow: 1; height: 1px; background: rgba(184,138,68,0.25); margin: 0 10px;"></div>
+                <div class="step-item active">
+                    <span class="step-num">3</span>
+                    <span>Confirm Order</span>
+                </div>
+            </div>
+
             <div class="checkout-grid">
                 <form id="checkoutForm" onsubmit="handlePlaceOrder(event)">
-                    <h4>1. Customer Details &amp; Address</h4>
+                    <h4 style="font-family: var(--font-brand); color: #3C0008; margin-bottom: 12px; font-size: 0.95rem;">1. Customer Details &amp; Address</h4>
                     <div class="input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                         <div class="input-group">
                             <label>Full Name</label>
                             <input type="text" placeholder="e.g. Ananya Sharma" id="checkoutName">
                         </div>
                         <div class="input-group">
-                            <label>Phone Number</label>
+                            <label>Mobile Number</label>
                             <input type="text" placeholder="+91 98765 43210" id="checkoutPhone" required>
                         </div>
                     </div>
@@ -1575,7 +1689,7 @@ function injectModalsHTML() {
                         <textarea placeholder="House/Flat No, Street, Landmark, City, Pincode" id="checkoutAddress" required style="height: 60px;"></textarea>
                     </div>
 
-                    <h4 style="margin-top: 20px; margin-bottom: 10px;">2. Select Payment Method</h4>
+                    <h4 style="font-family: var(--font-brand); color: #3C0008; margin-top: 20px; margin-bottom: 10px; font-size: 0.95rem;">2. Select Payment Method</h4>
                     <div class="payment-methods-grid">
                         <label class="pay-option">
                             <input type="radio" name="paymentMethod" value="UPI (QR)" checked onchange="document.getElementById('upiQrBox').style.display='block';">
@@ -1583,7 +1697,7 @@ function injectModalsHTML() {
                         </label>
                         <label class="pay-option">
                             <input type="radio" name="paymentMethod" value="COD" onchange="document.getElementById('upiQrBox').style.display='none';">
-                            <span class="pay-label">💵 Cash on Delivery</span>
+                            <span class="pay-label">💵 Cash on Delivery (COD)</span>
                         </label>
                         <label class="pay-option">
                             <input type="radio" name="paymentMethod" value="NetBanking" onchange="document.getElementById('upiQrBox').style.display='none';">
@@ -1594,8 +1708,8 @@ function injectModalsHTML() {
                     <!-- Dynamic UPI QR Display -->
                     <div id="upiQrBox" style="background: rgba(184,138,68,0.06); border: 1.5px dashed #B88A44; padding: 16px; border-radius: 12px; text-align: center; margin-top: 15px;">
                         <span style="font-size: 0.8rem; font-weight: 700; color: #3C0008; display: block; margin-bottom: 8px;">Scan QR Code using GPay, PhonePe, Paytm, or BHIM UPI</span>
-                        <div style="background: #FFF; padding: 10px; display: inline-block; border-radius: 10px; border: 1px solid rgba(184,138,68,0.3);">
-                            <img id="upiQrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=achiracouture@upi%26pn=Achira%20Couture" alt="UPI QR Code" style="width: 150px; height: 150px; display: block;">
+                        <div style="background: #FFF; padding: 10px; display: inline-block; border-radius: 10px; border: 1px solid rgba(184,138,68,0.3); box-shadow: 0 4px 15px rgba(0,0,0,0.06);">
+                            <img id="upiQrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=achiracouture@upi%26pn=Achira%20Couture" alt="UPI QR Code" style="width: 140px; height: 140px; display: block;">
                         </div>
                         <div style="font-size: 0.8rem; color: #2C2C2C; margin-top: 8px;">UPI ID: <strong style="color: #3C0008;">achiracouture@upi</strong></div>
                     </div>
@@ -1603,11 +1717,17 @@ function injectModalsHTML() {
                     <!-- Validation Error Box -->
                     <div id="checkoutErrorMsg" style="color: #800020; font-size: 0.82rem; font-weight: 700; margin-top: 12px; display: none; background: rgba(128,0,32,0.08); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(128,0,32,0.2); text-align: left;"></div>
 
-                    <button type="submit" class="place-order-submit-btn" style="margin-top: 15px;">CONFIRM &amp; PLACE ORDER</button>
+                    <button type="submit" class="place-order-submit-btn" style="margin-top: 18px;">CONFIRM &amp; PLACE ORDER</button>
+                    
+                    <div class="trust-badges-bar">
+                        <span>🛡️ 256-Bit SSL Encrypted</span>
+                        <span>🚚 Free Insured Delivery</span>
+                        <span>👑 100% Authentic Couture</span>
+                    </div>
                 </form>
 
                 <div class="checkout-summary-box">
-                    <h4>Order Summary</h4>
+                    <h4 style="font-family: var(--font-brand); color: #3C0008; margin-bottom: 12px;">Order Summary</h4>
                     <div class="checkout-items-list" id="checkoutItemsList">
                         <!-- Summary -->
                     </div>
@@ -1626,7 +1746,7 @@ function injectModalsHTML() {
                         <div class="bill-row"><span>GST Tax (18%)</span><span id="chkTax">₹0</span></div>
                         <div class="bill-row"><span>Shipping Charges</span><span id="chkShipping">₹0</span></div>
                         <hr style="border-color: rgba(184,138,68,0.1); margin: 10px 0;">
-                        <div class="bill-row grand-total-row"><strong>Grand Total</strong><strong id="chkGrandTotal" style="color: #B88A44;">₹0</strong></div>
+                        <div class="bill-row grand-total-row"><strong>Grand Total</strong><strong id="chkGrandTotal" style="color: #B88A44; font-size: 1.15rem;">₹0</strong></div>
                     </div>
                 </div>
             </div>

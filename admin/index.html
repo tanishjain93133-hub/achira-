@@ -610,11 +610,13 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Email / Phone</th>
+                                <th>Query ID</th>
+                                <th>Name & Email</th>
+                                <th>Contact Number</th>
                                 <th>Subject</th>
                                 <th>Message</th>
                                 <th>Date</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="enquiriesBody">
@@ -820,6 +822,11 @@
                 if (def) def.status = newStatus;
             }
             renderAllData();
+        function deleteEnquiry(id) {
+            let localEnquiries = getDB('enquiries').filter(e => e.id !== id && e.name !== id);
+            localStorage.setItem('enquiries', JSON.stringify(localEnquiries));
+            enquiries = enquiries.filter(e => e.id !== id && e.name !== id);
+            renderAllData();
         }
 
         function renderAllData() {
@@ -915,14 +922,22 @@
                 </tr>
             `).join('');
 
-            // Render Enquiries
-            document.getElementById('enquiriesBody').innerHTML = enquiries.map(eq => `
+            // Render Enquiries (Combine LocalStorage + Default)
+            const localEnquiries = getDB('enquiries');
+            let combinedEnquiries = [...localEnquiries, ...enquiries];
+            let uniqueEnquiries = Array.from(new Map(combinedEnquiries.map(eq => [eq.id || eq.name + eq.message, eq])).values());
+
+            document.getElementById('enquiriesBody').innerHTML = uniqueEnquiries.map((eq, idx) => `
                 <tr>
-                    <td><strong>${eq.name}</strong></td>
-                    <td>${eq.contact}</td>
-                    <td>${eq.subject}</td>
-                    <td>${eq.message}</td>
-                    <td>${eq.date}</td>
+                    <td><strong style="color: var(--gold);">${eq.id || 'EQ-100' + (idx+1)}</strong></td>
+                    <td><strong>${eq.name}</strong><br><span style="font-size: 0.75rem; color: var(--text-muted);">${eq.email || 'patron@achira.com'}</span></td>
+                    <td>${eq.contact || eq.phone || '+91 98765 43210'}</td>
+                    <td><span class="badge badge-info">${eq.subject || 'General Inquiry'}</span></td>
+                    <td style="max-width: 250px; font-size: 0.82rem; line-height: 1.4;">${eq.message}</td>
+                    <td>${eq.date || 'Recent'}</td>
+                    <td>
+                        <button onclick="deleteEnquiry('${eq.id || eq.name}')" style="background: var(--danger); color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
+                    </td>
                 </tr>
             `).join('');
 
