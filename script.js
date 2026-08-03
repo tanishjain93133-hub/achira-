@@ -75,6 +75,7 @@ let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
 let currentAdmin = JSON.parse(localStorage.getItem('currentAdmin')) || null;
 let appliedDiscountPercent = 0;
 let appliedCouponCode = "";
+let pendingCheckoutAfterLogin = false;
 
 document.addEventListener('DOMContentLoaded', () => {
     injectModalsHTML();
@@ -438,6 +439,20 @@ function switchAuthTab(tab) {
     }
 }
 
+function onAuthSuccess(user, token, toastMsg) {
+    currentUser = user;
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    if (token) localStorage.setItem('userToken', token);
+    showToast(toastMsg || `Welcome, ${user.name}!`);
+    closeAuthModal();
+    if (pendingCheckoutAfterLogin) {
+        pendingCheckoutAfterLogin = false;
+        openCheckoutModal();
+    } else {
+        openProfileModal();
+    }
+}
+
 function handleUserLogin(e) {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
@@ -453,12 +468,7 @@ function handleUserLogin(e) {
         if (data.error || !data.user) {
             performLocalLogin(email, pass);
         } else {
-            currentUser = data.user;
-            localStorage.setItem('currentUser', JSON.stringify(data.user));
-            localStorage.setItem('userToken', data.token);
-            showToast(`Welcome back, ${data.user.name}!`);
-            closeAuthModal();
-            openProfileModal();
+            onAuthSuccess(data.user, data.token, `Welcome back, ${data.user.name}!`);
         }
     })
     .catch(err => {
@@ -478,12 +488,8 @@ function performLocalLogin(email, pass) {
         setDB('users', users);
     }
     
-    currentUser = matched;
-    localStorage.setItem('currentUser', JSON.stringify(matched));
-    localStorage.setItem('userToken', 'simulated-token-' + Date.now());
-    showToast(`Welcome back, ${matched.name}!`);
-    closeAuthModal();
-    openProfileModal();
+    const token = 'simulated-token-' + Date.now();
+    onAuthSuccess(matched, token, `Welcome back, ${matched.name}!`);
 }
 
 function handleUserSignup(e) {
@@ -503,12 +509,7 @@ function handleUserSignup(e) {
         if (data.error || !data.user) {
             performLocalSignup(name, email, pass, phone);
         } else {
-            currentUser = data.user;
-            localStorage.setItem('currentUser', JSON.stringify(data.user));
-            localStorage.setItem('userToken', data.token);
-            showToast(`Account successfully created! Welcome, ${data.user.name}!`);
-            closeAuthModal();
-            openProfileModal();
+            onAuthSuccess(data.user, data.token, `Account successfully created! Welcome, ${data.user.name}!`);
         }
     })
     .catch(err => {
@@ -519,21 +520,19 @@ function handleUserSignup(e) {
 function performLocalSignup(name, email, pass, phone) {
     const users = getDB('users');
     const existing = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    let user;
     
     if (existing) {
-        currentUser = existing;
+        user = existing;
     } else {
         const newUser = { id: Date.now(), name, email, phone, password: pass };
         users.push(newUser);
         setDB('users', users);
-        currentUser = { id: newUser.id, name, email, phone };
+        user = { id: newUser.id, name, email, phone };
     }
     
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    localStorage.setItem('userToken', 'simulated-token-' + Date.now());
-    showToast(`Account successfully created! Welcome, ${name}!`);
-    closeAuthModal();
-    openProfileModal();
+    const token = 'simulated-token-' + Date.now();
+    onAuthSuccess(user, token, `Account successfully created! Welcome, ${name}!`);
 }
 
 function handleUserLogout() {
@@ -641,12 +640,13 @@ function handleTrackOrder() {
 function openCheckoutModal() {
     const cart = getDB('cart');
     if (cart.length === 0) {
-        alert("Your shopping bag is empty!");
+        showToast("Your shopping bag is empty!");
         return;
     }
     
     if (!currentUser) {
-        alert("Please login or create a profile to checkout.");
+        pendingCheckoutAfterLogin = true;
+        showToast("Please login or create a profile to checkout.");
         openAuthModal();
         return;
     }
@@ -654,9 +654,19 @@ function openCheckoutModal() {
     const subtotal = calculateCartSubtotal();
     appliedDiscountPercent = 0;
     appliedCouponCode = "";
-    document.getElementById('couponMessage').textContent = "";
-    document.getElementById('checkoutCoupon').value = "";
+    const couponMsg = document.getElementById('couponMessage');
+    if (couponMsg) couponMsg.textContent = "";
+    const chkCoupon = document.getElementById('checkoutCoupon');
+    if (chkCoupon) chkCoupon.value = "";
     
+    // Auto fill user details if available
+    const chkName = document.getElementById('checkoutName');
+    const chkPhone = document.getElementById('checkoutPhone');
+    const chkAddress = document.getElementById('checkoutAddress');
+    if (chkName && currentUser.name) chkName.value = currentUser.name;
+    if (chkPhone && currentUser.phone) chkPhone.value = currentUser.phone;
+    if (chkAddress && currentUser.address) chkAddress.value = currentUser.address;
+
     updateCheckoutBillDetails(subtotal);
     renderCheckoutItemsList();
     
@@ -666,7 +676,8 @@ function openCheckoutModal() {
     const drawerOverlay = document.getElementById('drawerOverlay');
     if (drawerOverlay) drawerOverlay.classList.remove('active');
     
-    document.getElementById('checkoutModal').classList.add('active');
+    const chkModal = document.getElementById('checkoutModal');
+    if (chkModal) chkModal.classList.add('active');
 }
 
 function closeCheckoutModal() {
@@ -762,7 +773,6 @@ function handlePlaceOrder(e) {
     
     if (errBox) errBox.style.display = 'none';
 
-    const customerName = nameInput ? nameInput.value.trim() : "";
     const phoneRaw = phoneInput ? phoneInput.value.trim() : "";
     const address = addressInput ? addressInput.value.trim() : "";
 
@@ -776,7 +786,7 @@ function handlePlaceOrder(e) {
         if (targetEl) targetEl.focus();
     }
 
-    // 1. Full Name (Optional or validated if entered)
+    // 1. Full Name
     const customerName = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : (currentUser ? currentUser.name : "Valued Patron");
 
     // 2. Validate Phone Number (10-digit Indian Mobile Number)
@@ -797,7 +807,7 @@ function handlePlaceOrder(e) {
 
     const formattedPhone = "+91 " + phoneDigitsOnly.slice(0, 5) + " " + phoneDigitsOnly.slice(5);
     const payMode = payModeRadio ? payModeRadio.value : "UPI (QR)";
-    const userToken = localStorage.getItem('userToken');
+    const userToken = localStorage.getItem('userToken') || ('simulated-token-' + Date.now());
     
     const cart = getDB('cart');
     if (cart.length === 0) {
@@ -846,7 +856,7 @@ function handlePlaceOrder(e) {
         },
         body: JSON.stringify({
             name: customerName,
-            phone,
+            phone: formattedPhone,
             address,
             paymentMethod: payMode,
             couponCode: appliedCouponCode,
