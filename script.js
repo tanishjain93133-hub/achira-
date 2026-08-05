@@ -278,21 +278,51 @@ function updateHeaderBadges() {
     renderCartDrawerList();
 }
 
-function addItemToCart(productId) {
+let currentQuickViewSize = 'M';
+let currentQuickViewColor = 'Royal Red';
+
+function selectQuickViewSize(btn, sizeVal) {
+    currentQuickViewSize = sizeVal;
+    document.querySelectorAll('.qs-pill-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+function selectQuickViewColor(btn, colorVal) {
+    currentQuickViewColor = colorVal;
+    document.querySelectorAll('.qc-pill-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+function addItemToCart(productId, selectedSize = null, selectedColor = null) {
     const cart = getDB('cart');
-    const existing = cart.find(item => item.productId === productId);
+    const p = getDB('products').find(prod => prod.id === productId);
+    
+    let size = selectedSize;
+    if (!size) {
+        if (Array.isArray(p?.size)) size = p.size[0];
+        else if (typeof p?.size === 'string' && p.size.trim()) size = p.size.split(',')[0].trim();
+        else if (p?.category === 'Jewellery' || (p?.name && p.name.toLowerCase().includes('earring'))) size = 'Adjustable';
+        else size = 'M';
+    }
+
+    let color = selectedColor;
+    if (!color) {
+        if (typeof p?.color === 'string' && p.color.trim()) color = p.color.split(',')[0].trim();
+        else color = 'Royal Red';
+    }
+
+    const existing = cart.find(item => item.productId === productId && item.selectedSize === size && item.selectedColor === color);
     
     if (existing) {
         existing.qty++;
     } else {
-        cart.push({ productId, qty: 1 });
+        cart.push({ productId, qty: 1, selectedSize: size, selectedColor: color });
     }
     
     setDB('cart', cart);
     updateHeaderBadges();
     
-    const prod = getDB('products').find(p => p.id === productId);
-    showToast(`"${prod.name}" added to your shopping bag!`);
+    showToast(`"${p?.name || 'Item'}" (Size: ${size}, Color: ${color}) added to your shopping bag!`);
 }
 
 function addToCart(itemName, itemPrice) {
@@ -314,7 +344,7 @@ function addToCart(itemName, itemPrice) {
         };
         products.push(tempProd);
         setDB('products', products);
-        cart.push({ productId: tempId, qty: 1 });
+        cart.push({ productId: tempId, qty: 1, selectedSize: 'M', selectedColor: 'Royal Red' });
         setDB('cart', cart);
         updateHeaderBadges();
         showToast(`"${itemName}" added to your shopping bag!`);
@@ -352,16 +382,18 @@ function renderCartDrawerList() {
         if (!p) return;
         
         subtotal += p.price * item.qty;
+        const sizeColorBadge = `<div style="font-size: 0.76rem; color: #B88A44; margin-top: 3px; font-weight: 500;">Size: <strong>${item.selectedSize || 'M'}</strong> | Color: <strong>${item.selectedColor || 'Standard'}</strong></div>`;
         const html = `
             <div class="cart-item">
                 <img src="${p.image}" alt="${p.name}">
                 <div class="item-details">
                     <h5>${p.name}</h5>
+                    ${sizeColorBadge}
                     <span class="item-price">₹${(p.price * item.qty).toLocaleString('en-IN')}</span>
                     <div class="item-qty">
-                        <button onclick="changeCartQty(${p.id}, -1)">-</button>
+                        <button onclick="changeCartQty(${p.id}, -1, '${item.selectedSize || ''}', '${item.selectedColor || ''}')">-</button>
                         <span>${item.qty}</span>
-                        <button onclick="changeCartQty(${p.id}, 1)">+</button>
+                        <button onclick="changeCartQty(${p.id}, 1, '${item.selectedSize || ''}', '${item.selectedColor || ''}')">+</button>
                     </div>
                 </div>
             </div>
@@ -373,9 +405,9 @@ function renderCartDrawerList() {
     if (subtotalText) subtotalText.textContent = `₹${subtotal.toLocaleString('en-IN')}`;
 }
 
-function changeCartQty(productId, change) {
+function changeCartQty(productId, change, size = null, color = null) {
     const cart = getDB('cart');
-    const item = cart.find(i => i.productId === productId);
+    const item = cart.find(i => i.productId === productId && (!size || i.selectedSize === size) && (!color || i.selectedColor === color));
     if (!item) return;
     
     item.qty += change;
@@ -393,24 +425,63 @@ function openQuickView(productId) {
     const p = getDB('products').find(prod => prod.id === productId);
     if (!p) return;
 
+    let availableSizes = [];
+    if (Array.isArray(p.size)) availableSizes = p.size;
+    else if (typeof p.size === 'string' && p.size.trim()) availableSizes = p.size.split(',').map(s => s.trim());
+    else if (p.category === 'Jewellery' || (p.name && p.name.toLowerCase().includes('earring'))) availableSizes = ['Adjustable', 'Standard'];
+    else availableSizes = ['S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL'];
+
+    let availableColors = [];
+    if (Array.isArray(p.color)) availableColors = [p.color[0]];
+    else if (typeof p.color === 'string' && p.color.trim()) availableColors = p.color.split(',').map(c => c.trim());
+    else availableColors = ['Royal Red', 'Emerald Green', 'Maroon', 'Midnight Blue', 'Gold', 'Ivory White', 'Classic Black'];
+
+    currentQuickViewSize = availableSizes[0] || 'M';
+    currentQuickViewColor = availableColors[0] || 'Royal Red';
+
+    const sizesHTML = availableSizes.map((sz, idx) => `
+        <button type="button" class="qs-pill-btn ${idx === 0 ? 'active' : ''}" onclick="selectQuickViewSize(this, '${sz}')">${sz}</button>
+    `).join('');
+
+    const colorsHTML = availableColors.map((clr, idx) => `
+        <button type="button" class="qc-pill-btn ${idx === 0 ? 'active' : ''}" onclick="selectQuickViewColor(this, '${clr}')">${clr}</button>
+    `).join('');
+
     const quickViewContent = document.getElementById('quickViewContent');
     quickViewContent.innerHTML = `
         <div style="height: 480px; overflow: hidden; border-radius: 12px; border: 1px solid rgba(184, 138, 68, 0.15);">
             <img src="${p.image}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
-        <div style="padding: 10px;">
+        <div style="padding: 10px; max-height: 480px; overflow-y: auto;">
             <span style="font-family: var(--font-body); font-size: 0.8rem; font-weight: 700; color: #B88A44;">${p.category.toUpperCase()}</span>
-            <h3 class="modal-title-serif" style="margin-top: 10px; font-size: 1.6rem;">${p.name}</h3>
-            <div style="color: #B88A44; font-size: 1.1rem; margin: 15px 0;">★★★★★ (5 reviews)</div>
-            <p style="font-family: var(--font-body); font-size: 0.9rem; line-height: 1.8; color: var(--color-charcoal-body); margin-bottom: 25px;">
-                Material: ${p.fabric}<br>
+            <h3 class="modal-title-serif" style="margin-top: 6px; font-size: 1.5rem;">${p.name}</h3>
+            <div style="color: #B88A44; font-size: 1rem; margin: 8px 0;">★★★★★ (5 reviews)</div>
+            <p style="font-family: var(--font-body); font-size: 0.85rem; line-height: 1.6; color: var(--color-charcoal-body); margin-bottom: 15px;">
+                Fabric/Material: ${p.fabric}<br>
                 Occasion: ${p.occasion}<br>
-                Handcrafted by master Indian weavers. Premium quality couture.
+                Handcrafted luxury couture by master Indian artisans.
             </p>
-            <div style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 600; color: var(--color-black-text); margin-bottom: 30px;">
+
+            <!-- Size Selection -->
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: var(--color-black-text); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Select Size Options:</label>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    ${sizesHTML}
+                </div>
+            </div>
+
+            <!-- Color Selection -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: var(--color-black-text); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Select Color Options:</label>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    ${colorsHTML}
+                </div>
+            </div>
+
+            <div style="font-family: var(--font-heading); font-size: 1.6rem; font-weight: 600; color: var(--color-black-text); margin-bottom: 20px;">
                 ₹${p.price.toLocaleString('en-IN')}
             </div>
-            <button class="add-to-bag" style="width: 100%; padding: 14px; border-radius: 30px;" onclick="addItemToCart(${p.id}); closeQuickViewModal();">ADD TO SHOPPING BAG</button>
+            <button class="add-to-bag" style="width: 100%; padding: 14px; border-radius: 30px;" onclick="addItemToCart(${p.id}, currentQuickViewSize, currentQuickViewColor); closeQuickViewModal();">ADD TO SHOPPING BAG</button>
         </div>
     `;
     
@@ -763,7 +834,7 @@ function renderCheckoutItemsList() {
         
         const html = `
             <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 8px;">
-                <span>${p.name} <strong>x${item.qty}</strong></span>
+                <span>${p.name} <small style="color: #B88A44;">(${item.selectedSize || 'M'} / ${item.selectedColor || 'Standard'})</small> <strong>x${item.qty}</strong></span>
                 <span>₹${(p.price * item.qty).toLocaleString('en-IN')}</span>
             </div>
         `;

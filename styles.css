@@ -5649,6 +5649,34 @@ body::before {
     color: #5A000C;
 }
 
+/* Quick View Size and Color Pills */
+.qs-pill-btn, .qc-pill-btn {
+    padding: 6px 14px;
+    border: 1px solid #E5D5C0;
+    border-radius: 20px;
+    background: #FFFFFF;
+    color: #2C2C2C;
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.qs-pill-btn:hover, .qc-pill-btn:hover {
+    border-color: #B88A44;
+    color: #B88A44;
+    transform: translateY(-1px);
+}
+
+.qs-pill-btn.active, .qc-pill-btn.active {
+    background: linear-gradient(135deg, #3C0008, #5A000C);
+    color: #D4AF37;
+    border-color: #B88A44;
+    box-shadow: 0 4px 12px rgba(60, 0, 8, 0.25);
+}
+
 
 
 
