@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Render Products & Collections ---
-    renderFeaturedProducts(getDB('products'));
+    applyFeaturedFilters();
     renderBestSellers();
     renderNewArrivals();
     updateHeaderBadges();
@@ -227,9 +227,42 @@ function renderFeaturedProducts(products) {
     });
 }
 
+let activeFeaturedTab = 'clothing';
+
+function switchFeaturedTab(tab) {
+    activeFeaturedTab = tab;
+    
+    const btnClothing = document.getElementById('tabClothingBtn');
+    const btnJewellery = document.getElementById('tabJewelleryBtn');
+    
+    if (btnClothing && btnJewellery) {
+        if (tab === 'clothing') {
+            btnClothing.style.background = 'linear-gradient(135deg, #3C0008, #680010)';
+            btnClothing.style.color = '#D4AF37';
+            btnClothing.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            
+            btnJewellery.style.background = 'transparent';
+            btnJewellery.style.color = '#3C0008';
+            btnJewellery.style.boxShadow = 'none';
+        } else {
+            btnJewellery.style.background = 'linear-gradient(135deg, #3C0008, #680010)';
+            btnJewellery.style.color = '#D4AF37';
+            btnJewellery.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            
+            btnClothing.style.background = 'transparent';
+            btnClothing.style.color = '#3C0008';
+            btnClothing.style.boxShadow = 'none';
+        }
+    }
+    
+    applyFeaturedFilters();
+}
+
 function applyFeaturedFilters() {
-    const searchVal = document.getElementById('featSearch').value.toLowerCase();
-    const maxPrice = parseInt(document.getElementById('featPrice').value);
+    const searchEl = document.getElementById('featSearch');
+    const searchVal = searchEl ? searchEl.value.toLowerCase() : '';
+    const priceEl = document.getElementById('featPrice');
+    const maxPrice = priceEl ? parseInt(priceEl.value) : 250000;
 
     const categories = Array.from(document.querySelectorAll('#featCategory input:checked')).map(el => el.value);
     const fabrics = Array.from(document.querySelectorAll('#featFabric input:checked')).map(el => el.value);
@@ -237,12 +270,18 @@ function applyFeaturedFilters() {
     const sizes = Array.from(document.querySelectorAll('#featSize input:checked')).map(el => el.value);
 
     const filtered = getDB('products').filter(p => {
+        // Tab filter: Luxury Clothing vs Fine Jewellery
+        const isJewellery = p.category === 'Jewellery' || (p.name && (p.name.toLowerCase().includes('jewel') || p.name.toLowerCase().includes('choker') || p.name.toLowerCase().includes('earring') || p.name.toLowerCase().includes('necklace') || p.name.toLowerCase().includes('kundan') || p.name.toLowerCase().includes('polki')));
+        
+        if (activeFeaturedTab === 'clothing' && isJewellery) return false;
+        if (activeFeaturedTab === 'jewellery' && !isJewellery) return false;
+
         if (searchVal && !p.name.toLowerCase().includes(searchVal)) return false;
         if (p.price > maxPrice) return false;
         if (categories.length > 0 && !categories.includes(p.category)) return false;
         if (fabrics.length > 0 && !fabrics.includes(p.fabric)) return false;
         if (colors.length > 0 && !colors.includes(p.color)) return false;
-        if (sizes.length > 0 && !p.size.some(s => sizes.includes(s))) return false;
+        if (sizes.length > 0 && Array.isArray(p.size) && !p.size.some(s => sizes.includes(s))) return false;
         return true;
     });
 
