@@ -849,24 +849,11 @@
                         </div>
                     </div>
 
-                    <!-- Phone Number with OTP Button -->
                     <div class="input-group" style="margin-bottom: 14px;">
                         <label>10-Digit Mobile Number *</label>
-                        <div style="display: flex; gap: 10px;">
-                            <input type="tel" placeholder="e.g. 9876543210" id="checkoutPhone" maxlength="10" required style="flex-grow: 1;">
-                            <button type="button" id="sendOtpBtn" onclick="sendMobileOtp()" style="background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 10px; padding: 0 16px; font-weight: 700; font-size: 0.8rem; cursor: pointer; white-space: nowrap;">Send OTP</button>
-                        </div>
+                        <input type="tel" placeholder="e.g. 9876543210" id="checkoutPhone" maxlength="10" required>
                     </div>
 
-                    <!-- OTP Verification Input Box -->
-                    <div id="otpVerificationBox" style="display: none; background: rgba(184,138,68,0.08); border: 1.5px dashed #B88A44; padding: 14px; border-radius: 12px; margin-bottom: 14px;">
-                        <label style="font-size: 0.78rem; font-weight: 700; color: #3C0008; display: block; margin-bottom: 6px;">Enter 4-Digit OTP Code sent to your mobile:</label>
-                        <div style="display: flex; gap: 10px;">
-                            <input type="text" placeholder="••••" id="checkoutOtp" maxlength="4" style="letter-spacing: 0.3em; font-size: 1.1rem; text-align: center; font-weight: 700; width: 140px;">
-                            <button type="button" id="verifyOtpBtn" onclick="verifyMobileOtp()" style="background: #006633; color: #FFF; border: none; border-radius: 10px; padding: 0 18px; font-weight: 700; font-size: 0.8rem; cursor: pointer;">VERIFY OTP</button>
-                        </div>
-                        <div id="otpStatusMsg" style="font-size: 0.78rem; margin-top: 6px; font-weight: 700; display: none;"></div>
-                    </div>
 
                     <div class="input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
                         <div class="input-group">
