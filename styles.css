@@ -5303,54 +5303,60 @@ body::before {
 }
 
 /* ==========================================================================
-   CHOOSE YOUR LUXURY COLLECTION SECTION
+   LUXURY BOUTIQUE EXPERIENCE SECTION (CHOOSE YOUR EXPERIENCE)
    ========================================================================== */
-.choose-collection-section {
-    padding: 70px 24px;
-    background: var(--color-cream-bg, #FAF6F0);
+.experience-section {
+    padding: 90px 24px;
+    background: #FAF6F0;
+    text-align: center;
 }
 
-.choose-collection-container {
-    max-width: 1350px;
+.experience-container {
+    max-width: 950px;
     margin: 0 auto;
     width: 100%;
 }
 
-.choose-collection-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 32px;
+.experience-tiles-grid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
     width: 100%;
+    margin-top: 45px;
 }
 
-.hero-collection-card {
+.luxury-experience-tile {
     position: relative;
-    height: 650px;
-    border-radius: 28px;
+    width: 350px;
+    height: 440px;
+    border-radius: 175px 175px 24px 24px;
     overflow: hidden;
     cursor: pointer;
-    border: 1.5px solid rgba(184, 138, 68, 0.28);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     background: #140A0C;
+    border: 1.5px solid rgba(184, 138, 68, 0.28);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(184, 138, 68, 0.08);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
 }
 
-.hero-collection-card:hover {
+.luxury-experience-tile:hover {
+    transform: translateY(-8px) scale(1.04);
     border-color: #D4AF37;
-    box-shadow: 0 25px 60px rgba(212, 175, 55, 0.35), 0 0 35px rgba(184, 138, 68, 0.2);
-    transform: translateY(-6px);
+    box-shadow: 0 22px 50px rgba(212, 175, 55, 0.28), 0 0 30px rgba(184, 138, 68, 0.22);
 }
 
-.hero-card-bg-wrap {
+.tile-arch-img-wrap {
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
     width: 100%;
     height: 100%;
     overflow: hidden;
 }
 
-.hero-card-bg-wrap img {
+.tile-arch-img-wrap img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -5359,115 +5365,102 @@ body::before {
     display: block;
 }
 
-.hero-collection-card:hover .hero-card-bg-wrap img {
-    transform: scale(1.05);
+.luxury-experience-tile:hover .tile-arch-img-wrap img {
+    transform: scale(1.06);
 }
 
-.hero-card-overlay {
+.tile-gradient-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(16, 8, 10, 0.94) 0%, rgba(16, 8, 10, 0.5) 45%, rgba(0, 0, 0, 0.1) 100%);
+    background: linear-gradient(to top, rgba(16, 8, 10, 0.95) 0%, rgba(16, 8, 10, 0.45) 55%, rgba(0, 0, 0, 0.05) 100%);
     pointer-events: none;
     transition: opacity 0.4s ease;
 }
 
-.hero-collection-card:hover .hero-card-overlay {
-    background: linear-gradient(to top, rgba(16, 8, 10, 0.97) 0%, rgba(16, 8, 10, 0.6) 50%, rgba(0, 0, 0, 0.15) 100%);
+.luxury-experience-tile:hover .tile-gradient-overlay {
+    background: linear-gradient(to top, rgba(16, 8, 10, 0.98) 0%, rgba(16, 8, 10, 0.55) 60%, rgba(0, 0, 0, 0.1) 100%);
 }
 
-.hero-card-content {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    padding: 45px 40px;
-    z-index: 2;
+.tile-info-content {
+    position: relative;
+    z-index: 3;
+    padding: 32px 24px;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
 }
 
-.hero-card-badge {
-    font-family: var(--font-body);
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: #D4AF37;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    background: rgba(60, 0, 8, 0.75);
-    padding: 5px 14px;
-    border-radius: 20px;
-    border: 1px solid rgba(212, 175, 55, 0.4);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-.hero-card-title {
+.tile-title {
     font-family: var(--font-brand);
-    font-size: 2.3rem;
+    font-size: 1.65rem;
     font-weight: 700;
     color: #FFFFFF;
     letter-spacing: 0.04em;
-    margin: 4px 0 0 0;
-    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
-    line-height: 1.15;
+    margin: 0;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
 }
 
-.hero-card-sub {
+.tile-subtext {
     font-family: var(--font-body);
-    font-size: 0.95rem;
+    font-size: 0.82rem;
     color: #F5E6B8;
     font-weight: 500;
-    margin-bottom: 14px;
-    opacity: 0.92;
+    margin-bottom: 12px;
+    opacity: 0.9;
+    letter-spacing: 0.02em;
 }
 
-.hero-card-btn {
+.tile-cta-btn {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
-    padding: 14px 30px;
+    gap: 8px;
+    padding: 10px 22px;
     background: linear-gradient(135deg, #3C0008 0%, #680010 50%, #3C0008 100%);
     color: #D4AF37;
     font-family: var(--font-body);
-    font-size: 0.88rem;
+    font-size: 0.78rem;
     font-weight: 700;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     border: 1px solid #B88A44;
-    border-radius: 35px;
+    border-radius: 30px;
     text-decoration: none;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
     transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.hero-collection-card:hover .hero-card-btn,
-.hero-card-btn:hover {
+.luxury-experience-tile:hover .tile-cta-btn,
+.tile-cta-btn:hover {
     background: linear-gradient(135deg, #D4AF37 0%, #F5E6B8 50%, #B88A44 100%);
     color: #3C0008;
     border-color: #FFFFFF;
-    transform: translateY(-3px);
-    box-shadow: 0 12px 30px rgba(184, 138, 68, 0.55);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(184, 138, 68, 0.5);
 }
 
-.hero-collection-card:hover .hero-card-btn .btn-arrow {
-    transform: translateX(5px);
+.tile-arrow {
+    transition: transform 0.3s ease;
+    display: inline-block;
 }
 
-@media (max-width: 900px) {
-    .choose-collection-grid {
-        grid-template-columns: 1fr;
-        gap: 24px;
+.luxury-experience-tile:hover .tile-arrow {
+    transform: translateX(4px);
+}
+
+@media (max-width: 768px) {
+    .experience-section {
+        padding: 60px 16px;
     }
-    .hero-collection-card {
-        height: 480px;
-        border-radius: 20px;
+    .experience-tiles-grid {
+        flex-direction: column;
+        gap: 30px;
     }
-    .hero-card-content {
-        padding: 30px 24px;
-    }
-    .hero-card-title {
-        font-size: 1.8rem;
+    .luxury-experience-tile {
+        width: 100%;
+        max-width: 340px;
+        height: 420px;
     }
 }
 /* ==========================================================================
