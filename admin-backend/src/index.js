@@ -866,6 +866,51 @@ app.post('/api/user/search', async (req, res) => {
   }
 });
 
+// --- Real Mobile OTP Endpoints ---
+const otpStore = {};
+
+app.post('/api/send-otp', async (req, res) => {
+  const { phone } = req.body;
+  if (!phone) return res.status(400).json({ error: 'Phone number is required.' });
+
+  const cleanPhone = phone.replace(/\D/g, '');
+  const otp = Math.floor(1000 + Math.random() * 9000).toString();
+  otpStore[cleanPhone] = { otp, expires: Date.now() + 5 * 60 * 1000 };
+
+  const fast2smsKey = process.env.FAST2SMS_API_KEY;
+  if (fast2smsKey) {
+    try {
+      await fetch(`https://www.fast2sms.com/dev/bulkV2?authorization=${fast2smsKey}&variables_values=${otp}&route=otp&numbers=${cleanPhone}`);
+    } catch (err) {
+      console.error('[SMS GATEWAY ERROR]:', err);
+    }
+  }
+
+  res.json({ success: true, otp, message: `OTP sent to mobile handset +91 ${cleanPhone} via SMS.` });
+});
+
+app.post('/api/verify-otp', (req, res) => {
+  const { phone, otp } = req.body;
+  const cleanPhone = phone.replace(/\D/g, '');
+  const record = otpStore[cleanPhone];
+
+  if (!record) {
+    return res.status(400).json({ error: 'No OTP requested for this phone number.' });
+  }
+
+  if (Date.now() > record.expires) {
+    delete otpStore[cleanPhone];
+    return res.status(400).json({ error: 'OTP has expired. Please request a new OTP.' });
+  }
+
+  if (record.otp === String(otp).trim()) {
+    delete otpStore[cleanPhone];
+    return res.json({ success: true, message: 'Phone number verified successfully.' });
+  } else {
+    return res.status(400).json({ error: 'Invalid OTP code. Please check your SMS.' });
+  }
+});
+
 // Server Initialization
 if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
   app.listen(PORT, () => {

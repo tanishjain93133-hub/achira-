@@ -950,16 +950,40 @@ function sendMobileOtp() {
         sendBtn.style.background = '#006633';
     }
 
+    fetch(`${API_BASE}/api/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: cleanPhone })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data && data.otp) generatedOtp = data.otp;
+    })
+    .catch(e => console.error(e));
+
     if (typeof showToast === 'function') {
-        showToast(`📲 ACHIRA OTP: ${generatedOtp} sent to +91 ${cleanPhone}`);
+        showToast(`📩 OTP sent to +91 ${cleanPhone}. Please check your mobile phone!`);
     }
-    setTimeout(() => {
-        alert(`📲 ACHIRA SECURITY OTP VERIFICATION ✦\n\nYour 4-Digit Verification OTP is: ${generatedOtp}\n\nPlease enter ${generatedOtp} in the checkout form to verify your mobile number (+91 ${cleanPhone}).`);
-    }, 300);
+
+    // Add WhatsApp OTP fallback button if not present
+    let waWrapper = document.getElementById('waOtpWrapper');
+    if (!waWrapper && otpBox) {
+        const waBtnHtml = `
+            <div id="waOtpWrapper" style="margin-top: 10px; font-size: 0.78rem; text-align: left;">
+                <span style="color: #555;">Didn't receive SMS? </span>
+                <a id="waOtpLink" href="https://wa.me/91${cleanPhone}?text=Hello%20Achira%20Atelier,%20my%20Verification%20OTP%20is%20${generatedOtp}" target="_blank" style="color: #25D366; font-weight: 700; text-decoration: underline;">
+                    💬 Click here to receive OTP on WhatsApp (+91 ${cleanPhone})
+                </a>
+            </div>
+        `;
+        otpBox.insertAdjacentHTML('beforeend', waBtnHtml);
+    }
 }
 
 function verifyMobileOtp() {
     const otpInput = document.getElementById('checkoutOtp');
+    const phoneEl = document.getElementById('checkoutPhone');
+    const phoneRaw = phoneEl ? phoneEl.value.trim() : '';
     const userEnteredOtp = otpInput ? otpInput.value.trim() : '';
     const statusMsg = document.getElementById('otpStatusMsg');
 
@@ -982,12 +1006,48 @@ function verifyMobileOtp() {
         }
         if (typeof showToast === 'function') showToast('Mobile number verified ✓');
     } else {
-        if (statusMsg) {
-            statusMsg.innerHTML = '❌ <strong>Invalid OTP.</strong> Please check and enter correct 4-digit code.';
-            statusMsg.style.color = '#dc3545';
-            statusMsg.style.display = 'block';
-        }
-        if (otpInput) otpInput.style.border = '2px solid #dc3545';
+        fetch(`${API_BASE}/api/verify-otp`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: phoneRaw, otp: userEnteredOtp })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                isPhoneVerified = true;
+                if (statusMsg) {
+                    statusMsg.innerHTML = '✅ <strong>Mobile Number Verified Successfully!</strong>';
+                    statusMsg.style.color = '#006633';
+                    statusMsg.style.display = 'block';
+                }
+                const verifyBtn = document.getElementById('verifyOtpBtn');
+                if (verifyBtn) {
+                    verifyBtn.disabled = true;
+                    verifyBtn.textContent = 'VERIFIED ✓';
+                    verifyBtn.style.background = '#006633';
+                }
+                if (otpInput) {
+                    otpInput.disabled = true;
+                    otpInput.style.border = '2px solid #006633';
+                }
+                if (typeof showToast === 'function') showToast('Mobile number verified ✓');
+            } else {
+                if (statusMsg) {
+                    statusMsg.innerHTML = '❌ <strong>Invalid OTP.</strong> Please check your mobile phone for SMS/WhatsApp.';
+                    statusMsg.style.color = '#dc3545';
+                    statusMsg.style.display = 'block';
+                }
+                if (otpInput) otpInput.style.border = '2px solid #dc3545';
+            }
+        })
+        .catch(() => {
+            if (statusMsg) {
+                statusMsg.innerHTML = '❌ <strong>Invalid OTP.</strong> Please check your mobile phone for SMS/WhatsApp.';
+                statusMsg.style.color = '#dc3545';
+                statusMsg.style.display = 'block';
+            }
+            if (otpInput) otpInput.style.border = '2px solid #dc3545';
+        });
     }
 }
 
