@@ -815,54 +815,168 @@
         <div class="l-modal-content large-content">
             <button class="close-l-modal" onclick="closeCheckoutModal()">&times;</button>
             <h3 class="modal-title-serif">Secure Luxury Checkout</h3>
+            
+            <div class="checkout-stepper">
+                <div class="step-item active">
+                    <span class="step-num">1</span>
+                    <span>Shipping Address</span>
+                </div>
+                <div style="flex-grow: 1; height: 1px; background: rgba(184,138,68,0.25); margin: 0 10px;"></div>
+                <div class="step-item active">
+                    <span class="step-num">2</span>
+                    <span>Payment Details</span>
+                </div>
+                <div style="flex-grow: 1; height: 1px; background: rgba(184,138,68,0.25); margin: 0 10px;"></div>
+                <div class="step-item active">
+                    <span class="step-num">3</span>
+                    <span>Confirm Order</span>
+                </div>
+            </div>
+
             <div class="checkout-grid">
                 <!-- Left side form -->
                 <form id="checkoutForm" onsubmit="handlePlaceOrder(event)">
-                    <h4>1. Customer Details &amp; Address</h4>
-                    <div class="input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                    <h4 style="font-family: var(--font-brand); color: #3C0008; margin-bottom: 14px; font-size: 1rem; border-bottom: 1.5px solid rgba(184,138,68,0.2); padding-bottom: 6px;">1. Customer &amp; Shipping Details</h4>
+                    
+                    <div class="input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
                         <div class="input-group">
-                            <label>Full Name</label>
+                            <label>Full Name *</label>
                             <input type="text" placeholder="e.g. Ananya Sharma" id="checkoutName" required>
                         </div>
                         <div class="input-group">
-                            <label>Phone Number</label>
-                            <input type="text" placeholder="+91 98765 43210" id="checkoutPhone" required>
+                            <label>Email Address *</label>
+                            <input type="email" placeholder="e.g. ananya.sharma@gmail.com" id="checkoutEmail" required>
                         </div>
                     </div>
-                    <div class="input-group" style="margin-bottom: 16px;">
-                        <label>Delivery Address</label>
-                        <textarea placeholder="House/Flat No, Street, Landmark, City, Pincode" id="checkoutAddress" required style="height: 60px;"></textarea>
+
+                    <!-- Phone Number with OTP Button -->
+                    <div class="input-group" style="margin-bottom: 14px;">
+                        <label>10-Digit Mobile Number *</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="tel" placeholder="e.g. 9876543210" id="checkoutPhone" maxlength="10" required style="flex-grow: 1;">
+                            <button type="button" id="sendOtpBtn" onclick="sendMobileOtp()" style="background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 10px; padding: 0 16px; font-weight: 700; font-size: 0.8rem; cursor: pointer; white-space: nowrap;">Send OTP</button>
+                        </div>
                     </div>
 
-                    <h4 style="margin-top: 20px; margin-bottom: 10px;">2. Select Payment Method</h4>
+                    <!-- OTP Verification Input Box -->
+                    <div id="otpVerificationBox" style="display: none; background: rgba(184,138,68,0.08); border: 1.5px dashed #B88A44; padding: 14px; border-radius: 12px; margin-bottom: 14px;">
+                        <label style="font-size: 0.78rem; font-weight: 700; color: #3C0008; display: block; margin-bottom: 6px;">Enter 4-Digit OTP Code sent to your mobile:</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" placeholder="••••" id="checkoutOtp" maxlength="4" style="letter-spacing: 0.3em; font-size: 1.1rem; text-align: center; font-weight: 700; width: 140px;">
+                            <button type="button" id="verifyOtpBtn" onclick="verifyMobileOtp()" style="background: #006633; color: #FFF; border: none; border-radius: 10px; padding: 0 18px; font-weight: 700; font-size: 0.8rem; cursor: pointer;">VERIFY OTP</button>
+                        </div>
+                        <div id="otpStatusMsg" style="font-size: 0.78rem; margin-top: 6px; font-weight: 700; display: none;"></div>
+                    </div>
+
+                    <div class="input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                        <div class="input-group">
+                            <label>Flat / House No / Building *</label>
+                            <input type="text" placeholder="e.g. Flat 402, Royal Palms" id="checkoutHouse" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Street / Area / Landmark *</label>
+                            <input type="text" placeholder="e.g. Bandra West, Opp. Taj Hotel" id="checkoutStreet" required>
+                        </div>
+                    </div>
+
+                    <div class="input-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                        <div class="input-group">
+                            <label>City *</label>
+                            <input type="text" placeholder="e.g. Mumbai" id="checkoutCity" required>
+                        </div>
+                        <div class="input-group">
+                            <label>State *</label>
+                            <select id="checkoutState" required style="width:100%; padding:12px; border:1.5px solid rgba(184,138,68,0.25); border-radius:10px; background:#FFF; font-family:var(--font-body); font-size:0.85rem; color:#121212;">
+                                <option value="">Select State</option>
+                                <option value="Maharashtra">Maharashtra</option>
+                                <option value="Delhi">Delhi</option>
+                                <option value="Karnataka">Karnataka</option>
+                                <option value="Gujarat">Gujarat</option>
+                                <option value="Punjab">Punjab</option>
+                                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                <option value="Rajasthan">Rajasthan</option>
+                                <option value="West Bengal">West Bengal</option>
+                                <option value="Telangana">Telangana</option>
+                                <option value="Tamil Nadu">Tamil Nadu</option>
+                                <option value="Haryana">Haryana</option>
+                                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                <option value="Kerala">Kerala</option>
+                                <option value="Bihar">Bihar</option>
+                                <option value="Other">Other Indian State</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>6-Digit Pincode *</label>
+                            <input type="text" placeholder="e.g. 400050" id="checkoutPincode" maxlength="6" required>
+                        </div>
+                    </div>
+
+                    <h4 style="font-family: var(--font-brand); color: #3C0008; margin-top: 20px; margin-bottom: 12px; font-size: 1rem; border-bottom: 1.5px solid rgba(184,138,68,0.2); padding-bottom: 6px;">2. Payment Method</h4>
                     <div class="payment-methods-grid">
                         <label class="pay-option">
-                            <input type="radio" name="paymentMethod" value="UPI (QR)" checked onchange="document.getElementById('upiQrBox').style.display='block';">
-                            <span class="pay-label">📱 Scan UPI QR Code (GPay / PhonePe / Paytm)</span>
+                            <input type="radio" name="paymentMethod" value="UPI (QR)" checked onchange="togglePaymentViews('upi')">
+                            <span class="pay-label">📱 Scan &amp; Pay via UPI QR Code (GPay / PhonePe / Paytm / BHIM)</span>
                         </label>
                         <label class="pay-option">
-                            <input type="radio" name="paymentMethod" value="COD" onchange="document.getElementById('upiQrBox').style.display='none';">
-                            <span class="pay-label">💵 Cash on Delivery</span>
+                            <input type="radio" name="paymentMethod" value="COD" onchange="togglePaymentViews('cod')">
+                            <span class="pay-label">💵 Cash on Delivery (COD)</span>
                         </label>
                         <label class="pay-option">
-                            <input type="radio" name="paymentMethod" value="NetBanking" onchange="document.getElementById('upiQrBox').style.display='none';">
-                            <span class="pay-label">💳 Credit Card / Net Banking</span>
+                            <input type="radio" name="paymentMethod" value="Card" onchange="togglePaymentViews('card')">
+                            <span class="pay-label">💳 Credit Card / Debit Card / Net Banking</span>
                         </label>
                     </div>
 
-                    <!-- Dynamic UPI QR Display -->
+                    <!-- Payment Option A: UPI -->
                     <div id="upiQrBox" style="background: rgba(184,138,68,0.06); border: 1.5px dashed #B88A44; padding: 16px; border-radius: 12px; text-align: center; margin-top: 15px;">
-                        <span style="font-size: 0.8rem; font-weight: 700; color: #3C0008; display: block; margin-bottom: 8px;">Scan QR Code using GPay, PhonePe, Paytm, or BHIM UPI</span>
-                        <div style="background: #FFF; padding: 10px; display: inline-block; border-radius: 10px; border: 1px solid rgba(184,138,68,0.3);">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: #3C0008; display: block; margin-bottom: 8px;">Scan QR Code using GPay, PhonePe, Paytm, or BHIM UPI</span>
+                        <div style="background: #FFF; padding: 10px; display: inline-block; border-radius: 10px; border: 1px solid rgba(184,138,68,0.3); box-shadow: 0 4px 15px rgba(0,0,0,0.06);">
                             <img id="upiQrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=achiracouture@upi%26pn=Achira%20Couture" alt="UPI QR Code" style="width: 150px; height: 150px; display: block;">
                         </div>
-                        <div style="font-size: 0.8rem; color: #2C2C2C; margin-top: 8px;">UPI ID: <strong style="color: #3C0008;">achiracouture@upi</strong></div>
+                        <div style="font-size: 0.85rem; color: #2C2C2C; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <span>UPI ID: <strong style="color: #3C0008;">achiracouture@upi</strong></span>
+                            <button type="button" onclick="navigator.clipboard.writeText('achiracouture@upi'); showToast('UPI ID Copied! ✓');" style="background: #B88A44; color: #FFF; border: none; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; cursor: pointer;">Copy</button>
+                        </div>
+                        <div class="input-group" style="margin-top: 12px; text-align: left;">
+                            <label style="font-size: 0.78rem;">12-Digit UTR / Transaction Reference ID (Optional)</label>
+                            <input type="text" placeholder="e.g. 423819204918" id="checkoutUtr" maxlength="12">
+                        </div>
+                    </div>
+
+                    <!-- Payment Option B: COD -->
+                    <div id="codBox" style="display: none; background: rgba(0,102,51,0.06); border: 1.5px dashed #006633; padding: 16px; border-radius: 12px; margin-top: 15px; text-align: center;">
+                        <span style="font-size: 0.88rem; font-weight: 700; color: #006633; display: block; margin-bottom: 4px;">✓ Cash on Delivery Selected</span>
+                        <p style="font-size: 0.8rem; color: #2C2C2C; margin: 0;">Pay exact cash amount to our courier executive at your doorstep. Verified via Mobile SMS.</p>
+                    </div>
+
+                    <!-- Payment Option C: Card -->
+                    <div id="cardBox" style="display: none; background: rgba(60,0,8,0.04); border: 1.5px dashed #3C0008; padding: 16px; border-radius: 12px; margin-top: 15px;">
+                        <div class="input-group" style="margin-bottom: 10px;">
+                            <label>Card Number</label>
+                            <input type="text" placeholder="xxxx xxxx xxxx xxxx" id="cardNum" maxlength="19">
+                        </div>
+                        <div class="input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="input-group">
+                                <label>Expiry Date</label>
+                                <input type="text" placeholder="MM/YY" id="cardExp" maxlength="5">
+                            </div>
+                            <div class="input-group">
+                                <label>CVV / CVC</label>
+                                <input type="password" placeholder="•••" id="cardCvv" maxlength="3">
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Validation Error Box -->
-                    <div id="checkoutErrorMsg" style="color: #800020; font-size: 0.82rem; font-weight: 700; margin-top: 12px; display: none; background: rgba(128,0,32,0.08); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(128,0,32,0.2); text-align: left;"></div>
+                    <div id="checkoutErrorMsg" style="color: #dc3545; font-size: 0.85rem; font-weight: 700; margin-top: 15px; display: none; background: #fff0f0; padding: 12px 16px; border-radius: 8px; border: 1.5px solid #dc3545; text-align: left; box-shadow: 0 4px 12px rgba(220,53,69,0.15);"></div>
 
-                    <button type="submit" class="place-order-submit-btn" style="margin-top: 15px;">CONFIRM &amp; PLACE ORDER</button>
+                    <button type="submit" class="place-order-submit-btn" style="margin-top: 20px;">CONFIRM &amp; PLACE ORDER</button>
+                    
+                    <div class="trust-badges-bar">
+                        <span>🛡️ 256-Bit SSL Encrypted</span>
+                        <span>🚚 Free Insured Delivery</span>
+                        <span>👑 100% Authentic Couture</span>
+                    </div>
                 </form>
 
                 <!-- Right side summary -->

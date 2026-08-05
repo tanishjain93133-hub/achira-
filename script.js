@@ -765,7 +765,6 @@ function handleTrackOrder() {
     resultBox.innerHTML = html;
 }
 
-// --- Checkout & Coupon management ---
 function openCheckoutModal() {
     const cart = getDB('cart');
     if (cart.length === 0) {
@@ -773,28 +772,53 @@ function openCheckoutModal() {
         return;
     }
     
-    if (!currentUser) {
-        pendingCheckoutAfterLogin = true;
-        showToast("Please login or create a profile to checkout.");
-        openAuthModal();
-        return;
-    }
-
     const subtotal = calculateCartSubtotal();
     appliedDiscountPercent = 0;
     appliedCouponCode = "";
+    isPhoneVerified = false;
+    generatedOtp = null;
+
     const couponMsg = document.getElementById('couponMessage');
     if (couponMsg) couponMsg.textContent = "";
     const chkCoupon = document.getElementById('checkoutCoupon');
     if (chkCoupon) chkCoupon.value = "";
     
+    // Reset OTP UI
+    const otpBox = document.getElementById('otpVerificationBox');
+    if (otpBox) otpBox.style.display = 'none';
+    const sendBtn = document.getElementById('sendOtpBtn');
+    if (sendBtn) {
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send OTP';
+        sendBtn.style.background = 'linear-gradient(135deg, #3C0008, #680010)';
+    }
+    const verifyBtn = document.getElementById('verifyOtpBtn');
+    if (verifyBtn) {
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = 'VERIFY OTP';
+        verifyBtn.style.background = '#006633';
+    }
+    const otpInput = document.getElementById('checkoutOtp');
+    if (otpInput) {
+        otpInput.disabled = false;
+        otpInput.value = '';
+        otpInput.style.border = '1.5px solid rgba(184, 138, 68, 0.25)';
+    }
+    const otpStatus = document.getElementById('otpStatusMsg');
+    if (otpStatus) otpStatus.style.display = 'none';
+
+    const errBox = document.getElementById('checkoutErrorMsg');
+    if (errBox) errBox.style.display = 'none';
+
     // Auto fill user details if available
     const chkName = document.getElementById('checkoutName');
     const chkPhone = document.getElementById('checkoutPhone');
-    const chkAddress = document.getElementById('checkoutAddress');
-    if (chkName && currentUser.name) chkName.value = currentUser.name;
-    if (chkPhone && currentUser.phone) chkPhone.value = currentUser.phone;
-    if (chkAddress && currentUser.address) chkAddress.value = currentUser.address;
+    const chkEmail = document.getElementById('checkoutEmail');
+    if (currentUser) {
+        if (chkName && currentUser.name) chkName.value = currentUser.name;
+        if (chkPhone && currentUser.phone) chkPhone.value = currentUser.phone.replace('+91 ', '');
+        if (chkEmail && currentUser.email) chkEmail.value = currentUser.email;
+    }
 
     updateCheckoutBillDetails(subtotal);
     renderCheckoutItemsList();
@@ -892,6 +916,81 @@ function buyNowWithName(itemName, itemPrice) {
     openCheckoutModal();
 }
 
+let generatedOtp = null;
+let isPhoneVerified = false;
+
+function sendMobileOtp() {
+    const phoneEl = document.getElementById('checkoutPhone');
+    const phoneRaw = phoneEl ? phoneEl.value.trim() : '';
+    const cleanPhone = phoneRaw.replace(/\D/g, '');
+
+    const errBox = document.getElementById('checkoutErrorMsg');
+    if (errBox) errBox.style.display = 'none';
+
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+        if (errBox) {
+            errBox.innerHTML = '❌ <strong>Validation Error:</strong> Please enter a valid 10-digit Indian Mobile Number (e.g. 9876543210).';
+            errBox.style.display = 'block';
+        }
+        if (phoneEl) {
+            phoneEl.style.border = '2px solid #dc3545';
+            phoneEl.focus();
+        }
+        return;
+    }
+
+    generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
+    const otpBox = document.getElementById('otpVerificationBox');
+    if (otpBox) otpBox.style.display = 'block';
+
+    const sendBtn = document.getElementById('sendOtpBtn');
+    if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'OTP Sent ✓';
+        sendBtn.style.background = '#006633';
+    }
+
+    if (typeof showToast === 'function') {
+        showToast(`📲 ACHIRA OTP: ${generatedOtp} sent to +91 ${cleanPhone}`);
+    }
+    setTimeout(() => {
+        alert(`📲 ACHIRA SECURITY OTP VERIFICATION ✦\n\nYour 4-Digit Verification OTP is: ${generatedOtp}\n\nPlease enter ${generatedOtp} in the checkout form to verify your mobile number (+91 ${cleanPhone}).`);
+    }, 300);
+}
+
+function verifyMobileOtp() {
+    const otpInput = document.getElementById('checkoutOtp');
+    const userEnteredOtp = otpInput ? otpInput.value.trim() : '';
+    const statusMsg = document.getElementById('otpStatusMsg');
+
+    if (userEnteredOtp && userEnteredOtp === generatedOtp) {
+        isPhoneVerified = true;
+        if (statusMsg) {
+            statusMsg.innerHTML = '✅ <strong>Mobile Number Verified Successfully!</strong>';
+            statusMsg.style.color = '#006633';
+            statusMsg.style.display = 'block';
+        }
+        const verifyBtn = document.getElementById('verifyOtpBtn');
+        if (verifyBtn) {
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = 'VERIFIED ✓';
+            verifyBtn.style.background = '#006633';
+        }
+        if (otpInput) {
+            otpInput.disabled = true;
+            otpInput.style.border = '2px solid #006633';
+        }
+        if (typeof showToast === 'function') showToast('Mobile number verified ✓');
+    } else {
+        if (statusMsg) {
+            statusMsg.innerHTML = '❌ <strong>Invalid OTP.</strong> Please check and enter correct 4-digit code.';
+            statusMsg.style.color = '#dc3545';
+            statusMsg.style.display = 'block';
+        }
+        if (otpInput) otpInput.style.border = '2px solid #dc3545';
+    }
+}
+
 function togglePaymentViews(mode) {
     const upi = document.getElementById('upiQrBox');
     const cod = document.getElementById('codBox');
@@ -953,6 +1052,11 @@ function handlePlaceOrder(e) {
     const cleanPhone = phoneRaw.replace(/\D/g, '');
     if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
         showError('Please enter a valid 10-digit Indian Mobile Number (e.g. 9876543210).', phoneEl);
+        return;
+    }
+
+    if (!isPhoneVerified) {
+        showError('Please click "Send OTP" and enter the 4-digit code to verify your mobile number before placing your order.', phoneEl);
         return;
     }
 
@@ -1818,14 +1922,28 @@ function injectModalsHTML() {
                             <input type="text" placeholder="e.g. Ananya Sharma" id="checkoutName" required>
                         </div>
                         <div class="input-group">
-                            <label>10-Digit Mobile Number *</label>
-                            <input type="tel" placeholder="e.g. 9876543210" id="checkoutPhone" maxlength="10" required>
+                            <label>Email Address *</label>
+                            <input type="email" placeholder="e.g. ananya.sharma@gmail.com" id="checkoutEmail" required>
                         </div>
                     </div>
 
+                    <!-- Phone Number with OTP Button -->
                     <div class="input-group" style="margin-bottom: 14px;">
-                        <label>Email Address *</label>
-                        <input type="email" placeholder="e.g. ananya.sharma@gmail.com" id="checkoutEmail" required>
+                        <label>10-Digit Mobile Number *</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="tel" placeholder="e.g. 9876543210" id="checkoutPhone" maxlength="10" required style="flex-grow: 1;">
+                            <button type="button" id="sendOtpBtn" onclick="sendMobileOtp()" style="background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 10px; padding: 0 16px; font-weight: 700; font-size: 0.8rem; cursor: pointer; white-space: nowrap;">Send OTP</button>
+                        </div>
+                    </div>
+
+                    <!-- OTP Verification Input Box -->
+                    <div id="otpVerificationBox" style="display: none; background: rgba(184,138,68,0.08); border: 1.5px dashed #B88A44; padding: 14px; border-radius: 12px; margin-bottom: 14px;">
+                        <label style="font-size: 0.78rem; font-weight: 700; color: #3C0008; display: block; margin-bottom: 6px;">Enter 4-Digit OTP Code sent to your mobile:</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" placeholder="••••" id="checkoutOtp" maxlength="4" style="letter-spacing: 0.3em; font-size: 1.1rem; text-align: center; font-weight: 700; width: 140px;">
+                            <button type="button" id="verifyOtpBtn" onclick="verifyMobileOtp()" style="background: #006633; color: #FFF; border: none; border-radius: 10px; padding: 0 18px; font-weight: 700; font-size: 0.8rem; cursor: pointer;">VERIFY OTP</button>
+                        </div>
+                        <div id="otpStatusMsg" style="font-size: 0.78rem; margin-top: 6px; font-weight: 700; display: none;"></div>
                     </div>
 
                     <div class="input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
