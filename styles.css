@@ -5476,7 +5476,10 @@ body::before {
    ACHIRA ATELIER - LUXURY CHECKOUT & ENQUIRY FORM STYLING
    ========================================================================== */
 .luxury-modal .l-modal-content.large-content {
-    max-width: 950px;
+    max-width: 1050px;
+    width: 95vw;
+    max-height: 92vh;
+    overflow-y: auto;
     background: linear-gradient(145deg, #FAF6F0 0%, #FFFFFF 100%);
     border: 1px solid rgba(184, 138, 68, 0.35);
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25), 0 0 40px rgba(184, 138, 68, 0.15);

@@ -892,55 +892,109 @@ function buyNowWithName(itemName, itemPrice) {
     openCheckoutModal();
 }
 
+function togglePaymentViews(mode) {
+    const upi = document.getElementById('upiQrBox');
+    const cod = document.getElementById('codBox');
+    const card = document.getElementById('cardBox');
+
+    if (upi) upi.style.display = (mode === 'upi') ? 'block' : 'none';
+    if (cod) cod.style.display = (mode === 'cod') ? 'block' : 'none';
+    if (card) card.style.display = (mode === 'card') ? 'block' : 'none';
+}
+
 function handlePlaceOrder(e) {
     e.preventDefault();
-    const nameInput = document.getElementById('checkoutName');
-    const phoneInput = document.getElementById('checkoutPhone');
-    const addressInput = document.getElementById('checkoutAddress');
+    const nameEl = document.getElementById('checkoutName');
+    const phoneEl = document.getElementById('checkoutPhone');
+    const emailEl = document.getElementById('checkoutEmail');
+    const houseEl = document.getElementById('checkoutHouse');
+    const streetEl = document.getElementById('checkoutStreet');
+    const cityEl = document.getElementById('checkoutCity');
+    const stateEl = document.getElementById('checkoutState');
+    const pincodeEl = document.getElementById('checkoutPincode');
+    const utrEl = document.getElementById('checkoutUtr');
     const payModeRadio = document.querySelector('input[name="paymentMethod"]:checked');
     const errBox = document.getElementById('checkoutErrorMsg');
-    
+
+    const allInputs = [nameEl, phoneEl, emailEl, houseEl, streetEl, cityEl, stateEl, pincodeEl];
+    allInputs.forEach(el => {
+        if (el) el.style.border = '1.5px solid rgba(184, 138, 68, 0.25)';
+    });
     if (errBox) errBox.style.display = 'none';
 
-    const phoneRaw = phoneInput ? phoneInput.value.trim() : "";
-    const address = addressInput ? addressInput.value.trim() : "";
-
-    function showCheckoutError(msg, targetEl) {
+    function showError(msg, targetEl) {
         if (errBox) {
-            errBox.innerHTML = `⚠️ ${msg}`;
+            errBox.innerHTML = `❌ <strong>Form Error:</strong> ${msg}`;
             errBox.style.display = 'block';
+            errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
         } else {
-            alert(`⚠️ ${msg}`);
+            alert(`❌ ${msg}`);
         }
-        if (targetEl) targetEl.focus();
+        if (targetEl) {
+            targetEl.style.border = '2px solid #dc3545';
+            targetEl.focus();
+        }
     }
 
-    // 1. Full Name
-    const customerName = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : (currentUser ? currentUser.name : "Valued Patron");
+    const name = nameEl ? nameEl.value.trim() : '';
+    const phoneRaw = phoneEl ? phoneEl.value.trim() : '';
+    const email = emailEl ? emailEl.value.trim() : '';
+    const house = houseEl ? houseEl.value.trim() : '';
+    const street = streetEl ? streetEl.value.trim() : '';
+    const city = cityEl ? cityEl.value.trim() : '';
+    const state = stateEl ? stateEl.value : '';
+    const pincode = pincodeEl ? pincodeEl.value.trim() : '';
 
-    // 2. Validate Phone Number (10-digit Indian Mobile Number)
-    const cleanPhone = phoneRaw.replace(/[\s\-\+\(\)]/g, '');
-    const phoneDigitsOnly = cleanPhone.startsWith('91') && cleanPhone.length === 12 ? cleanPhone.slice(2) : cleanPhone;
-    const phoneRegex = /^[6-9]\d{9}$/;
-    
-    if (!phoneRegex.test(phoneDigitsOnly)) {
-        showCheckoutError("Please enter a valid 10-digit mobile number (e.g. 7049845357).", phoneInput);
+    if (!name || name.length < 3) {
+        showError('Please enter your Full Name (at least 3 characters).', nameEl);
         return;
     }
 
-    // 3. Validate Delivery Address
-    if (!address || address.length < 5) {
-        showCheckoutError("Please enter your complete delivery address.", addressInput);
+    const cleanPhone = phoneRaw.replace(/\D/g, '');
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+        showError('Please enter a valid 10-digit Indian Mobile Number (e.g. 9876543210).', phoneEl);
         return;
     }
 
-    const formattedPhone = "+91 " + phoneDigitsOnly.slice(0, 5) + " " + phoneDigitsOnly.slice(5);
-    const payMode = payModeRadio ? payModeRadio.value : "UPI (QR)";
-    const userToken = localStorage.getItem('userToken') || ('simulated-token-' + Date.now());
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showError('Please enter a valid email address (e.g. ananya@gmail.com).', emailEl);
+        return;
+    }
+
+    if (!house || house.length < 2) {
+        showError('Please enter Flat / House No / Building Name.', houseEl);
+        return;
+    }
+
+    if (!street || street.length < 3) {
+        showError('Please enter Street / Area / Landmark.', streetEl);
+        return;
+    }
+
+    if (!city || city.length < 2) {
+        showError('Please enter your City.', cityEl);
+        return;
+    }
+
+    if (!state) {
+        showError('Please select your State.', stateEl);
+        return;
+    }
+
+    if (!pincode || !/^\d{6}$/.test(pincode)) {
+        showError('Please enter a valid 6-digit Indian Pincode (e.g. 400050).', pincodeEl);
+        return;
+    }
+
+    const payMode = payModeRadio ? payModeRadio.value : 'UPI (QR)';
+    const utr = utrEl ? utrEl.value.trim() : '';
+
+    const fullAddress = `${house}, ${street}, ${city}, ${state} - ${pincode}`;
+    const formattedPhone = `+91 ${cleanPhone.slice(0, 5)} ${cleanPhone.slice(5)}`;
     
     const cart = getDB('cart');
     if (cart.length === 0) {
-        showCheckoutError("Your shopping bag is empty! Please add items to proceed.", null);
+        showError('Your shopping bag is empty! Add products before placing order.', null);
         return;
     }
 
@@ -955,17 +1009,19 @@ function handlePlaceOrder(e) {
     const products = getDB('products');
     const itemsSummary = cart.map(item => {
         const p = products.find(prod => prod.id === item.productId);
-        return p ? `${p.name} (x${item.qty})` : `Couture Item (x${item.qty})`;
-    }).join(", ");
+        const sz = item.selectedSize || 'M';
+        const clr = item.selectedColor || 'Standard';
+        return p ? `${p.name} (Size: ${sz}, Color: ${clr}) x${item.qty}` : `Couture Item (x${item.qty})`;
+    }).join(', ');
 
-    const orderId = "ACH-" + Math.floor(100000 + Math.random() * 900000);
+    const orderId = 'ACH-' + Math.floor(100000 + Math.random() * 900000);
     const formattedOrder = {
         id: orderId,
-        userEmail: currentUser ? currentUser.email : (customerName.toLowerCase().replace(/\s+/g, '') + "@gmail.com"),
-        userName: customerName,
+        userName: name,
+        userEmail: email,
         userPhone: formattedPhone,
-        userAddress: address,
-        paymentMode: payMode,
+        userAddress: fullAddress,
+        paymentMode: utr ? `${payMode} (UTR: ${utr})` : payMode,
         subtotal: subtotal,
         discount: discount,
         tax: tax,
@@ -973,10 +1029,12 @@ function handlePlaceOrder(e) {
         grandTotal: grandTotal,
         itemsSummary: itemsSummary,
         itemsDetail: [...cart],
-        status: "Processing",
+        status: 'Processing',
+        orderStatus: 'Processing',
         date: new Date().toLocaleDateString('en-IN')
     };
 
+    const userToken = localStorage.getItem('userToken') || ('simulated-token-' + Date.now());
     fetch(`${API_BASE}/api/user/checkout`, {
         method: 'POST',
         headers: { 
@@ -984,9 +1042,9 @@ function handlePlaceOrder(e) {
             'Authorization': `Bearer ${userToken}`
         },
         body: JSON.stringify({
-            name: customerName,
+            name: name,
             phone: formattedPhone,
-            address,
+            address: fullAddress,
             paymentMethod: payMode,
             couponCode: appliedCouponCode,
             items: cart
@@ -1752,51 +1810,127 @@ function injectModalsHTML() {
 
             <div class="checkout-grid">
                 <form id="checkoutForm" onsubmit="handlePlaceOrder(event)">
-                    <h4 style="font-family: var(--font-brand); color: #3C0008; margin-bottom: 12px; font-size: 0.95rem;">1. Customer Details &amp; Address</h4>
-                    <div class="input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                    <h4 style="font-family: var(--font-brand); color: #3C0008; margin-bottom: 14px; font-size: 1rem; border-bottom: 1.5px solid rgba(184,138,68,0.2); padding-bottom: 6px;">1. Shipping &amp; Customer Details</h4>
+                    
+                    <div class="input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
                         <div class="input-group">
-                            <label>Full Name</label>
-                            <input type="text" placeholder="e.g. Ananya Sharma" id="checkoutName">
+                            <label>Full Name *</label>
+                            <input type="text" placeholder="e.g. Ananya Sharma" id="checkoutName" required>
                         </div>
                         <div class="input-group">
-                            <label>Mobile Number</label>
-                            <input type="text" placeholder="+91 98765 43210" id="checkoutPhone" required>
+                            <label>10-Digit Mobile Number *</label>
+                            <input type="tel" placeholder="e.g. 9876543210" id="checkoutPhone" maxlength="10" required>
                         </div>
-                    </div>
-                    <div class="input-group" style="margin-bottom: 16px;">
-                        <label>Delivery Address</label>
-                        <textarea placeholder="House/Flat No, Street, Landmark, City, Pincode" id="checkoutAddress" required style="height: 60px;"></textarea>
                     </div>
 
-                    <h4 style="font-family: var(--font-brand); color: #3C0008; margin-top: 20px; margin-bottom: 10px; font-size: 0.95rem;">2. Select Payment Method</h4>
+                    <div class="input-group" style="margin-bottom: 14px;">
+                        <label>Email Address *</label>
+                        <input type="email" placeholder="e.g. ananya.sharma@gmail.com" id="checkoutEmail" required>
+                    </div>
+
+                    <div class="input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                        <div class="input-group">
+                            <label>Flat / House No / Building *</label>
+                            <input type="text" placeholder="e.g. Flat 402, Royal Palms" id="checkoutHouse" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Street / Area / Landmark *</label>
+                            <input type="text" placeholder="e.g. Bandra West, Opp. Taj Hotel" id="checkoutStreet" required>
+                        </div>
+                    </div>
+
+                    <div class="input-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                        <div class="input-group">
+                            <label>City *</label>
+                            <input type="text" placeholder="e.g. Mumbai" id="checkoutCity" required>
+                        </div>
+                        <div class="input-group">
+                            <label>State *</label>
+                            <select id="checkoutState" required style="width:100%; padding:12px; border:1.5px solid rgba(184,138,68,0.25); border-radius:10px; background:#FFF; font-family:var(--font-body); font-size:0.85rem; color:#121212;">
+                                <option value="">Select State</option>
+                                <option value="Maharashtra">Maharashtra</option>
+                                <option value="Delhi">Delhi</option>
+                                <option value="Karnataka">Karnataka</option>
+                                <option value="Gujarat">Gujarat</option>
+                                <option value="Punjab">Punjab</option>
+                                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                <option value="Rajasthan">Rajasthan</option>
+                                <option value="West Bengal">West Bengal</option>
+                                <option value="Telangana">Telangana</option>
+                                <option value="Tamil Nadu">Tamil Nadu</option>
+                                <option value="Haryana">Haryana</option>
+                                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                <option value="Kerala">Kerala</option>
+                                <option value="Bihar">Bihar</option>
+                                <option value="Other">Other Indian State</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>6-Digit Pincode *</label>
+                            <input type="text" placeholder="e.g. 400050" id="checkoutPincode" maxlength="6" required>
+                        </div>
+                    </div>
+
+                    <h4 style="font-family: var(--font-brand); color: #3C0008; margin-top: 20px; margin-bottom: 12px; font-size: 1rem; border-bottom: 1.5px solid rgba(184,138,68,0.2); padding-bottom: 6px;">2. Payment Method</h4>
                     <div class="payment-methods-grid">
                         <label class="pay-option">
-                            <input type="radio" name="paymentMethod" value="UPI (QR)" checked onchange="document.getElementById('upiQrBox').style.display='block';">
-                            <span class="pay-label">📱 Scan UPI QR Code (GPay / PhonePe / Paytm)</span>
+                            <input type="radio" name="paymentMethod" value="UPI (QR)" checked onchange="togglePaymentViews('upi')">
+                            <span class="pay-label">📱 Scan &amp; Pay via UPI QR Code (GPay / PhonePe / Paytm / BHIM)</span>
                         </label>
                         <label class="pay-option">
-                            <input type="radio" name="paymentMethod" value="COD" onchange="document.getElementById('upiQrBox').style.display='none';">
+                            <input type="radio" name="paymentMethod" value="COD" onchange="togglePaymentViews('cod')">
                             <span class="pay-label">💵 Cash on Delivery (COD)</span>
                         </label>
                         <label class="pay-option">
-                            <input type="radio" name="paymentMethod" value="NetBanking" onchange="document.getElementById('upiQrBox').style.display='none';">
-                            <span class="pay-label">💳 Credit Card / Net Banking</span>
+                            <input type="radio" name="paymentMethod" value="Card" onchange="togglePaymentViews('card')">
+                            <span class="pay-label">💳 Credit Card / Debit Card / Net Banking</span>
                         </label>
                     </div>
 
-                    <!-- Dynamic UPI QR Display -->
+                    <!-- Payment Option A: UPI -->
                     <div id="upiQrBox" style="background: rgba(184,138,68,0.06); border: 1.5px dashed #B88A44; padding: 16px; border-radius: 12px; text-align: center; margin-top: 15px;">
-                        <span style="font-size: 0.8rem; font-weight: 700; color: #3C0008; display: block; margin-bottom: 8px;">Scan QR Code using GPay, PhonePe, Paytm, or BHIM UPI</span>
+                        <span style="font-size: 0.85rem; font-weight: 700; color: #3C0008; display: block; margin-bottom: 8px;">Scan QR Code using GPay, PhonePe, Paytm, or BHIM UPI</span>
                         <div style="background: #FFF; padding: 10px; display: inline-block; border-radius: 10px; border: 1px solid rgba(184,138,68,0.3); box-shadow: 0 4px 15px rgba(0,0,0,0.06);">
-                            <img id="upiQrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=achiracouture@upi%26pn=Achira%20Couture" alt="UPI QR Code" style="width: 140px; height: 140px; display: block;">
+                            <img id="upiQrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=achiracouture@upi%26pn=Achira%20Couture" alt="UPI QR Code" style="width: 150px; height: 150px; display: block;">
                         </div>
-                        <div style="font-size: 0.8rem; color: #2C2C2C; margin-top: 8px;">UPI ID: <strong style="color: #3C0008;">achiracouture@upi</strong></div>
+                        <div style="font-size: 0.85rem; color: #2C2C2C; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <span>UPI ID: <strong style="color: #3C0008;">achiracouture@upi</strong></span>
+                            <button type="button" onclick="navigator.clipboard.writeText('achiracouture@upi'); showToast('UPI ID Copied! ✓');" style="background: #B88A44; color: #FFF; border: none; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; cursor: pointer;">Copy</button>
+                        </div>
+                        <div class="input-group" style="margin-top: 12px; text-align: left;">
+                            <label style="font-size: 0.78rem;">12-Digit UTR / Transaction Reference ID (Optional)</label>
+                            <input type="text" placeholder="e.g. 423819204918" id="checkoutUtr" maxlength="12">
+                        </div>
+                    </div>
+
+                    <!-- Payment Option B: COD -->
+                    <div id="codBox" style="display: none; background: rgba(0,102,51,0.06); border: 1.5px dashed #006633; padding: 16px; border-radius: 12px; margin-top: 15px; text-align: center;">
+                        <span style="font-size: 0.88rem; font-weight: 700; color: #006633; display: block; margin-bottom: 4px;">✓ Cash on Delivery Selected</span>
+                        <p style="font-size: 0.8rem; color: #2C2C2C; margin: 0;">Pay exact cash amount to our courier executive at your doorstep. Verified via Mobile SMS.</p>
+                    </div>
+
+                    <!-- Payment Option C: Card -->
+                    <div id="cardBox" style="display: none; background: rgba(60,0,8,0.04); border: 1.5px dashed #3C0008; padding: 16px; border-radius: 12px; margin-top: 15px;">
+                        <div class="input-group" style="margin-bottom: 10px;">
+                            <label>Card Number</label>
+                            <input type="text" placeholder="xxxx xxxx xxxx xxxx" id="cardNum" maxlength="19">
+                        </div>
+                        <div class="input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="input-group">
+                                <label>Expiry Date</label>
+                                <input type="text" placeholder="MM/YY" id="cardExp" maxlength="5">
+                            </div>
+                            <div class="input-group">
+                                <label>CVV / CVC</label>
+                                <input type="password" placeholder="•••" id="cardCvv" maxlength="3">
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Validation Error Box -->
-                    <div id="checkoutErrorMsg" style="color: #800020; font-size: 0.82rem; font-weight: 700; margin-top: 12px; display: none; background: rgba(128,0,32,0.08); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(128,0,32,0.2); text-align: left;"></div>
+                    <div id="checkoutErrorMsg" style="color: #dc3545; font-size: 0.85rem; font-weight: 700; margin-top: 15px; display: none; background: #fff0f0; padding: 12px 16px; border-radius: 8px; border: 1.5px solid #dc3545; text-align: left; box-shadow: 0 4px 12px rgba(220,53,69,0.15);"></div>
 
-                    <button type="submit" class="place-order-submit-btn" style="margin-top: 18px;">CONFIRM &amp; PLACE ORDER</button>
+                    <button type="submit" class="place-order-submit-btn" style="margin-top: 20px;">CONFIRM &amp; PLACE ORDER</button>
                     
                     <div class="trust-badges-bar">
                         <span>🛡️ 256-Bit SSL Encrypted</span>
