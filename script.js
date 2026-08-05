@@ -219,7 +219,7 @@ function renderFeaturedProducts(products) {
                     <span class="info-meta">${p.category.toUpperCase()} • ${p.fabric.toUpperCase()}</span>
                     <h4 class="info-title" onclick="openQuickView(${p.id})">${p.name}</h4>
                     <span class="info-price">₹${p.price.toLocaleString('en-IN')}</span>
-                    <button class="add-bag-pill-btn" onclick="addItemToCart(${p.id})">ADD TO BAG</button>
+                    <button class="add-bag-pill-btn" style="background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border-color: #B88A44; font-weight: 700;" onclick="openQuickView(${p.id})">⚡ BUY NOW</button>
                 </div>
             </div>
         `;
@@ -481,7 +481,8 @@ function openQuickView(productId) {
             <div style="font-family: var(--font-heading); font-size: 1.6rem; font-weight: 600; color: var(--color-black-text); margin-bottom: 20px;">
                 ₹${p.price.toLocaleString('en-IN')}
             </div>
-            <button class="add-to-bag" style="width: 100%; padding: 14px; border-radius: 30px;" onclick="addItemToCart(${p.id}, currentQuickViewSize, currentQuickViewColor); closeQuickViewModal();">ADD TO SHOPPING BAG</button>
+            <button class="buy-now-btn" style="width: 100%; padding: 14px; border-radius: 30px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; font-weight: 700; border: 1px solid #B88A44; cursor: pointer; text-transform: uppercase; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(60, 0, 8, 0.3);" onclick="addItemToCart(${p.id}, currentQuickViewSize, currentQuickViewColor); closeQuickViewModal(); openCheckoutModal();">⚡ BUY NOW</button>
+            <button class="add-to-bag" style="width: 100%; padding: 12px; border-radius: 30px; background: transparent; border: 1px solid #B88A44; color: #121212; font-weight: 600; cursor: pointer;" onclick="addItemToCart(${p.id}, currentQuickViewSize, currentQuickViewColor); closeQuickViewModal();">ADD TO SHOPPING BAG</button>
         </div>
     `;
     
@@ -1004,6 +1005,7 @@ function completeOrderPlacement(formattedOrder) {
     const orders = getDB('orders');
     orders.unshift(formattedOrder);
     setDB('orders', orders);
+    setDB('admin_orders', orders);
     
     setDB('cart', []);
     updateHeaderBadges();
@@ -1125,7 +1127,7 @@ function renderBestSellers() {
                     <div class="card-price" style="margin-bottom: 14px;">
                         <span class="price">₹${p.price.toLocaleString('en-IN')}</span>
                     </div>
-                    <button class="add-to-bag" style="width: 100%; border-radius: 30px; padding: 10px; font-size: 0.75rem;" onclick="addItemToCart(${p.id})">ADD TO BAG</button>
+                    <button class="add-to-bag" style="width: 100%; border-radius: 30px; padding: 10px; font-size: 0.75rem; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border-color: #B88A44; font-weight: 700;" onclick="openQuickView(${p.id})">⚡ BUY NOW</button>
                 </div>
             </div>
         `;
@@ -1174,7 +1176,7 @@ function renderNewArrivals() {
                     <span class="info-meta">${p.category.toUpperCase()} • ${p.fabric.toUpperCase()}</span>
                     <h4 class="info-title" onclick="openQuickView(${p.id})">${p.name}</h4>
                     <span class="info-price">₹${p.price.toLocaleString('en-IN')}</span>
-                    <button class="add-bag-pill-btn" onclick="addItemToCart(${p.id})">ADD TO BAG</button>
+                    <button class="add-bag-pill-btn" style="background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border-color: #B88A44; font-weight: 700;" onclick="openQuickView(${p.id})">⚡ BUY NOW</button>
                 </div>
             </div>
         `;
