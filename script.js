@@ -229,6 +229,25 @@ function renderFeaturedProducts(products) {
 
 let activeFeaturedTab = 'clothing';
 
+function isJewelleryProduct(p) {
+    if (!p) return false;
+    const cat = (p.category || '').toLowerCase();
+    const name = (p.name || '').toLowerCase();
+    const fab = (p.fabric || '').toLowerCase();
+    return cat.includes('jewel') || 
+           name.includes('jewel') || 
+           name.includes('choker') || 
+           name.includes('earring') || 
+           name.includes('necklace') || 
+           name.includes('kundan') || 
+           name.includes('polki') || 
+           name.includes('jhumka') || 
+           name.includes('pendant') || 
+           name.includes('stud') || 
+           fab.includes('gemstone') || 
+           fab.includes('gold');
+}
+
 function switchFeaturedTab(tab) {
     activeFeaturedTab = tab;
     
@@ -254,7 +273,8 @@ function switchFeaturedTab(tab) {
             btnClothing.style.boxShadow = 'none';
         }
     }
-    
+
+    document.querySelectorAll('.featured-sidebar input[type="checkbox"]').forEach(cb => cb.checked = false);
     applyFeaturedFilters();
 }
 
@@ -270,11 +290,11 @@ function applyFeaturedFilters() {
     const sizes = Array.from(document.querySelectorAll('#featSize input:checked')).map(el => el.value);
 
     const filtered = getDB('products').filter(p => {
-        // Tab filter: Luxury Clothing vs Fine Jewellery
-        const isJewellery = p.category === 'Jewellery' || (p.name && (p.name.toLowerCase().includes('jewel') || p.name.toLowerCase().includes('choker') || p.name.toLowerCase().includes('earring') || p.name.toLowerCase().includes('necklace') || p.name.toLowerCase().includes('kundan') || p.name.toLowerCase().includes('polki')));
+        const isJewel = isJewelleryProduct(p);
         
-        if (activeFeaturedTab === 'clothing' && isJewellery) return false;
-        if (activeFeaturedTab === 'jewellery' && !isJewellery) return false;
+        // Strict Tab Filtering
+        if (activeFeaturedTab === 'clothing' && isJewel) return false;
+        if (activeFeaturedTab === 'jewellery' && !isJewel) return false;
 
         if (searchVal && !p.name.toLowerCase().includes(searchVal)) return false;
         if (p.price > maxPrice) return false;
@@ -289,11 +309,14 @@ function applyFeaturedFilters() {
 }
 
 function clearFeaturedFilters() {
-    document.getElementById('featSearch').value = '';
-    document.getElementById('featPrice').value = 25000;
-    document.getElementById('featPriceVal').textContent = '25,000';
+    const search = document.getElementById('featSearch');
+    if (search) search.value = '';
+    const price = document.getElementById('featPrice');
+    if (price) price.value = 200000;
+    const priceVal = document.getElementById('featPriceVal');
+    if (priceVal) priceVal.textContent = '2,00,000';
     document.querySelectorAll('.featured-sidebar input[type="checkbox"]').forEach(cb => cb.checked = false);
-    renderFeaturedProducts(getDB('products'));
+    applyFeaturedFilters();
 }
 
 function updateFeatPriceLabel(value) {
