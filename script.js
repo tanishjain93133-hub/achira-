@@ -1515,26 +1515,23 @@ function handleAdminLogin(e) {
     const userEl = document.getElementById('adminUser');
     const passEl = document.getElementById('adminPass');
     const user = userEl ? userEl.value.trim() : 'admin';
-    const pass = passEl ? passEl.value.trim() : 'password';
+    const pass = passEl ? passEl.value.trim() : 'admin123';
 
-    const validUsers = ['admin', 'achira@123', 'achira123', 'admin@achira.com'];
-    const validPasswords = ['password', 'achira@8061@7741', 'achira80617741', 'Achira@8061@7741'];
-
-    if (validUsers.includes(user.toLowerCase()) || user.length > 0) {
-        if (validPasswords.includes(pass) || pass.length >= 4 || user.toLowerCase() === 'admin') {
-            currentAdmin = { username: user, role: 'Admin' };
-            localStorage.setItem('currentAdmin', JSON.stringify(currentAdmin));
-            showToast("Gateway connection established.");
-            showAdminMainDashboard();
-            return;
-        }
+    if (user.length > 0 && pass.length > 0) {
+        currentAdmin = { username: user, role: 'Admin' };
+        localStorage.setItem('currentAdmin', JSON.stringify(currentAdmin));
+        localStorage.setItem('adminToken', 'admin-session-' + Date.now());
+        showToast("Gateway connection established.");
+        showAdminMainDashboard();
+        return;
     }
-    alert("Incorrect Admin Gateway credentials. Try admin / password.");
+    alert("Please enter username and password.");
 }
 
 function handleAdminLogout() {
     currentAdmin = null;
     localStorage.removeItem('currentAdmin');
+    localStorage.removeItem('adminToken');
     showAdminLoginView();
     showToast("Gateway session terminated.");
 }
@@ -1557,19 +1554,25 @@ function renderAdminStats() {
     const products = getDB('products');
     const customers = getDB('users');
     
-    const totalRev = orders.reduce((sum, o) => sum + o.grandTotal, 0);
+    const totalRev = orders.reduce((sum, o) => sum + (o.grandTotal || 0), 0);
     const todaySales = orders.reduce((sum, o) => {
-        if (o.date === new Date().toLocaleDateString('en-IN')) return sum + o.grandTotal;
+        if (o.date === new Date().toLocaleDateString('en-IN')) return sum + (o.grandTotal || 0);
         return sum;
     }, 0);
-    const pendingOrders = orders.filter(o => o.status === "Pending").length;
+    const pendingOrders = orders.filter(o => (o.status || o.orderStatus) === "Pending").length;
 
-    document.getElementById('statRevenue').textContent = `₹${totalRev.toLocaleString('en-IN')}`;
-    document.getElementById('statTodaySales').textContent = `₹${todaySales.toLocaleString('en-IN')}`;
-    document.getElementById('statOrders').textContent = orders.length;
-    document.getElementById('statCustomers').textContent = customers.length + 1; // plus default patron
-    document.getElementById('statProducts').textContent = products.length;
-    document.getElementById('statPendingOrders').textContent = pendingOrders;
+    const elRev = document.getElementById('statRevenue');
+    if (elRev) elRev.textContent = `₹${totalRev.toLocaleString('en-IN')}`;
+    const elToday = document.getElementById('statTodaySales');
+    if (elToday) elToday.textContent = `₹${todaySales.toLocaleString('en-IN')}`;
+    const elOrders = document.getElementById('statOrders');
+    if (elOrders) elOrders.textContent = orders.length;
+    const elCust = document.getElementById('statCustomers');
+    if (elCust) elCust.textContent = customers.length + 1;
+    const elProd = document.getElementById('statProducts');
+    if (elProd) elProd.textContent = products.length;
+    const elPending = document.getElementById('statPendingOrders');
+    if (elPending) elPending.textContent = pendingOrders;
 }
 
 // Manage Products in Admin Panel
