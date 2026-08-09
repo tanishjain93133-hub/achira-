@@ -713,20 +713,22 @@ function handleContactSubmit(e) {
         id: 'EQ-' + Math.floor(1000 + Math.random() * 9000),
         name: name,
         email: email,
+        phone: phone,
         contact: phone,
         subject: subject,
         message: message,
-        date: new Date().toLocaleDateString('en-IN')
+        date: new Date().toLocaleDateString('en-IN'),
+        createdAt: new Date().toISOString()
     };
 
     const list = getDB('enquiries');
     list.unshift(newEnquiry);
     setDB('enquiries', list);
 
-    fetch(`${API_BASE}/api/admin/contact`, {
+    fetch(`${API_BASE}/api/user/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newEnquiry)
+        body: JSON.stringify({ name, phone, email, subject, message })
     }).catch(() => {});
 
     showToast("✦ Query submitted! Our Atelier Concierge will reach out shortly.");
@@ -1466,7 +1468,13 @@ function renderNewArrivals() {
 // --- Admin Panel Functions ---
 function openAdminModal(e) {
     if (e) e.preventDefault();
-    window.open('https://admin-frontend-five-khaki.vercel.app', '_blank');
+    const modal = document.getElementById('adminModal');
+    if (modal) {
+        modal.classList.add('active');
+        showAdminMainDashboard();
+    } else {
+        window.location.href = 'admin.html';
+    }
 }
 
 function closeAdminModal() {
@@ -1489,6 +1497,7 @@ function showAdminMainDashboard() {
     renderAdminCustomersTable();
     renderAdminCoupons();
     renderAdminReviewsTable();
+    renderAdminEnquiriesTable();
     renderAdminSettingsForm();
 }
 
@@ -1525,8 +1534,12 @@ function switchAdminTab(tabId) {
     document.querySelectorAll('.admin-nav-item').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.admin-tab-view').forEach(view => view.classList.remove('active'));
     
-    event.currentTarget.classList.add('active');
-    document.getElementById(tabId).classList.add('active');
+    if (window.event && window.event.currentTarget) {
+        window.event.currentTarget.classList.add('active');
+    }
+    const target = document.getElementById(tabId);
+    if (target) target.classList.add('active');
+    if (tabId === 'admin-enquiries') renderAdminEnquiriesTable();
 }
 
 // Stats overview
@@ -1814,6 +1827,42 @@ function deleteReview(reviewId) {
     setDB('reviews', filtered);
     renderAdminReviewsTable();
     showToast("Review deleted.");
+}
+
+// Manage Enquiries in Admin Panel
+function renderAdminEnquiriesTable() {
+    const tbody = document.getElementById('adminEnquiriesTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const enquiries = getDB('enquiries', []);
+    if (enquiries.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px; color: var(--color-charcoal-body);">No customer enquiries found.</td></tr>`;
+        return;
+    }
+
+    enquiries.forEach((eq, idx) => {
+        const row = `
+            <tr>
+                <td><strong style="color: #B88A44;">${eq.id || 'EQ-' + (1000 + idx)}</strong></td>
+                <td><strong>${eq.name}</strong><br><span style="font-size: 0.72rem; color: #666;">${eq.email || 'N/A'}</span></td>
+                <td>${eq.phone || eq.contact || 'N/A'}</td>
+                <td><span class="badge badge-info" style="background: rgba(184,138,68,0.15); color: #B88A44; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem;">${eq.subject || 'General Enquiry'}</span></td>
+                <td style="max-width: 250px; font-size: 0.8rem; line-height: 1.4;">"${eq.message}"</td>
+                <td style="font-size: 0.75rem; color: #888;">${eq.date || 'Recent'}</td>
+                <td><button onclick="deleteAdminEnquiry('${eq.id || eq.name}')" style="background: #800020; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button></td>
+            </tr>
+        `;
+        tbody.insertAdjacentHTML('beforeend', row);
+    });
+}
+
+function deleteAdminEnquiry(id) {
+    let enquiries = getDB('enquiries', []);
+    enquiries = enquiries.filter(e => e.id !== id && e.name !== id);
+    setDB('enquiries', enquiries);
+    renderAdminEnquiriesTable();
+    showToast("Enquiry removed.");
 }
 
 // Settings
@@ -2239,6 +2288,7 @@ function injectModalsHTML() {
                         <button class="admin-nav-item" onclick="switchAdminTab('admin-products')">Manage Products</button>
                         <button class="admin-nav-item" onclick="switchAdminTab('admin-orders')">Manage Orders</button>
                         <button class="admin-nav-item" onclick="switchAdminTab('admin-customers')">Manage Customers</button>
+                        <button class="admin-nav-item" onclick="switchAdminTab('admin-enquiries')">Manage Enquiries</button>
                         <button class="admin-nav-item" onclick="switchAdminTab('admin-coupons')">Banner &amp; Coupons</button>
                         <button class="admin-nav-item" onclick="switchAdminTab('admin-reviews')">Manage Reviews</button>
                         <button class="admin-nav-item" onclick="switchAdminTab('admin-settings')">System Settings</button>
@@ -2354,6 +2404,20 @@ function injectModalsHTML() {
                                     <tr><th>Product Name</th><th>Patron</th><th>Rating</th><th>Review Content</th><th>Status</th><th>Actions</th></tr>
                                 </thead>
                                 <tbody id="adminReviewsTableBody">
+                                    <!-- Dynamic Body -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="admin-enquiries" class="admin-tab-view">
+                        <h4>Customer Enquiries &amp; Messages</h4>
+                        <div class="table-wrap">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr><th>ID</th><th>Sender</th><th>Contact Phone</th><th>Subject</th><th>Message</th><th>Date</th><th>Action</th></tr>
+                                </thead>
+                                <tbody id="adminEnquiriesTableBody">
                                     <!-- Dynamic Body -->
                                 </tbody>
                             </table>

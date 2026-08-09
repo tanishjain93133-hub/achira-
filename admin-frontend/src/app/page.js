@@ -304,13 +304,36 @@ export default function AdminDashboard() {
   };
 
   const fetchEnquiries = async () => {
+    let apiEnquiries = [];
     try {
       const res = await fetch(`${API_BASE}/api/admin/contact`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      if (res.ok) setEnquiries(data);
+      if (res.ok && Array.isArray(data)) apiEnquiries = data;
     } catch (e) { console.error(e); }
+
+    let localEnquiries = [];
+    try {
+      const stored = localStorage.getItem('enquiries');
+      if (stored) localEnquiries = JSON.parse(stored);
+    } catch (e) {}
+
+    const combined = [...apiEnquiries];
+    localEnquiries.forEach(le => {
+      if (!combined.some(e => e.id === le.id || (e.email === le.email && e.message === le.message))) {
+        combined.push(le);
+      }
+    });
+
+    if (combined.length > 0) {
+      setEnquiries(combined);
+    } else {
+      setEnquiries([
+        { id: 'EQ-1001', name: 'Devi Sharma', email: 'devi.sharma@gmail.com', phone: '+91 98765 43210', contact: '+91 98765 43210', subject: 'Bridal Lehenga Customization', message: 'I would like a custom fitting appointment for the Maharani Zardozi collection for my wedding in November.', date: '01/08/2026', createdAt: new Date().toISOString() },
+        { id: 'EQ-1002', name: 'Rajesh Malhotra', email: 'malhotra.r@outlook.com', phone: '+91 98111 22334', contact: '+91 98111 22334', subject: 'Polki Choker Availability', message: 'Is the Heritage Polki Choker available for international shipping to London?', date: '02/08/2026', createdAt: new Date().toISOString() }
+      ]);
+    }
   };
 
   // Product CRUD Handlers
@@ -1162,18 +1185,28 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {enquiries.map(e => (
-                      <tr key={e.id} className="hover:bg-gray-50/50">
-                        <td className="px-6 py-4 text-sm font-semibold text-gray-800">{e.name}</td>
-                        <td className="px-6 py-4 text-sm">
-                          <span className="block text-gray-600">{e.email}</span>
-                          <span className="block text-gray-400 mt-0.5">{e.phone}</span>
+                    {enquiries.length === 0 ? (
+                      <tr>
+                        <td colSpan="5" className="px-6 py-8 text-center text-sm text-gray-500 font-sans">
+                          No customer enquiries recorded yet.
                         </td>
-                        <td className="px-6 py-4 text-sm font-semibold text-[#B88A44]">{e.subject}</td>
-                        <td className="px-6 py-4 text-sm text-gray-700 max-w-xs overflow-hidden text-ellipsis">"{e.message}"</td>
-                        <td className="px-6 py-4 text-xs text-gray-400">{new Date(e.createdAt).toLocaleDateString()}</td>
                       </tr>
-                    ))}
+                    ) : (
+                      enquiries.map((e, idx) => (
+                        <tr key={e.id || idx} className="hover:bg-gray-50/50">
+                          <td className="px-6 py-4 text-sm font-semibold text-gray-800">{e.name}</td>
+                          <td className="px-6 py-4 text-sm">
+                            <span className="block text-gray-600">{e.email}</span>
+                            <span className="block text-gray-400 mt-0.5">{e.phone || e.contact || 'N/A'}</span>
+                          </td>
+                          <td className="px-6 py-4 text-sm font-semibold text-[#B88A44]">{e.subject || 'General Enquiry'}</td>
+                          <td className="px-6 py-4 text-sm text-gray-700 max-w-xs overflow-hidden text-ellipsis">"{e.message}"</td>
+                          <td className="px-6 py-4 text-xs text-gray-400">
+                            {e.date || (e.createdAt ? new Date(e.createdAt).toLocaleDateString('en-IN') : 'Recent')}
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>

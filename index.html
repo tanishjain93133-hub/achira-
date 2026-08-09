@@ -672,7 +672,7 @@
         </div>
 
         <div class="footer-bottom">
-            <p>&copy; 2026 ACHIRA Couture &amp; Fine Jewellery. All Rights Reserved. Designed with Royal Elegance. | <a href="https://admin-frontend-five-khaki.vercel.app" target="_blank" style="color: #B88A44; text-decoration: underline; font-weight: bold;">👑 Admin Gateway</a></p>
+            <p>&copy; 2026 ACHIRA Couture &amp; Fine Jewellery. All Rights Reserved. Designed with Royal Elegance. | <a href="admin.html" onclick="openAdminModal(event)" style="color: #B88A44; text-decoration: underline; font-weight: bold;">👑 Admin Gateway</a></p>
         </div>
     </footer>
 
@@ -1058,6 +1058,7 @@
                         <button class="admin-nav-item" onclick="switchAdminTab('admin-products')">Manage Products</button>
                         <button class="admin-nav-item" onclick="switchAdminTab('admin-orders')">Manage Orders</button>
                         <button class="admin-nav-item" onclick="switchAdminTab('admin-customers')">Manage Customers</button>
+                        <button class="admin-nav-item" onclick="switchAdminTab('admin-enquiries')">Manage Enquiries</button>
                         <button class="admin-nav-item" onclick="switchAdminTab('admin-coupons')">Banner &amp; Coupons</button>
                         <button class="admin-nav-item" onclick="switchAdminTab('admin-reviews')">Manage Reviews</button>
                         <button class="admin-nav-item" onclick="switchAdminTab('admin-settings')">System Settings</button>
@@ -1181,6 +1182,21 @@
                                 </thead>
                                 <tbody id="adminReviewsTableBody">
                                     <!-- Dynamic -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Customer Enquiries Tab -->
+                    <div id="admin-enquiries" class="admin-tab-view">
+                        <h4>Customer Enquiries &amp; Messages</h4>
+                        <div class="table-wrap">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr><th>ID</th><th>Sender</th><th>Contact Phone</th><th>Subject</th><th>Message</th><th>Date</th><th>Action</th></tr>
+                                </thead>
+                                <tbody id="adminEnquiriesTableBody">
+                                    <!-- Dynamic Body -->
                                 </tbody>
                             </table>
                         </div>

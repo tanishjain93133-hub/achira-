@@ -833,6 +833,7 @@
             if (el) el.classList.add('active');
             const titleEl = document.getElementById('pageTitle');
             if (titleEl && el) titleEl.textContent = el.textContent.replace(/^[^\s]+\s/, '') + ' Management';
+            renderAllData();
         }
 
         function updateOrderStatus(orderId, newStatus) {
@@ -974,6 +975,7 @@
             // Render Enquiries
             const enqBody = document.getElementById('enquiriesBody');
             if (enqBody) {
+                enquiries = getDB('enquiries', defaultEnquiries);
                 enqBody.innerHTML = enquiries.map((eq, idx) => `
                     <tr>
                         <td><strong style="color: var(--gold);">${eq.id || 'EQ-100' + (idx+1)}</strong></td>
