@@ -6,6 +6,10 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding database...');
 
+  await prisma.product.deleteMany({}).catch(() => {});
+  await prisma.coupon.deleteMany({}).catch(() => {});
+  await prisma.settings.deleteMany({}).catch(() => {});
+
   // 1. Seed Admin
   const adminPassword = await bcrypt.hash('achira@8061@7741', 10);
   const admin = await prisma.admin.upsert({
@@ -62,11 +66,11 @@ async function main() {
     { name: "Royal Gold Kundan Necklace Set", category: "Gold Jewellery", fabric: "Gold", color: "Gold", size: "Adjustable", price: 95000, availability: "New Arrival", occasion: "Wedding", image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80", rating: 5, stock: 3, sku: "ACH-JWL-010", description: "Handcrafted Kundan necklace set with matching jhumkas." },
     { name: "Vasant Floral Organza Saree", category: "Organza Sarees", fabric: "Organza", color: "Pink", size: "Free Size", price: 6800, availability: "Trending", occasion: "Festive", image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=600&q=85", rating: 5, stock: 11, sku: "ACH-SAR-011", description: "Fluid organza saree with delicate handpainted floral motifs." },
     { name: "Royal Banarasi Silk Lehenga", category: "Bridal Lehengas", fabric: "Silk", color: "Red", size: "M,L,XL", price: 14500, availability: "Best Seller", occasion: "Wedding", image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80", rating: 5, stock: 3, sku: "ACH-LEH-012", description: "Royal bridal lehenga set crafted in Banarasi silk." },
-    { name: "Atelier Spiral Diamond Studs", category: "Diamond Jewellery", fabric: "Diamonds", color: "Gold", size: "Adjustable", price: 45000, availability: "New Arrival", occasion: "Festive", image: "earring1.jpg", rating: 5, stock: 6, sku: "ACH-JWL-013", description: "Premium rose gold spiral studs encrusted with certified diamonds." },
-    { name: "Celestial Crescent Diamond Earrings", category: "Diamond Jewellery", fabric: "Diamonds", color: "Gold", size: "Adjustable", price: 58000, availability: "New Arrival", occasion: "Bridal", image: "earring2.jpg", rating: 5, stock: 4, sku: "ACH-JWL-014", description: "Crescent moon drop earrings featuring G-H VVS diamonds." },
-    { name: "Infinity Loop Diamond Earrings", category: "Diamond Jewellery", fabric: "Diamonds", color: "Gold", size: "Adjustable", price: 61500, availability: "Best Seller", occasion: "Wedding", image: "earring3.jpg", rating: 5, stock: 5, sku: "ACH-JWL-015", description: "Infinity twist studs featuring IGI certified diamonds." },
-    { name: "Royal Halo Gold & Diamond Jhumkas", category: "Gold Jewellery", fabric: "Gold", color: "Gold", size: "Adjustable", price: 74000, availability: "Best Seller", occasion: "Bridal", image: "earring4.jpg", rating: 5, stock: 3, sku: "ACH-JWL-016", description: "Traditional jhumkas adorned with fine gold filigree and diamonds." },
-    { name: "Aura Linear Diamond Drops", category: "Diamond Jewellery", fabric: "Diamonds", color: "Gold", size: "Adjustable", price: 68000, availability: "Limited Edition", occasion: "Anniversary", image: "earring5.jpg", rating: 5, stock: 2, sku: "ACH-JWL-017", description: "Delicate linear drops featuring certified solitaire diamonds." }
+    { name: "Atelier Spiral Pave Diamond Studs", category: "Diamond Jewellery", fabric: "Diamonds", color: "Gold", size: "Adjustable", price: 45000, availability: "New Arrival", occasion: "Festive", image: "earring1.jpg", rating: 5, stock: 6, sku: "ACH-JWL-013", description: "Premium pave spiral studs encrusted with certified diamonds." },
+    { name: "Celestial Crescent Diamond Earrings", category: "Diamond Jewellery", fabric: "Diamonds", color: "Gold", size: "Adjustable", price: 58000, availability: "New Arrival", occasion: "Bridal", image: "earring2.jpg", rating: 5, stock: 4, sku: "ACH-JWL-014", description: "Crescent moon pave drop earrings featuring G-H VVS diamonds." },
+    { name: "Solitaire Diamond Riviera Necklace", category: "Diamond Jewellery", fabric: "Diamonds", color: "Gold", size: "Adjustable", price: 185000, availability: "Best Seller", occasion: "Wedding", image: "earring3.jpg", rating: 5, stock: 3, sku: "ACH-JWL-015", description: "Single-line solitaire diamond riviera necklace featuring GIA certified stones." },
+    { name: "Aura Four-Stone Linear Drop Earrings", category: "Diamond Jewellery", fabric: "Diamonds", color: "Gold", size: "Adjustable", price: 74000, availability: "Best Seller", occasion: "Bridal", image: "earring4.jpg", rating: 5, stock: 3, sku: "ACH-JWL-016", description: "Four-stone linear drop earrings adorned with brilliant solitaires." },
+    { name: "Double Layer Riviera Diamond Necklace", category: "Diamond Jewellery", fabric: "Diamonds", color: "Gold", size: "Adjustable", price: 245000, availability: "Limited Edition", occasion: "Anniversary", image: "earring5.jpg", rating: 5, stock: 2, sku: "ACH-JWL-017", description: "Grand double-layered diamond riviera necklace for royal occasions." }
   ];
 
   await prisma.product.createMany({

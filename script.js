@@ -16,11 +16,11 @@ const initialProducts = [
     { id: 11, name: "Vasant Floral Organza Saree", category: "Organza Sarees", fabric: "Organza", color: "Pink", size: ["Free Size"], price: 6800, availability: "Trending", occasion: "Festive", image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=600&q=85", rating: 5 },
     { id: 12, name: "Royal Banarasi Silk Lehenga", category: "Bridal Lehengas", fabric: "Silk", color: "Red", size: ["M", "L", "XL", "XXL"], price: 14500, availability: "Best Seller", occasion: "Wedding", image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80", rating: 5 },
     { id: 13, name: "Royal Heritage Velvet Gown", category: "Gown", fabric: "Velvet", color: "Maroon", size: ["S", "M", "L", "XL", "XXL", "XXXXL", "XXXXXL"], price: 8900, availability: "New Arrival", occasion: "Party Wear", image: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=600&q=80", rating: 5 },
-    { id: 14, name: "Atelier Spiral Studs", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 45000, availability: "New Arrival", occasion: "Festive", image: "earring1.jpg", rating: 5 },
-    { id: 15, name: "Celestial Crescent Earrings", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 58000, availability: "New Arrival", occasion: "Bridal", image: "earring2.jpg", rating: 5 },
-    { id: 16, name: "Infinity Loop Earrings", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 61500, availability: "Best Seller", occasion: "Wedding", image: "earring3.jpg", rating: 5 },
-    { id: 17, name: "Royal Halo Jhumkas", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 74000, availability: "Best Seller", occasion: "Bridal", image: "earring4.jpg", rating: 5 },
-    { id: 18, name: "Aura Linear Drops", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 68000, availability: "Limited Edition", occasion: "Anniversary", image: "earring5.jpg", rating: 5 }
+    { id: 14, name: "Atelier Spiral Pave Studs", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 45000, availability: "New Arrival", occasion: "Festive", image: "earring1.jpg", rating: 5 },
+    { id: 15, name: "Celestial Crescent Diamond Earrings", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 58000, availability: "New Arrival", occasion: "Bridal", image: "earring2.jpg", rating: 5 },
+    { id: 16, name: "Solitaire Diamond Riviera Necklace", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 185000, availability: "Best Seller", occasion: "Wedding", image: "earring3.jpg", rating: 5 },
+    { id: 17, name: "Aura Four-Stone Linear Drop Earrings", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 74000, availability: "Best Seller", occasion: "Bridal", image: "earring4.jpg", rating: 5 },
+    { id: 18, name: "Double Layer Riviera Diamond Necklace", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 245000, availability: "Limited Edition", occasion: "Anniversary", image: "earring5.jpg", rating: 5 }
 ];
 
 // Helper database functions
