@@ -132,37 +132,29 @@ export default function AdminDashboard() {
       }
     } catch (e) { console.error(e); }
 
+    // Compute stats dynamically from active state
+    const rev = orders.reduce((sum, o) => sum + (o.grandTotal || 0), 0);
+    const todayStr = new Date().toLocaleDateString('en-IN');
+    const todaySales = orders.reduce((sum, o) => {
+      if (o.date === todayStr || (o.createdAt && new Date(o.createdAt).toLocaleDateString('en-IN') === todayStr)) return sum + (o.grandTotal || 0);
+      return sum;
+    }, 0);
+
     setStats({
-      revenue: 345000,
-      todaySales: 24500,
-      totalOrders: 18,
-      pending: 3,
-      confirmed: 5,
-      packed: 4,
-      shipped: 3,
-      delivered: 3,
-      cancelled: 0,
-      customers: 24,
-      productsCount: 12,
-      lowStock: 2,
-      outOfStock: 0,
-      charts: {
-        revenue: [
-          { name: 'Mon', value: 35000 },
-          { name: 'Tue', value: 45000 },
-          { name: 'Wed', value: 60000 },
-          { name: 'Thu', value: 42000 },
-          { name: 'Fri', value: 75000 },
-          { name: 'Sat', value: 88000 },
-          { name: 'Sun', value: 95000 }
-        ],
-        topSelling: [
-          { name: "Royal Heritage Velvet Gown", value: 8900, sales: 14 },
-          { name: "Avani Banarasi Silk Saree", value: 8500, sales: 11 },
-          { name: "Maharani Zardozi Anarkali Dress", value: 4500, sales: 9 },
-          { name: "Kashmiri Arayan Embroidered Dress", value: 3200, sales: 7 }
-        ]
-      }
+      revenue: rev,
+      todaySales: todaySales,
+      totalOrders: orders.length,
+      pending: orders.filter(o => (o.orderStatus || o.status) === 'Pending').length,
+      confirmed: orders.filter(o => (o.orderStatus || o.status) === 'Confirmed').length,
+      packed: orders.filter(o => (o.orderStatus || o.status) === 'Packed').length,
+      shipped: orders.filter(o => (o.orderStatus || o.status) === 'Shipped').length,
+      delivered: orders.filter(o => (o.orderStatus || o.status) === 'Delivered').length,
+      cancelled: orders.filter(o => (o.orderStatus || o.status) === 'Cancelled').length,
+      customers: customers.length,
+      productsCount: products.length,
+      lowStock: products.filter(p => p.stock > 0 && p.stock <= 5).length,
+      outOfStock: products.filter(p => p.stock === 0).length,
+      charts: { revenue: [], topSelling: [] }
     });
   };
 
@@ -170,19 +162,10 @@ export default function AdminDashboard() {
     try {
       const res = await fetch(`${API_BASE}/api/admin/products`);
       const data = await res.json();
-      if (res.ok && Array.isArray(data) && data.length > 0) {
+      if (res.ok && Array.isArray(data)) {
         setProducts(data);
-        return;
       }
     } catch (e) { console.error(e); }
-
-    setProducts([
-      { id: 1, name: "Maharani Zardozi Anarkali Dress", category: "Gown", price: 4500, stock: 12, sku: "ACH-101", image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80", availability: "New Arrival", color: "Royal Red, Maroon, Gold", size: "S,M,L,XL,XXL,XXXXL" },
-      { id: 2, name: "Kashmiri Arayan Embroidered Dress", category: "Lucknowi Kurti", price: 3200, stock: 8, sku: "ACH-102", image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80", availability: "Best Seller", color: "Black, Midnight Blue", size: "M,L,XL,XXL" },
-      { id: 3, name: "Gulbahar Handblock Cotton Dress", category: "Cotton Kurti", price: 1800, stock: 15, sku: "ACH-103", image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=600&q=80", availability: "In Stock", color: "Blush Pink, Mustard Yellow", size: "XS,S,M,L,XL,XXL,XXXXL,XXXXXL" },
-      { id: 4, name: "Avani Banarasi Silk Saree", category: "Designer Saree", price: 8500, stock: 5, sku: "ACH-104", image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80", availability: "Best Seller", color: "Crimson Red, Gold, Emerald Green", size: "Free Size" },
-      { id: 5, name: "Royal Heritage Velvet Gown", category: "Gown", price: 8900, stock: 10, sku: "ACH-105", image: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=600&q=80", availability: "New Arrival", color: "Maroon, Navy Blue", size: "S,M,L,XL,XXL" }
-    ]);
   };
 
   const fetchOrders = async () => {
@@ -211,16 +194,7 @@ export default function AdminDashboard() {
     });
 
     console.log(`[ADMIN DEBUG] Orders found: ${combined.length}`);
-    if (combined.length > 0) {
-      console.log(`[ADMIN DEBUG] Latest order ID: ${combined[0].id}`);
-      setOrders(combined);
-    } else {
-      setOrders([
-        { id: "ACH-9021", userName: "Priya Sharma", userEmail: "priya@gmail.com", userPhone: "+91 98765 43210", userAddress: "Flat 402, Royal Palms, Bandra West, Mumbai - 400050", itemsSummary: "Royal Heritage Velvet Gown (Size: M, Color: Maroon) (x1)", grandTotal: 8900, paymentMode: "UPI (QR)", orderStatus: "Delivered", status: "Delivered", createdAt: "2026-08-01" },
-        { id: "ACH-9022", userName: "Ananya Roy", userEmail: "ananya.roy@yahoo.com", userPhone: "+91 98123 45678", userAddress: "B-12, Green Park Main, New Delhi - 110016", itemsSummary: "Avani Banarasi Silk Saree (Size: Free Size, Color: Red) (x1)", grandTotal: 8500, paymentMode: "UPI (QR)", orderStatus: "Confirmed", status: "Confirmed", createdAt: "2026-08-02" },
-        { id: "ACH-9023", userName: "Kavita Verma", userEmail: "kavita.v@outlook.com", userPhone: "+91 97654 32109", userAddress: "House 88, Sector 15, Chandigarh - 160015", itemsSummary: "Atelier Lucknowi Chikankari Tunic (Size: L, Color: White) (x2)", grandTotal: 5800, paymentMode: "COD", orderStatus: "Shipped", status: "Shipped", createdAt: "2026-08-02" }
-      ]);
-    }
+    setOrders(combined);
   };
 
   const fetchCustomers = async () => {
@@ -246,14 +220,7 @@ export default function AdminDashboard() {
       }
     });
 
-    if (combined.length > 0) {
-      setCustomers(combined);
-    } else {
-      setCustomers([
-        { id: 1, name: "Priya Sharma", email: "priya@gmail.com", phone: "+91 98765 43210", address: "Flat 402, Royal Palms, Bandra West, Mumbai - 400050" },
-        { id: 2, name: "Ananya Roy", email: "ananya.roy@yahoo.com", phone: "+91 98123 45678", address: "B-12, Green Park Main, New Delhi - 110016" }
-      ]);
-    }
+    setCustomers(combined);
   };
 
   const fetchLogs = async () => {
@@ -1024,47 +991,53 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {orders.map((o, idx) => {
-                      const displayId = String(o.id).startsWith('ACH-') ? o.id : ('ACH-' + o.id);
-                      const cName = o.customerName || o.userName || 'Valued Patron';
-                      const cPhone = o.phone || o.userPhone || '';
-                      const cEmail = o.email || o.userEmail || '';
-                      const pMethod = o.paymentMethod || o.paymentMode || 'COD';
-                      const pStatus = o.paymentStatus || 'Pending';
-                      const oStatus = o.orderStatus || o.status || 'Pending';
+                    {orders.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-500 font-medium">No orders found.</td>
+                      </tr>
+                    ) : (
+                      orders.map((o, idx) => {
+                        const displayId = String(o.id).startsWith('ACH-') ? o.id : ('ACH-' + o.id);
+                        const cName = o.customerName || o.userName || 'Valued Patron';
+                        const cPhone = o.phone || o.userPhone || '';
+                        const cEmail = o.email || o.userEmail || '';
+                        const pMethod = o.paymentMethod || o.paymentMode || 'COD';
+                        const pStatus = o.paymentStatus || 'Pending';
+                        const oStatus = o.orderStatus || o.status || 'Pending';
 
-                      return (
-                        <tr key={o.id || idx} className="hover:bg-gray-50/50">
-                          <td className="px-6 py-4 text-sm font-semibold text-gray-800">{displayId}</td>
-                          <td className="px-6 py-4">
-                            <span className="text-sm font-semibold text-gray-800 block">{cName}</span>
-                            <span className="text-xs text-gray-400 block mt-0.5">{cEmail} {cPhone ? `| ${cPhone}` : ''}</span>
-                          </td>
-                          <td className="px-6 py-4 text-sm font-semibold text-[#B88A44]">₹{(o.grandTotal || 0).toLocaleString('en-IN')}</td>
-                          <td className="px-6 py-4 text-sm text-gray-500">
-                            <span className="block font-medium">{pMethod}</span>
-                            <span className={`text-xs font-bold ${pStatus === 'Paid' ? 'text-green-600' : 'text-amber-500'}`}>{pStatus}</span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <select 
-                              value={oStatus} 
-                              onChange={e => handleUpdateOrderStatus(o.dbId || o.id, e.target.value)}
-                              className="text-xs font-semibold p-1.5 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#B88A44]"
-                            >
-                              <option value="Pending">Pending</option>
-                              <option value="Confirmed">Confirmed</option>
-                              <option value="Packed">Packed</option>
-                              <option value="Shipped">Shipped</option>
-                              <option value="Delivered">Delivered</option>
-                              <option value="Cancelled">Cancelled</option>
-                            </select>
-                          </td>
-                          <td className="px-6 py-4 text-xs font-bold">
-                            <a href="#" className="text-[#B88A44] hover:underline">View Invoice</a>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                        return (
+                          <tr key={o.id || idx} className="hover:bg-gray-50/50">
+                            <td className="px-6 py-4 text-sm font-semibold text-gray-800">{displayId}</td>
+                            <td className="px-6 py-4">
+                              <span className="text-sm font-semibold text-gray-800 block">{cName}</span>
+                              <span className="text-xs text-gray-400 block mt-0.5">{cEmail} {cPhone ? `| ${cPhone}` : ''}</span>
+                            </td>
+                            <td className="px-6 py-4 text-sm font-semibold text-[#B88A44]">₹{(o.grandTotal || 0).toLocaleString('en-IN')}</td>
+                            <td className="px-6 py-4 text-sm text-gray-500">
+                              <span className="block font-medium">{pMethod}</span>
+                              <span className={`text-xs font-bold ${pStatus === 'Paid' ? 'text-green-600' : 'text-amber-500'}`}>{pStatus}</span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <select 
+                                value={oStatus} 
+                                onChange={e => handleUpdateOrderStatus(o.dbId || o.id, e.target.value)}
+                                className="text-xs font-semibold p-1.5 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#B88A44]"
+                              >
+                                <option value="Pending">Pending</option>
+                                <option value="Confirmed">Confirmed</option>
+                                <option value="Packed">Packed</option>
+                                <option value="Shipped">Shipped</option>
+                                <option value="Delivered">Delivered</option>
+                                <option value="Cancelled">Cancelled</option>
+                              </select>
+                            </td>
+                            <td className="px-6 py-4 text-xs font-bold">
+                              <a href="#" className="text-[#B88A44] hover:underline">View Invoice</a>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -1088,16 +1061,22 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {customers.map(c => (
-                      <tr key={c.id} className="hover:bg-gray-50/50">
-                        <td className="px-6 py-4 text-sm font-semibold text-gray-800">{c.name}</td>
-                        <td className="px-6 py-4 text-sm text-gray-600">{c.email}</td>
-                        <td className="px-6 py-4 text-sm text-gray-500">{c.phone}</td>
-                        <td className="px-6 py-4 text-sm text-center font-bold text-gray-700">{c.orderCount}</td>
-                        <td className="px-6 py-4 text-sm font-semibold text-[#B88A44]">₹{c.totalSpent.toLocaleString('en-IN')}</td>
-                        <td className="px-6 py-4 text-xs text-gray-400">{new Date(c.regDate).toLocaleDateString()}</td>
+                    {customers.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-500 font-medium">No customers found.</td>
                       </tr>
-                    ))}
+                    ) : (
+                      customers.map((c, idx) => (
+                        <tr key={c.id || idx} className="hover:bg-gray-50/50">
+                          <td className="px-6 py-4 text-sm font-semibold text-gray-800">{c.name || 'Valued Patron'}</td>
+                          <td className="px-6 py-4 text-sm text-gray-600">{c.email || 'N/A'}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{c.phone || 'N/A'}</td>
+                          <td className="px-6 py-4 text-sm text-center font-bold text-gray-700">{c.ordersCount || c.orderCount || 0}</td>
+                          <td className="px-6 py-4 text-sm font-semibold text-[#B88A44]">₹{(c.totalSpent || 0).toLocaleString('en-IN')}</td>
+                          <td className="px-6 py-4 text-xs text-gray-400">{c.regDate ? new Date(c.regDate).toLocaleDateString('en-IN') : 'Registered'}</td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>

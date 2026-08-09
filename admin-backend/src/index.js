@@ -616,21 +616,105 @@ app.put('/api/admin/orders/:id/status', authenticateToken, requireAdmin, async (
   }
 });
 
+// Dynamic Overview Stats API
+app.get('/api/admin/stats', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    let orders = await prisma.order.findMany().catch(() => []);
+    const combinedOrders = [...orders];
+    serverOrdersStore.forEach(so => {
+      if (!combinedOrders.some(o => o.id === so.id || o.dbId === so.dbId)) {
+        combinedOrders.push(so);
+      }
+    });
+
+    let users = await prisma.user.findMany().catch(() => []);
+    let products = await prisma.product.findMany().catch(() => []);
+
+    const totalRev = combinedOrders.reduce((sum, o) => sum + (o.grandTotal || 0), 0);
+    const todayStr = new Date().toLocaleDateString('en-IN');
+    const todaySales = combinedOrders.reduce((sum, o) => {
+      const oDate = o.date || (o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-IN') : '');
+      if (oDate === todayStr) return sum + (o.grandTotal || 0);
+      return sum;
+    }, 0);
+
+    const pending = combinedOrders.filter(o => (o.orderStatus || o.status) === 'Pending').length;
+    const confirmed = combinedOrders.filter(o => (o.orderStatus || o.status) === 'Confirmed').length;
+    const packed = combinedOrders.filter(o => (o.orderStatus || o.status) === 'Packed').length;
+    const shipped = combinedOrders.filter(o => (o.orderStatus || o.status) === 'Shipped').length;
+    const delivered = combinedOrders.filter(o => (o.orderStatus || o.status) === 'Delivered').length;
+    const cancelled = combinedOrders.filter(o => (o.orderStatus || o.status) === 'Cancelled').length;
+
+    res.json({
+      revenue: totalRev,
+      todaySales: todaySales,
+      totalOrders: combinedOrders.length,
+      pending,
+      confirmed,
+      packed,
+      shipped,
+      delivered,
+      cancelled,
+      customers: users.length,
+      productsCount: products.length,
+      lowStock: products.filter(p => p.stock > 0 && p.stock <= 5).length,
+      outOfStock: products.filter(p => p.stock === 0).length,
+      charts: {
+        revenue: [],
+        topSelling: []
+      }
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Customer Management
 app.get('/api/admin/customers', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const users = await prisma.user.findMany({ orderBy: { id: 'desc' } });
-    // Inject orders activity metrics
-    const orders = await prisma.order.findMany();
-    const enriched = users.map(u => {
-      const userOrders = orders.filter(o => o.userId === u.id);
-      return {
-        ...u,
-        orderCount: userOrders.length,
-        totalSpent: userOrders.reduce((sum, o) => o.orderStatus !== 'Cancelled' ? sum + o.grandTotal : sum, 0)
-      };
+    const users = await prisma.user.findMany({ orderBy: { id: 'desc' } }).catch(() => []);
+    const orders = await prisma.order.findMany().catch(() => []);
+    
+    const combinedOrders = [...orders];
+    serverOrdersStore.forEach(so => {
+      if (!combinedOrders.some(o => o.id === so.id || o.dbId === so.dbId)) {
+        combinedOrders.push(so);
+      }
     });
-    res.json(enriched);
+
+    const customersMap = new Map();
+
+    users.forEach(u => {
+      const userOrders = combinedOrders.filter(o => o.userId === u.id || (o.email && u.email && o.email.toLowerCase() === u.email.toLowerCase()));
+      customersMap.set(u.email.toLowerCase(), {
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        phone: u.phone || '+91 98765 43210',
+        address: u.address || 'Registered Customer Account',
+        ordersCount: userOrders.length,
+        totalSpent: userOrders.reduce((sum, o) => sum + (o.grandTotal || 0), 0)
+      });
+    });
+
+    combinedOrders.forEach(o => {
+      const email = (o.email || o.userEmail || '').toLowerCase();
+      if (email && !customersMap.has(email)) {
+        const name = o.customerName || o.userName || 'Valued Patron';
+        const userOrders = combinedOrders.filter(x => (x.email || x.userEmail || '').toLowerCase() === email);
+        customersMap.set(email, {
+          id: o.dbId || o.id,
+          name: name,
+          email: email,
+          phone: o.phone || o.userPhone || '+91 98765 43210',
+          address: o.address || o.userAddress || 'Checkout Customer',
+          ordersCount: userOrders.length,
+          totalSpent: userOrders.reduce((sum, x) => sum + (x.grandTotal || 0), 0)
+        });
+      }
+    });
+
+    res.json(Array.from(customersMap.values()));
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
