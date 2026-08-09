@@ -72,7 +72,9 @@ function initDatabase() {
     getDB('settings', { gst: 18, shipping: 150, email: 'atelier@achira.com', phone: '+91 98765 43210' });
 }
 
-const API_BASE = 'https://admin-backend-pearl.vercel.app';
+const API_BASE = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'))
+  ? 'http://localhost:5000'
+  : 'https://admin-backend-pearl.vercel.app';
 
 // Global active session state
 let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;

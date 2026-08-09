@@ -12,7 +12,9 @@ import {
   FileText, Search, Tag, Mail, RefreshCw, Plus, Edit, Trash2, Check
 } from 'lucide-react';
 
-const API_BASE = 'https://admin-backend-pearl.vercel.app';
+const API_BASE = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:5000'
+  : 'https://admin-backend-pearl.vercel.app';
 
 export default function AdminDashboard() {
   const [token, setToken] = useState(null);

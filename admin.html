@@ -729,7 +729,9 @@
     </div>
 
     <script>
-        const API_BASE = 'https://admin-backend-pearl.vercel.app';
+        const API_BASE = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'))
+          ? 'http://localhost:5000'
+          : 'https://admin-backend-pearl.vercel.app';
 
         let defaultProducts = [
             { id: 1, name: "Maharani Zardozi Anarkali Dress", category: "Cotton Kurtas", price: 4500, availability: "New Arrival", image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80" },
