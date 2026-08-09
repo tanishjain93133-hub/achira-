@@ -1266,6 +1266,7 @@ function handlePlaceOrder(e) {
         },
         body: JSON.stringify({
             name: name,
+            email: email,
             phone: formattedPhone,
             address: fullAddress,
             paymentMethod: payMode,
@@ -1273,12 +1274,20 @@ function handlePlaceOrder(e) {
             items: cart
         })
     })
-    .then(res => res.json())
-    .then(data => {
+    .then(async res => {
+        const data = await res.json();
+        if (!res.ok || data.error) {
+            throw new Error(data.error || 'Database order creation failed.');
+        }
+        if (data.order && data.order.id) {
+            formattedOrder.id = 'ACH-' + data.order.id;
+            formattedOrder.dbId = data.order.id;
+        }
         completeOrderPlacement(formattedOrder);
     })
     .catch(err => {
-        completeOrderPlacement(formattedOrder);
+        console.error('Checkout DB Error:', err);
+        showError(`Order placement failed: ${err.message}. Please try again.`, null);
     });
 }
 
@@ -1672,28 +1681,58 @@ function deleteProduct(productId) {
 }
 
 // Manage Orders
-function renderAdminOrdersTable() {
+async function renderAdminOrdersTable() {
     const tbody = document.getElementById('adminOrdersTableBody');
+    if (!tbody) return;
     tbody.innerHTML = '';
     
-    getDB('orders').forEach(o => {
+    let ordersList = [];
+    const adminToken = localStorage.getItem('adminToken');
+    if (adminToken) {
+        try {
+            const res = await fetch(`${API_BASE}/api/admin/orders`, {
+                headers: { 'Authorization': `Bearer ${adminToken}` }
+            });
+            const data = await res.json();
+            if (res.ok && Array.isArray(data)) ordersList = data;
+        } catch (e) { console.error(e); }
+    }
+
+    if (ordersList.length === 0) {
+        ordersList = getDB('orders');
+    }
+
+    if (ordersList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--color-charcoal-body);">No orders placed yet.</td></tr>`;
+        return;
+    }
+    
+    ordersList.forEach(o => {
+        const uName = o.userName || o.customerName || 'Valued Patron';
+        const uEmail = o.userEmail || o.email || 'patron@achira.com';
+        const uPhone = o.userPhone || o.phone || '';
+        const payMode = o.paymentMode || o.paymentMethod || 'COD';
+        const st = o.status || o.orderStatus || 'Pending';
+        const total = (o.grandTotal || 0).toLocaleString('en-IN');
+        const displayId = String(o.id).startsWith('ACH-') ? o.id : ('ACH-' + o.id);
+
         const row = `
             <tr>
-                <td><strong>${o.id}</strong></td>
+                <td><strong>${displayId}</strong></td>
                 <td>
-                    <strong>${o.userName}</strong><br>
-                    <span style="font-size: 0.72rem; color: var(--color-charcoal-body);">${o.userEmail} | ${o.userPhone}</span>
+                    <strong>${uName}</strong><br>
+                    <span style="font-size: 0.72rem; color: var(--color-charcoal-body);">${uEmail} ${uPhone ? '| ' + uPhone : ''}</span>
                 </td>
-                <td>${o.paymentMode.toUpperCase()}</td>
-                <td>₹${o.grandTotal.toLocaleString('en-IN')}</td>
+                <td>${payMode.toUpperCase()}</td>
+                <td>₹${total}</td>
                 <td>
-                    <select onchange="updateOrderStatus('${o.id}', this.value)" style="border-radius: 4px; padding: 4px; font-family: var(--font-body); font-size: 0.75rem;">
-                        <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                        <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-                        <option value="Packed" ${o.status === 'Packed' ? 'selected' : ''}>Packed</option>
-                        <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
-                        <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-                        <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                    <select onchange="updateOrderStatus('${o.dbId || o.id}', this.value)" style="border-radius: 4px; padding: 4px; font-family: var(--font-body); font-size: 0.75rem;">
+                        <option value="Pending" ${st === 'Pending' ? 'selected' : ''}>Pending</option>
+                        <option value="Confirmed" ${st === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                        <option value="Packed" ${st === 'Packed' ? 'selected' : ''}>Packed</option>
+                        <option value="Shipped" ${st === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                        <option value="Delivered" ${st === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                        <option value="Cancelled" ${st === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
                     </select>
                 </td>
                 <td><button class="admin-invoice-action" onclick="openInvoice('${o.id}')">📄 Print</button></td>

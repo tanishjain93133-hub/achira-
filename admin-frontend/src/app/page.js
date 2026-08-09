@@ -997,37 +997,47 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {orders.map(o => (
-                      <tr key={o.id} className="hover:bg-gray-50/50">
-                        <td className="px-6 py-4 text-sm font-semibold text-gray-800">ACH-{o.id}</td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm font-semibold text-gray-800 block">{o.customerName}</span>
-                          <span className="text-xs text-gray-400 block mt-0.5">{o.phone}</span>
-                        </td>
-                        <td className="px-6 py-4 text-sm font-semibold text-[#B88A44]">₹{o.grandTotal.toLocaleString('en-IN')}</td>
-                        <td className="px-6 py-4 text-sm text-gray-500">
-                          <span className="block font-medium">{o.paymentMethod}</span>
-                          <span className={`text-xs font-bold ${o.paymentStatus === 'Paid' ? 'text-green-600' : 'text-amber-500'}`}>{o.paymentStatus}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <select 
-                            value={o.orderStatus} 
-                            onChange={e => handleUpdateOrderStatus(o.id, e.target.value)}
-                            className="text-xs font-semibold p-1.5 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#B88A44]"
-                          >
-                            <option value="Pending">Pending</option>
-                            <option value="Confirmed">Confirmed</option>
-                            <option value="Packed">Packed</option>
-                            <option value="Shipped">Shipped</option>
-                            <option value="Delivered">Delivered</option>
-                            <option value="Cancelled">Cancelled</option>
-                          </select>
-                        </td>
-                        <td className="px-6 py-4 text-xs font-bold">
-                          <a href="#" className="text-[#B88A44] hover:underline">View Invoice</a>
-                        </td>
-                      </tr>
-                    ))}
+                    {orders.map((o, idx) => {
+                      const displayId = String(o.id).startsWith('ACH-') ? o.id : ('ACH-' + o.id);
+                      const cName = o.customerName || o.userName || 'Valued Patron';
+                      const cPhone = o.phone || o.userPhone || '';
+                      const cEmail = o.email || o.userEmail || '';
+                      const pMethod = o.paymentMethod || o.paymentMode || 'COD';
+                      const pStatus = o.paymentStatus || 'Pending';
+                      const oStatus = o.orderStatus || o.status || 'Pending';
+
+                      return (
+                        <tr key={o.id || idx} className="hover:bg-gray-50/50">
+                          <td className="px-6 py-4 text-sm font-semibold text-gray-800">{displayId}</td>
+                          <td className="px-6 py-4">
+                            <span className="text-sm font-semibold text-gray-800 block">{cName}</span>
+                            <span className="text-xs text-gray-400 block mt-0.5">{cEmail} {cPhone ? `| ${cPhone}` : ''}</span>
+                          </td>
+                          <td className="px-6 py-4 text-sm font-semibold text-[#B88A44]">₹{(o.grandTotal || 0).toLocaleString('en-IN')}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">
+                            <span className="block font-medium">{pMethod}</span>
+                            <span className={`text-xs font-bold ${pStatus === 'Paid' ? 'text-green-600' : 'text-amber-500'}`}>{pStatus}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <select 
+                              value={oStatus} 
+                              onChange={e => handleUpdateOrderStatus(o.dbId || o.id, e.target.value)}
+                              className="text-xs font-semibold p-1.5 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#B88A44]"
+                            >
+                              <option value="Pending">Pending</option>
+                              <option value="Confirmed">Confirmed</option>
+                              <option value="Packed">Packed</option>
+                              <option value="Shipped">Shipped</option>
+                              <option value="Delivered">Delivered</option>
+                              <option value="Cancelled">Cancelled</option>
+                            </select>
+                          </td>
+                          <td className="px-6 py-4 text-xs font-bold">
+                            <a href="#" className="text-[#B88A44] hover:underline">View Invoice</a>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
