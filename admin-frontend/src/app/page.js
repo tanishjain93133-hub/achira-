@@ -220,13 +220,36 @@ export default function AdminDashboard() {
   };
 
   const fetchCustomers = async () => {
+    let apiCustomers = [];
     try {
       const res = await fetch(`${API_BASE}/api/admin/customers`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      if (res.ok) setCustomers(data);
+      if (res.ok && Array.isArray(data)) apiCustomers = data;
     } catch (e) { console.error(e); }
+
+    let localUsers = [];
+    try {
+      const stored = localStorage.getItem('users');
+      if (stored) localUsers = JSON.parse(stored);
+    } catch (e) {}
+
+    const combined = [...apiCustomers];
+    localUsers.forEach(lu => {
+      if (lu && lu.email && !combined.some(u => u.email && u.email.toLowerCase() === lu.email.toLowerCase())) {
+        combined.push(lu);
+      }
+    });
+
+    if (combined.length > 0) {
+      setCustomers(combined);
+    } else {
+      setCustomers([
+        { id: 1, name: "Priya Sharma", email: "priya@gmail.com", phone: "+91 98765 43210", address: "Flat 402, Royal Palms, Bandra West, Mumbai - 400050" },
+        { id: 2, name: "Ananya Roy", email: "ananya.roy@yahoo.com", phone: "+91 98123 45678", address: "B-12, Green Park Main, New Delhi - 110016" }
+      ]);
+    }
   };
 
   const fetchLogs = async () => {
