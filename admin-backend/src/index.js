@@ -21,6 +21,14 @@ app.use(cors({
 app.options('*', cors());
 app.use(express.json());
 
+// URL prefix normalization middleware for Vercel serverless deployment
+app.use((req, res, next) => {
+  if (req.url && !req.url.startsWith('/api') && req.url !== '/') {
+    req.url = '/api' + (req.url.startsWith('/') ? req.url : '/' + req.url);
+  }
+  next();
+});
+
 // Request logging middleware for debugging
 app.use((req, res, next) => {
   console.log(`[REQUEST] ${req.method} ${req.url} - Body:`, req.body);
