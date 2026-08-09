@@ -1257,6 +1257,11 @@ function handlePlaceOrder(e) {
         date: new Date().toLocaleDateString('en-IN')
     };
 
+    console.log('[ORDER DEBUG] Submitting checkout to API...');
+    console.log('[ORDER DEBUG] Customer email:', email);
+    console.log('[ORDER DEBUG] Products:', JSON.stringify(cart));
+    console.log('[ORDER DEBUG] Total: ₹' + grandTotal);
+
     const userToken = localStorage.getItem('userToken') || ('simulated-token-' + Date.now());
     fetch(`${API_BASE}/api/user/checkout`, {
         method: 'POST',
@@ -1277,6 +1282,7 @@ function handlePlaceOrder(e) {
     .then(async res => {
         try {
             const data = await res.json();
+            console.log('[ORDER DEBUG] API Response received:', data);
             if (data.order && data.order.id) {
                 formattedOrder.id = String(data.order.id).startsWith('ACH-') ? data.order.id : ('ACH-' + data.order.id);
                 formattedOrder.dbId = data.order.id;
@@ -1285,7 +1291,7 @@ function handlePlaceOrder(e) {
         completeOrderPlacement(formattedOrder);
     })
     .catch(err => {
-        console.warn('Checkout sync note:', err);
+        console.warn('[ORDER DEBUG] Checkout sync note:', err);
         completeOrderPlacement(formattedOrder);
     });
 }

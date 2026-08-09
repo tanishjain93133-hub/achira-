@@ -186,14 +186,16 @@ export default function AdminDashboard() {
   };
 
   const fetchOrders = async () => {
+    console.log('[ADMIN DEBUG] Fetching all orders...');
     let apiOrders = [];
     try {
       const res = await fetch(`${API_BASE}/api/admin/orders`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
+      console.log('[ADMIN DEBUG] Raw API response:', data);
       if (res.ok && Array.isArray(data)) apiOrders = data;
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error('[ADMIN DEBUG] Fetch error:', e); }
 
     let localOrders = [];
     try {
@@ -203,12 +205,14 @@ export default function AdminDashboard() {
 
     const combined = [...apiOrders];
     localOrders.forEach(lo => {
-      if (!combined.some(o => o.id === lo.id)) {
+      if (!combined.some(o => o.id === lo.id || o.dbId === lo.dbId)) {
         combined.push(lo);
       }
     });
 
+    console.log(`[ADMIN DEBUG] Orders found: ${combined.length}`);
     if (combined.length > 0) {
+      console.log(`[ADMIN DEBUG] Latest order ID: ${combined[0].id}`);
       setOrders(combined);
     } else {
       setOrders([

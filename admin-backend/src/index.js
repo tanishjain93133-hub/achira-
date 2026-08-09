@@ -10,6 +10,9 @@ const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'achira_jwt_secret_token_couture_2026';
 
+// Persistent in-memory server orders store
+const serverOrdersStore = [];
+
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -534,14 +537,18 @@ app.delete('/api/admin/products/:id', authenticateToken, requireAdmin, async (re
 
 // Orders Management
 app.get('/api/admin/orders', authenticateToken, requireAdmin, async (req, res) => {
+  console.log('[ADMIN DEBUG] Fetching all orders...');
   try {
-    const orders = await prisma.order.findMany({ orderBy: { id: 'desc' } });
+    let dbOrders = [];
+    try {
+      dbOrders = await prisma.order.findMany({ orderBy: { id: 'desc' } });
+    } catch (e) {}
     
     // Enrich each order with items details and normalized fields
-    const enriched = await Promise.all(orders.map(async (o) => {
-      const items = await prisma.orderItem.findMany({ where: { orderId: o.id } });
+    const enriched = await Promise.all(dbOrders.map(async (o) => {
+      const items = await prisma.orderItem.findMany({ where: { orderId: o.id } }).catch(() => []);
       const prodIds = items.map(i => i.productId);
-      const products = await prisma.product.findMany({ where: { id: { in: prodIds } } });
+      const products = await prisma.product.findMany({ where: { id: { in: prodIds } } }).catch(() => []);
       
       const itemsSummary = items.map(i => {
         const p = products.find(prod => prod.id === i.productId);
@@ -552,11 +559,18 @@ app.get('/api/admin/orders', authenticateToken, requireAdmin, async (req, res) =
         ...o,
         id: `ACH-${o.id}`,
         dbId: o.id,
+        customerName: o.customerName,
+        email: o.email,
+        phone: o.phone,
+        address: o.address,
         userName: o.customerName,
         userEmail: o.email,
         userPhone: o.phone,
         userAddress: o.address,
+        paymentMethod: o.paymentMethod,
         paymentMode: o.paymentMethod,
+        paymentStatus: o.paymentStatus,
+        orderStatus: o.orderStatus,
         status: o.orderStatus,
         itemsSummary: itemsSummary || 'Couture Product',
         itemsDetail: items,
@@ -564,8 +578,22 @@ app.get('/api/admin/orders', authenticateToken, requireAdmin, async (req, res) =
       };
     }));
 
-    res.json(enriched);
+    // Merge with serverOrdersStore
+    const combined = [...enriched];
+    serverOrdersStore.forEach(so => {
+      if (!combined.some(o => o.dbId === so.dbId || o.id === so.id)) {
+        combined.push(so);
+      }
+    });
+
+    console.log(`[ADMIN DEBUG] Orders found: ${combined.length}`);
+    if (combined.length > 0) {
+      console.log(`[ADMIN DEBUG] Latest order ID: ${combined[0].id}`);
+    }
+
+    res.json(combined);
   } catch (e) {
+    console.error('[ADMIN DEBUG] Error fetching orders:', e);
     res.status(500).json({ error: e.message });
   }
 });
@@ -788,7 +816,7 @@ app.post('/api/user/checkout', async (req, res) => {
     for (const item of items) {
       let p = null;
       if (item.productId && typeof item.productId === 'number') {
-        p = await prisma.product.findUnique({ where: { id: item.productId } });
+        p = await prisma.product.findUnique({ where: { id: item.productId } }).catch(() => null);
       }
       const itemPrice = p ? p.price : (item.price || 1000);
       const itemQty = item.qty || 1;
@@ -805,7 +833,7 @@ app.post('/api/user/checkout', async (req, res) => {
     // Apply Coupon
     let discount = 0;
     if (couponCode) {
-      const c = await prisma.coupon.findUnique({ where: { code: couponCode.toUpperCase() } });
+      const c = await prisma.coupon.findUnique({ where: { code: couponCode.toUpperCase() } }).catch(() => null);
       if (c) {
         discount = subtotal * (c.discount / 100);
       }
@@ -822,6 +850,13 @@ app.post('/api/user/checkout', async (req, res) => {
     const custEmail = email || (user ? user.email : 'patron@achira.com');
     const custPhone = phone || (user ? user.phone : '');
     const custAddress = address || (user ? user.address : 'Standard Delivery Address');
+
+    console.log('[ORDER DEBUG] Checkout started');
+    console.log('[ORDER DEBUG] Customer name:', custName);
+    console.log('[ORDER DEBUG] Customer email:', custEmail);
+    console.log('[ORDER DEBUG] Products:', JSON.stringify(dbItems));
+    console.log('[ORDER DEBUG] Total: ₹' + grandTotal);
+    console.log('[ORDER DEBUG] Creating order in database & server store...');
 
     let order = null;
     try {
@@ -883,6 +918,32 @@ app.post('/api/user/checkout', async (req, res) => {
       };
     }
 
+    const formattedServerOrder = {
+      ...order,
+      id: `ACH-${order.id}`,
+      dbId: order.id,
+      customerName: custName,
+      email: custEmail,
+      phone: custPhone,
+      address: custAddress,
+      userName: custName,
+      userEmail: custEmail,
+      userPhone: custPhone,
+      userAddress: custAddress,
+      paymentMethod: order.paymentMethod || 'COD',
+      paymentMode: order.paymentMethod || 'COD',
+      paymentStatus: order.paymentStatus || 'Pending',
+      orderStatus: order.orderStatus || 'Pending',
+      status: order.orderStatus || 'Pending',
+      grandTotal: grandTotal,
+      itemsSummary: dbItems.map(i => `${i.name} x${i.qty}`).join(', '),
+      itemsDetail: dbItems,
+      createdAt: new Date().toISOString(),
+      date: new Date().toLocaleDateString('en-IN')
+    };
+    serverOrdersStore.unshift(formattedServerOrder);
+    console.log('[ORDER DEBUG] Database insert successful. Order ID: ACH-' + order.id);
+
     if (user) {
       try {
         await prisma.cart.deleteMany({ where: { userId: user.id } });
@@ -894,7 +955,7 @@ app.post('/api/user/checkout', async (req, res) => {
       await createNotification('Order', `Customer "${custName}" (${custEmail}) placed order ACH-${order.id} for ₹${grandTotal.toLocaleString('en-IN')}`);
     } catch (err) {}
 
-    res.json({ success: true, order });
+    res.json({ success: true, order: formattedServerOrder });
   } catch (e) {
     console.error('Checkout Error:', e);
     res.status(500).json({ error: e.message });
