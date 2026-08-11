@@ -608,20 +608,52 @@ app.get('/api/admin/orders', authenticateToken, requireAdmin, async (req, res) =
 
 app.put('/api/admin/orders/:id/status', authenticateToken, requireAdmin, async (req, res) => {
   const { orderStatus, trackingNumber, paymentStatus } = req.body;
-  try {
-    const order = await prisma.order.update({
-      where: { id: parseInt(req.params.id) },
-      data: {
-        orderStatus,
-        trackingNumber: trackingNumber || undefined,
-        paymentStatus: paymentStatus || undefined
-      }
-    });
-    await createNotification('Order', `Order ACH-${order.id} status updated to ${orderStatus}.`);
-    res.json(order);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
+  const rawId = req.params.id;
+  const numId = parseInt(String(rawId).replace(/^ACH-/, ''), 10);
+
+  let updatedOrder = null;
+
+  // Update in-memory serverOrdersStore if present
+  const matchedInMemory = serverOrdersStore.find(o => o.id === rawId || o.dbId === numId || o.id === `ACH-${numId}`);
+  if (matchedInMemory) {
+    if (orderStatus) {
+      matchedInMemory.orderStatus = orderStatus;
+      matchedInMemory.status = orderStatus;
+    }
+    if (trackingNumber) matchedInMemory.trackingNumber = trackingNumber;
+    if (paymentStatus) matchedInMemory.paymentStatus = paymentStatus;
+    updatedOrder = matchedInMemory;
   }
+
+  // Update in database if valid numeric ID
+  if (!isNaN(numId)) {
+    try {
+      const dbOrder = await prisma.order.update({
+        where: { id: numId },
+        data: {
+          orderStatus: orderStatus || undefined,
+          trackingNumber: trackingNumber || undefined,
+          paymentStatus: paymentStatus || undefined
+        }
+      });
+      await createNotification('Order', `Order ACH-${dbOrder.id} status updated to ${orderStatus}.`);
+      updatedOrder = {
+        ...dbOrder,
+        id: `ACH-${dbOrder.id}`,
+        dbId: dbOrder.id,
+        orderStatus: dbOrder.orderStatus,
+        status: dbOrder.orderStatus
+      };
+    } catch (e) {
+      console.warn('Prisma order status update skipped:', e.message);
+    }
+  }
+
+  if (updatedOrder) {
+    return res.json(updatedOrder);
+  }
+
+  return res.status(404).json({ error: 'Order not found.' });
 });
 
 // Dynamic Overview Stats API
@@ -948,7 +980,7 @@ app.post('/api/user/checkout', async (req, res) => {
     console.log('[ORDER DEBUG] Customer email:', custEmail);
     console.log('[ORDER DEBUG] Products:', JSON.stringify(dbItems));
     console.log('[ORDER DEBUG] Total: ₹' + grandTotal);
-    console.log('[ORDER DEBUG] Creating order in database & server store...');
+    console.log('[ORDER DEBUG] Creating order in database...');
 
     let order = null;
     try {
@@ -983,7 +1015,9 @@ app.post('/api/user/checkout', async (req, res) => {
               price: dbi.price
             }
           });
-        } catch (itemErr) {}
+        } catch (itemErr) {
+          console.warn('Prisma OrderItem creation error:', itemErr.message);
+        }
 
         if (dbi.productId) {
           try {
@@ -995,19 +1029,8 @@ app.post('/api/user/checkout', async (req, res) => {
         }
       }
     } catch (dbErr) {
-      console.warn('Prisma DB write bypassed (read-only environment):', dbErr.message);
-      order = {
-        id: Math.floor(100000 + Math.random() * 900000),
-        invoiceNumber,
-        customerName: custName,
-        email: custEmail,
-        phone: custPhone,
-        address: custAddress,
-        paymentMethod: paymentMethod || 'COD',
-        paymentStatus: (paymentMethod === 'COD') ? 'Pending' : 'Paid',
-        orderStatus: 'Pending',
-        grandTotal
-      };
+      console.error('Prisma Order Creation Failed:', dbErr.message);
+      return res.status(500).json({ success: false, error: 'Failed to create order in database: ' + dbErr.message });
     }
 
     const formattedServerOrder = {

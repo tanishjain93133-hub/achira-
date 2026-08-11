@@ -14,7 +14,7 @@ import {
 
 const API_BASE = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
   ? 'http://localhost:5000'
-  : 'https://admin-backend-pearl.vercel.app';
+  : '';
 
 export default function AdminDashboard() {
   const [token, setToken] = useState(null);
@@ -322,14 +322,7 @@ export default function AdminDashboard() {
       }
     });
 
-    if (combined.length > 0) {
-      setEnquiries(combined);
-    } else {
-      setEnquiries([
-        { id: 'EQ-1001', name: 'Devi Sharma', email: 'devi.sharma@gmail.com', phone: '+91 98765 43210', contact: '+91 98765 43210', subject: 'Bridal Lehenga Customization', message: 'I would like a custom fitting appointment for the Maharani Zardozi collection for my wedding in November.', date: '01/08/2026', createdAt: new Date().toISOString() },
-        { id: 'EQ-1002', name: 'Rajesh Malhotra', email: 'malhotra.r@outlook.com', phone: '+91 98111 22334', contact: '+91 98111 22334', subject: 'Polki Choker Availability', message: 'Is the Heritage Polki Choker available for international shipping to London?', date: '02/08/2026', createdAt: new Date().toISOString() }
-      ]);
-    }
+    setEnquiries(combined);
   };
 
   // Product CRUD Handlers

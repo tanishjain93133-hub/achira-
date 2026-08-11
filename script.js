@@ -80,7 +80,7 @@ function initDatabase() {
 
 const API_BASE = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'))
   ? 'http://localhost:5000'
-  : 'https://admin-backend-pearl.vercel.app';
+  : '';
 
 // Global active session state
 let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
@@ -1291,16 +1291,22 @@ function handlePlaceOrder(e) {
         try {
             const data = await res.json();
             console.log('[ORDER DEBUG] API Response received:', data);
-            if (data.order && data.order.id) {
-                formattedOrder.id = String(data.order.id).startsWith('ACH-') ? data.order.id : ('ACH-' + data.order.id);
-                formattedOrder.dbId = data.order.id;
+            if (res.ok && (data.success || data.order)) {
+                if (data.order && data.order.id) {
+                    formattedOrder.id = String(data.order.id).startsWith('ACH-') ? data.order.id : ('ACH-' + data.order.id);
+                    formattedOrder.dbId = data.order.id;
+                }
+                completeOrderPlacement(formattedOrder);
+            } else {
+                showError(data.error || 'Failed to create order in database.', null);
             }
-        } catch (e) {}
-        completeOrderPlacement(formattedOrder);
+        } catch (e) {
+            showError('Database error occurred while placing order. Please try again.', null);
+        }
     })
     .catch(err => {
-        console.warn('[ORDER DEBUG] Checkout sync note:', err);
-        completeOrderPlacement(formattedOrder);
+        console.error('[ORDER DEBUG] Checkout connection error:', err);
+        showError('Network error connecting to backend database. Please ensure the server is running.', null);
     });
 }
 
@@ -1493,7 +1499,12 @@ function openAdminModal(e) {
     const modal = document.getElementById('adminModal');
     if (modal) {
         modal.classList.add('active');
-        showAdminMainDashboard();
+        const token = localStorage.getItem('adminToken');
+        if (token || localStorage.getItem('adminLoggedIn') === 'true') {
+            showAdminMainDashboard();
+        } else {
+            showAdminLoginView();
+        }
     } else {
         window.location.href = 'admin.html';
     }
@@ -1523,7 +1534,7 @@ function showAdminMainDashboard() {
     renderAdminSettingsForm();
 }
 
-function handleAdminLogin(e) {
+async function handleAdminLogin(e) {
     if (e) e.preventDefault();
     const userEl = document.getElementById('adminUser');
     const passEl = document.getElementById('adminPass');
@@ -1531,9 +1542,26 @@ function handleAdminLogin(e) {
     const pass = passEl ? passEl.value.trim() : 'admin123';
 
     if (user.length > 0 && pass.length > 0) {
+        try {
+            const res = await fetch(`${API_BASE}/api/admin/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: user, password: pass })
+            });
+            const data = await res.json();
+            if (res.ok && data.token) {
+                localStorage.setItem('adminToken', data.token);
+                localStorage.setItem('adminLoggedIn', 'true');
+                showToast("Gateway connection established.");
+                showAdminMainDashboard();
+                return;
+            }
+        } catch (err) { console.warn('Backend login fallback used'); }
+
         currentAdmin = { username: user, role: 'Admin' };
         localStorage.setItem('currentAdmin', JSON.stringify(currentAdmin));
         localStorage.setItem('adminToken', 'admin-session-' + Date.now());
+        localStorage.setItem('adminLoggedIn', 'true');
         showToast("Gateway connection established.");
         showAdminMainDashboard();
         return;
@@ -1758,39 +1786,65 @@ async function renderAdminOrdersTable() {
     });
 }
 
-function updateOrderStatus(orderId, newStatus) {
+async function updateOrderStatus(orderId, newStatus) {
     const orders = getDB('orders');
-    const matched = orders.find(o => o.id === orderId);
-    
+    const matched = orders.find(o => o.id === orderId || o.dbId === orderId);
     if (matched) {
         matched.status = newStatus;
+        matched.orderStatus = newStatus;
         setDB('orders', orders);
-        showToast(`Order status updated to: ${newStatus}`);
-        renderAdminStats();
     }
+    
+    const adminToken = localStorage.getItem('adminToken');
+    try {
+        const cleanId = String(orderId).replace(/^ACH-/, '');
+        await fetch(`${API_BASE}/api/admin/orders/${cleanId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${adminToken}`
+            },
+            body: JSON.stringify({ orderStatus: newStatus })
+        });
+    } catch (e) { console.error('Failed to update order status via API:', e); }
+
+    showToast(`Order status updated to: ${newStatus}`);
+    renderAdminStats();
+    renderAdminOrdersTable();
 }
 
-// Manage Customers
-function renderAdminCustomersTable() {
+async function renderAdminCustomersTable() {
     const tbody = document.getElementById('adminCustomersTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 15px; color: #777;">Loading patrons...</td></tr>';
+    
+    let customersList = [];
+    const adminToken = localStorage.getItem('adminToken');
+    if (adminToken) {
+        try {
+            const res = await fetch(`${API_BASE}/api/admin/customers`, {
+                headers: { 'Authorization': `Bearer ${adminToken}` }
+            });
+            const data = await res.json();
+            if (res.ok && Array.isArray(data)) customersList = data;
+        } catch (e) { console.error(e); }
+    }
+
+    if (customersList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: #777;">No customers found.</td></tr>';
+        return;
+    }
+    
     tbody.innerHTML = '';
-    
-    tbody.innerHTML += `
-        <tr>
-            <td><strong>Maharani Devi</strong></td>
-            <td>patron@achira.com</td>
-            <td>+91 98765 43210</td>
-            <td>Suite 101, Colaba Court, Colaba, Mumbai - 400001</td>
-        </tr>
-    `;
-    
-    getDB('users').forEach(u => {
+    customersList.forEach(c => {
         const row = `
             <tr>
-                <td><strong>${u.name}</strong></td>
-                <td>${u.email}</td>
-                <td>+91 98765 43210</td>
-                <td>Registered Customer Account</td>
+                <td><strong>${c.name || 'Patron'}</strong></td>
+                <td>${c.email || ''}</td>
+                <td>${c.phone || ''}</td>
+                <td>${c.address || 'Registered Account'}</td>
+                <td><strong>${c.ordersCount || 0}</strong></td>
+                <td><strong style="color: var(--color-gold-accent);">₹${(c.totalSpent || 0).toLocaleString('en-IN')}</strong></td>
             </tr>
         `;
         tbody.insertAdjacentHTML('beforeend', row);
