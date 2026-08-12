@@ -1288,22 +1288,17 @@ function handlePlaceOrder(e) {
         })
     })
     .then(async res => {
-        try {
-            const data = await res.json();
-            console.log('[ORDER DEBUG] API Response received:', data);
-            if (data && (data.order || data.success)) {
-                const orderObj = data.order || data;
-                if (orderObj && orderObj.id) {
-                    formattedOrder.id = String(orderObj.id).startsWith('ACH-') ? orderObj.id : ('ACH-' + orderObj.id);
-                    formattedOrder.dbId = orderObj.id;
-                }
-            }
-        } catch (e) {}
-        completeOrderPlacement(formattedOrder);
+        const data = await res.json().catch(() => ({}));
+        console.log('[ORDER DEBUG] API Response received:', data);
+        if (!res.ok || !data.success || !data.order) {
+            throw new Error(data.error || 'Server error creating order in database.');
+        }
+        const serverOrder = data.order;
+        completeOrderPlacement(serverOrder);
     })
     .catch(err => {
-        console.warn('[ORDER DEBUG] Checkout backend offline note:', err);
-        completeOrderPlacement(formattedOrder);
+        console.error('[ORDER ERROR] Checkout failed:', err);
+        showError(err.message || 'Failed to place order in database. Please try again.', null);
     });
 }
 

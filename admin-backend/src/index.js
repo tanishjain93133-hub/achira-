@@ -1032,6 +1032,31 @@ app.post('/api/user/checkout', async (req, res) => {
     const custPhone = phone || (user ? user.phone : '');
     const custAddress = address || (user ? user.address : 'Standard Delivery Address');
 
+    // Ensure customer account exists in database for this email
+    let dbUser = user;
+    if (!dbUser && custEmail) {
+      dbUser = await prisma.user.findUnique({ where: { email: custEmail } }).catch(() => null);
+      if (!dbUser) {
+        try {
+          const dummyPass = await bcrypt.hash('customer_' + Date.now(), 10);
+          dbUser = await prisma.user.create({
+            data: {
+              name: custName,
+              email: custEmail,
+              password: dummyPass,
+              phone: custPhone,
+              address: custAddress,
+              city: '',
+              state: '',
+              pincode: ''
+            }
+          });
+        } catch (e) {
+          console.warn('Auto-create user during checkout error:', e.message);
+        }
+      }
+    }
+
     console.log('[ORDER DEBUG] Checkout started');
     console.log('[ORDER DEBUG] Customer name:', custName);
     console.log('[ORDER DEBUG] Customer email:', custEmail);
@@ -1039,57 +1064,10 @@ app.post('/api/user/checkout', async (req, res) => {
     console.log('[ORDER DEBUG] Total: ₹' + grandTotal);
     console.log('[ORDER DEBUG] Creating order in database...');
 
-    let order = null;
-    try {
-      // Create Order in DB
-      order = await prisma.order.create({
-        data: {
-          userId: user ? user.id : 0,
-          customerName: custName,
-          email: custEmail,
-          phone: custPhone,
-          address: custAddress,
-          paymentMethod: paymentMethod || 'COD',
-          paymentStatus: (paymentMethod === 'COD') ? 'Pending' : 'Paid',
-          orderStatus: 'Pending',
-          invoiceNumber,
-          shippingFee,
-          tax,
-          discount,
-          subtotal,
-          grandTotal
-        }
-      });
-
-      // Create Order Items and update stock
-      for (const dbi of dbItems) {
-        try {
-          await prisma.orderItem.create({
-            data: {
-              orderId: order.id,
-              productId: dbi.productId,
-              qty: dbi.qty,
-              price: dbi.price
-            }
-          });
-        } catch (itemErr) {
-          console.warn('Prisma OrderItem creation error:', itemErr.message);
-        }
-
-        if (dbi.productId) {
-          try {
-            await prisma.product.update({
-              where: { id: dbi.productId },
-              data: { stock: { decrement: dbi.qty } }
-            });
-          } catch (err) {}
-        }
-      }
-    } catch (dbErr) {
-      console.warn('Prisma Order Creation read-only fallback:', dbErr.message);
-      order = {
-        id: Math.floor(100000 + Math.random() * 900000),
-        invoiceNumber,
+    // Create Order in DB strictly
+    const order = await prisma.order.create({
+      data: {
+        userId: dbUser ? dbUser.id : 0,
         customerName: custName,
         email: custEmail,
         phone: custPhone,
@@ -1097,8 +1075,38 @@ app.post('/api/user/checkout', async (req, res) => {
         paymentMethod: paymentMethod || 'COD',
         paymentStatus: (paymentMethod === 'COD') ? 'Pending' : 'Paid',
         orderStatus: 'Pending',
+        invoiceNumber,
+        shippingFee,
+        tax,
+        discount,
+        subtotal,
         grandTotal
-      };
+      }
+    });
+
+    // Create Order Items and update stock
+    for (const dbi of dbItems) {
+      try {
+        await prisma.orderItem.create({
+          data: {
+            orderId: order.id,
+            productId: dbi.productId,
+            qty: dbi.qty,
+            price: dbi.price
+          }
+        });
+      } catch (itemErr) {
+        console.warn('Prisma OrderItem creation error:', itemErr.message);
+      }
+
+      if (dbi.productId) {
+        try {
+          await prisma.product.update({
+            where: { id: dbi.productId },
+            data: { stock: { decrement: dbi.qty } }
+          });
+        } catch (err) {}
+      }
     }
 
     const formattedServerOrder = {
@@ -1121,16 +1129,16 @@ app.post('/api/user/checkout', async (req, res) => {
       grandTotal: grandTotal,
       itemsSummary: dbItems.map(i => `${i.name} x${i.qty}`).join(', '),
       itemsDetail: dbItems,
-      createdAt: new Date().toISOString(),
-      date: new Date().toLocaleDateString('en-IN')
+      createdAt: order.createdAt || new Date().toISOString(),
+      date: new Date(order.createdAt || Date.now()).toLocaleDateString('en-IN')
     };
     serverOrdersStore.unshift(formattedServerOrder);
     console.log('[ORDER DEBUG] Database insert successful. Order ID: ACH-' + order.id);
 
-    if (user) {
+    if (dbUser) {
       try {
-        await prisma.cart.deleteMany({ where: { userId: user.id } });
-        await logActivity(user.id, null, 'Place Order', req);
+        await prisma.cart.deleteMany({ where: { userId: dbUser.id } });
+        await logActivity(dbUser.id, null, 'Place Order', req);
       } catch (err) {}
     }
 
@@ -1141,7 +1149,7 @@ app.post('/api/user/checkout', async (req, res) => {
     res.json({ success: true, order: formattedServerOrder });
   } catch (e) {
     console.error('Checkout Error:', e);
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: e.message || 'Database order creation failed.' });
   }
 });
 

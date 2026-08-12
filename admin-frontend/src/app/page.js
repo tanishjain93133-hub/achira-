@@ -172,57 +172,28 @@ export default function AdminDashboard() {
 
   const fetchOrders = async () => {
     console.log('[ADMIN DEBUG] Fetching all orders...');
-    let apiOrders = [];
     try {
       const res = await fetch(`${API_BASE}/api/admin/orders`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
       console.log('[ADMIN DEBUG] Raw API response:', data);
-      if (res.ok && Array.isArray(data)) apiOrders = data;
-    } catch (e) { console.error('[ADMIN DEBUG] Fetch error:', e); }
-
-    let localOrders = [];
-    try {
-      const stored = localStorage.getItem('admin_orders') || localStorage.getItem('orders');
-      if (stored) localOrders = JSON.parse(stored);
-    } catch (e) {}
-
-    const combined = [...apiOrders];
-    localOrders.forEach(lo => {
-      if (!combined.some(o => o.id === lo.id || o.dbId === lo.dbId)) {
-        combined.push(lo);
+      if (res.ok && Array.isArray(data)) {
+        setOrders(data);
       }
-    });
-
-    console.log(`[ADMIN DEBUG] Orders found: ${combined.length}`);
-    setOrders(combined);
+    } catch (e) { console.error('[ADMIN DEBUG] Fetch error:', e); }
   };
 
   const fetchCustomers = async () => {
-    let apiCustomers = [];
     try {
       const res = await fetch(`${API_BASE}/api/admin/customers`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      if (res.ok && Array.isArray(data)) apiCustomers = data;
-    } catch (e) { console.error(e); }
-
-    let localUsers = [];
-    try {
-      const stored = localStorage.getItem('users');
-      if (stored) localUsers = JSON.parse(stored);
-    } catch (e) {}
-
-    const combined = [...apiCustomers];
-    localUsers.forEach(lu => {
-      if (lu && lu.email && !combined.some(u => u.email && u.email.toLowerCase() === lu.email.toLowerCase())) {
-        combined.push(lu);
+      if (res.ok && Array.isArray(data)) {
+        setCustomers(data);
       }
-    });
-
-    setCustomers(combined);
+    } catch (e) { console.error(e); }
   };
 
   const fetchLogs = async () => {

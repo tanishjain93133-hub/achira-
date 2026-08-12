@@ -253,13 +253,14 @@ body::before {
     transform: rotate(180deg);
 }
 
-/* MEGA MENU UNDER PRODUCTS */
+/* MEGA MENU DROPDOWNS */
 .mega-menu {
     position: absolute;
     top: 100%;
     left: 50%;
     transform: translateX(-50%) translateY(15px);
     width: 900px;
+    max-width: 92vw;
     background: rgba(250, 247, 242, 0.98);
     backdrop-filter: blur(20px);
     border: 1px solid var(--color-border-light);

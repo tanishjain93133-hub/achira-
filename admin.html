@@ -860,17 +860,10 @@
                 const res = await fetch(`${API_BASE}/api/admin/orders`, { headers });
                 const data = await res.json();
                 if (res.ok && Array.isArray(data)) {
-                    let localOrders = getDB('admin_orders', []);
-                    const combined = [...data];
-                    localOrders.forEach(lo => {
-                        if (!combined.some(o => o.id === lo.id || o.dbId === lo.dbId)) {
-                            combined.push(lo);
-                        }
-                    });
-                    orders = combined;
+                    orders = data;
                 }
             } catch (e) {
-                orders = getDB('admin_orders', defaultOrders);
+                console.error('Error fetching admin orders:', e);
             }
 
             // Fetch Customers
@@ -1054,15 +1047,19 @@
             // Render Customers
             const custBody = document.getElementById('customersBody');
             if (custBody) {
-                custBody.innerHTML = customers.map(c => `
+                custBody.innerHTML = customers.map(c => {
+                    const ordCount = c.ordersCount !== undefined ? c.ordersCount : (c.orders || c.totalOrders || 0);
+                    const spentVal = c.totalSpent !== undefined ? c.totalSpent : (c.spent || 0);
+                    return `
                     <tr>
                         <td><strong>${c.name || 'Patron'}</strong></td>
                         <td>${c.email || ''}</td>
-                        <td>${c.orders || c.totalOrders || 1}</td>
-                        <td>₹${(c.spent || c.totalSpent || 5000).toLocaleString('en-IN')}</td>
+                        <td>${ordCount}</td>
+                        <td>₹${Number(spentVal).toLocaleString('en-IN')}</td>
                         <td><span class="badge badge-info">${c.status || 'Active'}</span></td>
                     </tr>
-                `).join('');
+                `;
+                }).join('');
             }
 
             // Render Coupons

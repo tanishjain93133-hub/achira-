@@ -783,6 +783,38 @@
         let enquiries = getDB('enquiries', defaultEnquiries);
         let logs = getDB('admin_logs', defaultLogs);
 
+        const API_BASE = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'))
+          ? 'http://localhost:5000'
+          : '';
+
+        function getAuthHeader() {
+            const token = localStorage.getItem('adminToken');
+            return token ? { 'Authorization': `Bearer ${token}` } : {};
+        }
+
+        async function fetchLiveData() {
+            const headers = getAuthHeader();
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/products`);
+                const data = await res.json();
+                if (res.ok && Array.isArray(data) && data.length > 0) products = data;
+            } catch (e) {}
+
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/orders`, { headers });
+                const data = await res.json();
+                if (res.ok && Array.isArray(data)) orders = data;
+            } catch (e) {}
+
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/customers`, { headers });
+                const data = await res.json();
+                if (res.ok && Array.isArray(data)) customers = data;
+            } catch (e) {}
+
+            renderAllData();
+        }
+
         // CHECK AUTH
         window.onload = function() {
             const savedToken = localStorage.getItem('adminToken');
@@ -790,7 +822,7 @@
                 const loginOverlay = document.getElementById('loginOverlay');
                 if (loginOverlay) loginOverlay.style.display = 'none';
             }
-            renderAllData();
+            fetchLiveData();
         };
 
         async function handleLogin(e) {
