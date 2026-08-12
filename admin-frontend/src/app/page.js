@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { 
-  BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis, 
+import {
+  BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
-import { 
-  Users, ShoppingBag, CreditCard, Clock, CheckCircle, Package, 
-  Truck, XCircle, AlertTriangle, Layers, Bell, LogIn, 
-  Settings as SettingsIcon, LogOut, Sliders, MessageSquare, 
+import {
+  Users, ShoppingBag, CreditCard, Clock, CheckCircle, Package,
+  Truck, XCircle, AlertTriangle, Layers, Bell, LogIn,
+  Settings as SettingsIcon, LogOut, Sliders, MessageSquare,
   FileText, Search, Tag, Mail, RefreshCw, Plus, Edit, Trash2, Check
 } from 'lucide-react';
 
@@ -31,7 +31,7 @@ export default function AdminDashboard() {
   const [notifications, setNotifications] = useState([]);
   const [settings, setSettings] = useState({});
   const [enquiries, setEnquiries] = useState([]);
-  
+
   // Login Form State
   const [loginUser, setLoginUser] = useState('admin');
   const [loginPass, setLoginPass] = useState('admin123');
@@ -42,16 +42,16 @@ export default function AdminDashboard() {
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [prodForm, setProdForm] = useState({
-    name: '', category: 'Gown', fabric: 'Standard', color: 'Neutral', size: 'S,M,L,XL,XXL,XXXXL,XXXXXL', 
-    price: '', availability: 'In Stock', occasion: 'Festive', 
+    name: '', category: 'Gown', fabric: 'Standard', color: 'Neutral', size: 'S,M,L,XL,XXL,XXXXL,XXXXXL',
+    price: '', availability: 'In Stock', occasion: 'Festive',
     image: '', stock: '10', sku: '', description: '', videoUrl: '',
     featured: false, trending: false
   });
 
   // Settings Update Form State
   const [setForm, setSetForm] = useState({
-    gst: 18, shipping: 150, email: '', phone: '', storeName: '', 
-    paymentGateway: 'Razorpay', adminUsername: '', adminPassword: '', 
+    gst: 18, shipping: 150, email: '', phone: '', storeName: '',
+    paymentGateway: 'Razorpay', adminUsername: '', adminPassword: '',
     adminEmail: '', adminPhone: ''
   });
 
@@ -284,7 +284,7 @@ export default function AdminDashboard() {
     try {
       const stored = localStorage.getItem('enquiries');
       if (stored) localEnquiries = JSON.parse(stored);
-    } catch (e) {}
+    } catch (e) { }
 
     const combined = [...apiEnquiries];
     localEnquiries.forEach(le => {
@@ -299,7 +299,7 @@ export default function AdminDashboard() {
   // Product CRUD Handlers
   const handleSaveProduct = async (e) => {
     e.preventDefault();
-    const url = editingProduct 
+    const url = editingProduct
       ? `${API_BASE}/api/admin/products/${editingProduct.id}`
       : `${API_BASE}/api/admin/products`;
     const method = editingProduct ? 'PUT' : 'POST';
@@ -307,7 +307,7 @@ export default function AdminDashboard() {
     try {
       const res = await fetch(url, {
         method,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -574,7 +574,7 @@ export default function AdminDashboard() {
               ))}
             </div>
           </div>
-          <button 
+          <button
             onClick={handleLogout}
             className="flex items-center space-x-1.5 px-3 py-1.5 border border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-100 rounded-md text-xs font-semibold text-gray-600 transition-colors"
           >
@@ -588,70 +588,70 @@ export default function AdminDashboard() {
         {/* SIDEBAR NAVIGATION */}
         <aside className="w-64 bg-white border-r border-gray-100 flex flex-col justify-between hidden md:flex">
           <nav className="p-4 space-y-1">
-            <button 
+            <button
               onClick={() => setActiveTab('overview')}
               className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'overview' ? 'bg-[#B88A44]/10 text-[#B88A44]' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               <Layers className="h-4 w-4" />
               <span>Overview Panel</span>
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('products')}
               className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'products' ? 'bg-[#B88A44]/10 text-[#B88A44]' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               <Package className="h-4 w-4" />
               <span>Manage Products</span>
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('orders')}
               className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'orders' ? 'bg-[#B88A44]/10 text-[#B88A44]' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               <ShoppingBag className="h-4 w-4" />
               <span>Couture Orders</span>
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('customers')}
               className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'customers' ? 'bg-[#B88A44]/10 text-[#B88A44]' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               <Users className="h-4 w-4" />
               <span>Registered Patrons</span>
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('reviews')}
               className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'reviews' ? 'bg-[#B88A44]/10 text-[#B88A44]' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               <MessageSquare className="h-4 w-4" />
               <span>Reviews Moderation</span>
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('coupons')}
               className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'coupons' ? 'bg-[#B88A44]/10 text-[#B88A44]' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               <Tag className="h-4 w-4" />
               <span>Banner &amp; Coupons</span>
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('enquiries')}
               className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'enquiries' ? 'bg-[#B88A44]/10 text-[#B88A44]' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               <Mail className="h-4 w-4" />
               <span>Customer Enquiries</span>
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('logs')}
               className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'logs' ? 'bg-[#B88A44]/10 text-[#B88A44]' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               <Clock className="h-4 w-4" />
               <span>LoginActivity Logs</span>
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('searches')}
               className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'searches' ? 'bg-[#B88A44]/10 text-[#B88A44]' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               <Search className="h-4 w-4" />
               <span>Search History Logs</span>
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('settings')}
               className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'settings' ? 'bg-[#B88A44]/10 text-[#B88A44]' : 'text-gray-600 hover:bg-gray-50'}`}
             >
@@ -663,12 +663,12 @@ export default function AdminDashboard() {
 
         {/* MAIN BODY VIEW */}
         <main className="flex-1 overflow-y-auto p-6 md:p-8">
-          
+
           {/* TAB 1: OVERVIEW DASHBOARD */}
           {activeTab === 'overview' && (
             <div className="space-y-6">
               <h2 className="text-2xl font-serif text-gray-800 font-semibold">Overview Dashboard</h2>
-              
+
               {/* Cards Grid */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white border border-gray-100 p-5 rounded-lg shadow-sm flex items-center justify-between">
@@ -758,8 +758,8 @@ export default function AdminDashboard() {
                         <AreaChart data={stats.charts.revenue}>
                           <defs>
                             <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#B88A44" stopOpacity={0.2}/>
-                              <stop offset="95%" stopColor="#B88A44" stopOpacity={0}/>
+                              <stop offset="5%" stopColor="#B88A44" stopOpacity={0.2} />
+                              <stop offset="95%" stopColor="#B88A44" stopOpacity={0} />
                             </linearGradient>
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f5" />
@@ -799,12 +799,12 @@ export default function AdminDashboard() {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-serif text-gray-800 font-semibold">Product Management</h2>
-                <button 
+                <button
                   onClick={() => {
                     setEditingProduct(null);
                     setProdForm({
-                      name: '', category: 'Gown', fabric: 'Standard', color: 'Neutral', 
-                      size: 'S,M,L,XL,XXL,XXXXL,XXXXXL', price: '', availability: 'In Stock', occasion: 'Festive', 
+                      name: '', category: 'Gown', fabric: 'Standard', color: 'Neutral',
+                      size: 'S,M,L,XL,XXL,XXXXL,XXXXXL', price: '', availability: 'In Stock', occasion: 'Festive',
                       image: '', stock: '10', sku: '', description: '', videoUrl: '',
                       featured: false, trending: false
                     });
@@ -826,26 +826,26 @@ export default function AdminDashboard() {
                   <form onSubmit={handleSaveProduct} className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="col-span-1 md:col-span-2">
                       <label className="block text-xs font-bold text-gray-500 uppercase">Product Name</label>
-                      <input type="text" required className="mt-1 block w-full p-2 border border-gray-200 rounded" value={prodForm.name} onChange={e => setProdForm({...prodForm, name: e.target.value})} />
+                      <input type="text" required className="mt-1 block w-full p-2 border border-gray-200 rounded" value={prodForm.name} onChange={e => setProdForm({ ...prodForm, name: e.target.value })} />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase">SKU Code</label>
-                      <input type="text" required className="mt-1 block w-full p-2 border border-gray-200 rounded" value={prodForm.sku} onChange={e => setProdForm({...prodForm, sku: e.target.value})} />
+                      <input type="text" required className="mt-1 block w-full p-2 border border-gray-200 rounded" value={prodForm.sku} onChange={e => setProdForm({ ...prodForm, sku: e.target.value })} />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase">Price (₹)</label>
-                      <input type="number" required className="mt-1 block w-full p-2 border border-gray-200 rounded" value={prodForm.price} onChange={e => setProdForm({...prodForm, price: e.target.value})} />
+                      <input type="number" required className="mt-1 block w-full p-2 border border-gray-200 rounded" value={prodForm.price} onChange={e => setProdForm({ ...prodForm, price: e.target.value })} />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase">Stock Count</label>
-                      <input type="number" required className="mt-1 block w-full p-2 border border-gray-200 rounded" value={prodForm.stock} onChange={e => setProdForm({...prodForm, stock: e.target.value})} />
+                      <input type="number" required className="mt-1 block w-full p-2 border border-gray-200 rounded" value={prodForm.stock} onChange={e => setProdForm({ ...prodForm, stock: e.target.value })} />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase">Category</label>
-                      <select 
+                      <select
                         className="mt-1 block w-full p-2 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#B88A44]"
-                        value={prodForm.category} 
-                        onChange={e => setProdForm({...prodForm, category: e.target.value})}
+                        value={prodForm.category}
+                        onChange={e => setProdForm({ ...prodForm, category: e.target.value })}
                       >
                         <option value="Gown">Gown</option>
                         <option value="Cotton Kurti">Cotton Kurti</option>
@@ -863,28 +863,28 @@ export default function AdminDashboard() {
                     <div className="col-span-1 md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase">Available Sizes (comma-separated, e.g. XS,S,M,L,XL,XXL,XXXXL,XXXXXL)</label>
-                        <input type="text" className="mt-1 block w-full p-2 border border-gray-200 rounded" value={prodForm.size} onChange={e => setProdForm({...prodForm, size: e.target.value})} placeholder="S,M,L,XL,XXL,XXXXL,XXXXXL" />
+                        <input type="text" className="mt-1 block w-full p-2 border border-gray-200 rounded" value={prodForm.size} onChange={e => setProdForm({ ...prodForm, size: e.target.value })} placeholder="S,M,L,XL,XXL,XXXXL,XXXXXL" />
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase">Available Colors (comma-separated, e.g. Royal Red, Maroon, Gold, Black)</label>
-                        <input type="text" className="mt-1 block w-full p-2 border border-gray-200 rounded" value={prodForm.color || ''} onChange={e => setProdForm({...prodForm, color: e.target.value})} placeholder="Red, Maroon, Gold, Black, White, Blue" />
+                        <input type="text" className="mt-1 block w-full p-2 border border-gray-200 rounded" value={prodForm.color || ''} onChange={e => setProdForm({ ...prodForm, color: e.target.value })} placeholder="Red, Maroon, Gold, Black, White, Blue" />
                       </div>
                     </div>
                     <div className="col-span-1 md:col-span-3">
                       <label className="block text-xs font-bold text-gray-500 uppercase">Image URL</label>
-                      <input type="text" required className="mt-1 block w-full p-2 border border-gray-200 rounded" value={prodForm.image} onChange={e => setProdForm({...prodForm, image: e.target.value})} />
+                      <input type="text" required className="mt-1 block w-full p-2 border border-gray-200 rounded" value={prodForm.image} onChange={e => setProdForm({ ...prodForm, image: e.target.value })} />
                     </div>
                     <div className="col-span-1 md:col-span-3">
                       <label className="block text-xs font-bold text-gray-500 uppercase">Description</label>
-                      <textarea className="mt-1 block w-full p-2 border border-gray-200 rounded h-20" value={prodForm.description} onChange={e => setProdForm({...prodForm, description: e.target.value})}></textarea>
+                      <textarea className="mt-1 block w-full p-2 border border-gray-200 rounded h-20" value={prodForm.description} onChange={e => setProdForm({ ...prodForm, description: e.target.value })}></textarea>
                     </div>
                     <div className="flex items-center space-x-6 col-span-3">
                       <label className="flex items-center space-x-2">
-                        <input type="checkbox" checked={prodForm.featured} onChange={e => setProdForm({...prodForm, featured: e.target.checked})} />
+                        <input type="checkbox" checked={prodForm.featured} onChange={e => setProdForm({ ...prodForm, featured: e.target.checked })} />
                         <span className="text-sm font-semibold text-gray-700">Featured</span>
                       </label>
                       <label className="flex items-center space-x-2">
-                        <input type="checkbox" checked={prodForm.trending} onChange={e => setProdForm({...prodForm, trending: e.target.checked})} />
+                        <input type="checkbox" checked={prodForm.trending} onChange={e => setProdForm({ ...prodForm, trending: e.target.checked })} />
                         <span className="text-sm font-semibold text-gray-700">Trending</span>
                       </label>
                     </div>
@@ -984,8 +984,8 @@ export default function AdminDashboard() {
                               <span className={`text-xs font-bold ${pStatus === 'Paid' ? 'text-green-600' : 'text-amber-500'}`}>{pStatus}</span>
                             </td>
                             <td className="px-6 py-4">
-                              <select 
-                                value={oStatus} 
+                              <select
+                                value={oStatus}
                                 onChange={e => handleUpdateOrderStatus(o.dbId || o.id, e.target.value)}
                                 className="text-xs font-semibold p-1.5 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#B88A44]"
                               >
@@ -1273,27 +1273,27 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase">Store Name</label>
-                      <input type="text" className="mt-1 block w-full p-2.5 border border-gray-200 rounded" value={setForm.storeName} onChange={e => setSetForm({...setForm, storeName: e.target.value})} />
+                      <input type="text" className="mt-1 block w-full p-2.5 border border-gray-200 rounded" value={setForm.storeName} onChange={e => setSetForm({ ...setForm, storeName: e.target.value })} />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase">Contact Email</label>
-                      <input type="email" className="mt-1 block w-full p-2.5 border border-gray-200 rounded" value={setForm.email} onChange={e => setSetForm({...setForm, email: e.target.value})} />
+                      <input type="email" className="mt-1 block w-full p-2.5 border border-gray-200 rounded" value={setForm.email} onChange={e => setSetForm({ ...setForm, email: e.target.value })} />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase">Contact Phone</label>
-                      <input type="text" className="mt-1 block w-full p-2.5 border border-gray-200 rounded" value={setForm.phone} onChange={e => setSetForm({...setForm, phone: e.target.value})} />
+                      <input type="text" className="mt-1 block w-full p-2.5 border border-gray-200 rounded" value={setForm.phone} onChange={e => setSetForm({ ...setForm, phone: e.target.value })} />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase">GST Tax Rate (%)</label>
-                      <input type="number" className="mt-1 block w-full p-2.5 border border-gray-200 rounded" value={setForm.gst} onChange={e => setSetForm({...setForm, gst: e.target.value})} />
+                      <input type="number" className="mt-1 block w-full p-2.5 border border-gray-200 rounded" value={setForm.gst} onChange={e => setSetForm({ ...setForm, gst: e.target.value })} />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase">Standard Shipping Charge (₹)</label>
-                      <input type="number" className="mt-1 block w-full p-2.5 border border-gray-200 rounded" value={setForm.shipping} onChange={e => setSetForm({...setForm, shipping: e.target.value})} />
+                      <input type="number" className="mt-1 block w-full p-2.5 border border-gray-200 rounded" value={setForm.shipping} onChange={e => setSetForm({ ...setForm, shipping: e.target.value })} />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase">Payment Gateway</label>
-                      <input type="text" className="mt-1 block w-full p-2.5 border border-gray-200 rounded" value={setForm.paymentGateway} onChange={e => setSetForm({...setForm, paymentGateway: e.target.value})} />
+                      <input type="text" className="mt-1 block w-full p-2.5 border border-gray-200 rounded" value={setForm.paymentGateway} onChange={e => setSetForm({ ...setForm, paymentGateway: e.target.value })} />
                     </div>
                   </div>
 
@@ -1303,11 +1303,11 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase">New Username</label>
-                      <input type="text" placeholder="Leave blank to keep current" className="mt-1 block w-full p-2.5 border border-gray-200 rounded" value={setForm.adminUsername} onChange={e => setSetForm({...setForm, adminUsername: e.target.value})} />
+                      <input type="text" placeholder="Leave blank to keep current" className="mt-1 block w-full p-2.5 border border-gray-200 rounded" value={setForm.adminUsername} onChange={e => setSetForm({ ...setForm, adminUsername: e.target.value })} />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase">New Password</label>
-                      <input type="password" placeholder="Leave blank to keep current" className="mt-1 block w-full p-2.5 border border-gray-200 rounded" value={setForm.adminPassword} onChange={e => setSetForm({...setForm, adminPassword: e.target.value})} />
+                      <input type="password" placeholder="Leave blank to keep current" className="mt-1 block w-full p-2.5 border border-gray-200 rounded" value={setForm.adminPassword} onChange={e => setSetForm({ ...setForm, adminPassword: e.target.value })} />
                     </div>
                   </div>
 
