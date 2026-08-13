@@ -405,7 +405,7 @@
                     <label>Password</label>
                     <input type="password" id="loginPass" class="form-control" placeholder="••••••••" required value="admin123">
                 </div>
-                <button type="submit" class="btn-gold">Sign In</button>
+                <button type="button" onclick="handleLogin(event)" class="btn-gold">Sign In</button>
                 <div class="error-msg" id="loginError"></div>
             </form>
         </div>
@@ -788,15 +788,30 @@
             return token ? { 'Authorization': `Bearer ${token}` } : {};
         }
 
+        function hideLoginOverlay() {
+            const loginOverlay = document.getElementById('loginOverlay');
+            if (loginOverlay) {
+                loginOverlay.style.display = 'none';
+                loginOverlay.style.visibility = 'hidden';
+                loginOverlay.style.opacity = '0';
+            }
+        }
+
         // CHECK AUTH & INITIALIZE
         window.onload = function() {
             const savedToken = localStorage.getItem('adminToken');
             if (savedToken || localStorage.getItem('adminLoggedIn') === 'true') {
-                const loginOverlay = document.getElementById('loginOverlay');
-                if (loginOverlay) loginOverlay.style.display = 'none';
+                hideLoginOverlay();
             }
             fetchLiveData();
         };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedToken = localStorage.getItem('adminToken');
+            if (savedToken || localStorage.getItem('adminLoggedIn') === 'true') {
+                hideLoginOverlay();
+            }
+        });
 
         async function handleLogin(e) {
             if (e) e.preventDefault();
@@ -816,8 +831,7 @@
             // Immediately unlock dashboard
             localStorage.setItem('adminLoggedIn', 'true');
             localStorage.setItem('adminToken', 'admin-session-' + Date.now());
-            const loginOverlay = document.getElementById('loginOverlay');
-            if (loginOverlay) loginOverlay.style.display = 'none';
+            hideLoginOverlay();
 
             // Background API token sync
             fetch(`${API_BASE}/api/admin/login`, {
