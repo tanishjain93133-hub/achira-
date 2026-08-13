@@ -68,9 +68,10 @@ export default function AdminDashboard() {
     }
   }, []);
 
-  // Fetch admin stats when token changes
+  // Fetch admin stats when token changes & auto-poll every 6 seconds
   useEffect(() => {
-    if (token) {
+    if (!token) return;
+    const fetchAllData = () => {
       fetchStats();
       fetchProducts();
       fetchOrders();
@@ -82,7 +83,11 @@ export default function AdminDashboard() {
       fetchNotifications();
       fetchSettings();
       fetchEnquiries();
-    }
+    };
+
+    fetchAllData();
+    const interval = setInterval(fetchAllData, 6000);
+    return () => clearInterval(interval);
   }, [token]);
 
   const handleLogin = async (e) => {

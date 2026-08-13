@@ -76,6 +76,28 @@ function syncCloudPut() {
   });
 }
 
+async function pushToCloudStore(type, item) {
+  try {
+    await syncCloudGet().catch(() => {});
+    if (type === 'order' && item) {
+      if (!cloudCache.orders.some(o => String(o.id) === String(item.id))) {
+        cloudCache.orders.unshift(item);
+      }
+    } else if (type === 'user' && item) {
+      if (!cloudCache.users.some(u => u.email && item.email && u.email.toLowerCase() === item.email.toLowerCase())) {
+        cloudCache.users.unshift(item);
+      }
+    } else if (type === 'enquiry' && item) {
+      if (!cloudCache.enquiries.some(e => String(e.id) === String(item.id))) {
+        cloudCache.enquiries.unshift(item);
+      }
+    } else if (type === 'log' && item) {
+      cloudCache.logs.unshift(item);
+    }
+    await syncCloudPut().catch(() => {});
+  } catch (e) {}
+}
+
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -369,10 +391,8 @@ app.post('/api/user/register', async (req, res) => {
   }
 
   if (user) {
-    if (!cloudCache.users.some(u => u.email === user.email)) {
-      cloudCache.users.unshift(user);
-    }
-    cloudCache.logs.unshift({
+    await pushToCloudStore('user', user);
+    await pushToCloudStore('log', {
       id: Date.now(),
       action: `Create Account (${user.name})`,
       ip: req.ip || '127.0.0.1',
@@ -381,7 +401,6 @@ app.post('/api/user/register', async (req, res) => {
       os: 'Windows',
       createdAt: new Date().toISOString()
     });
-    syncCloudPut().catch(() => {});
   }
 
   const token = jwt.sign({ id: user.id, email: user.email, role: 'User' }, JWT_SECRET, { expiresIn: '7d' });
@@ -411,7 +430,7 @@ app.post('/api/user/login', async (req, res) => {
       });
     } catch (e) {}
 
-    cloudCache.logs.unshift({
+    await pushToCloudStore('log', {
       id: Date.now(),
       userId: user.id,
       action: `Customer Login (${user.email})`,
@@ -421,7 +440,6 @@ app.post('/api/user/login', async (req, res) => {
       os: 'Windows',
       createdAt: new Date().toISOString()
     });
-    syncCloudPut().catch(() => {});
 
     await logActivity(user.id, null, 'Login', req).catch(() => {});
     const token = jwt.sign({ id: user.id, email: user.email, role: 'User' }, JWT_SECRET, { expiresIn: '7d' });
@@ -1274,11 +1292,11 @@ app.post('/api/user/checkout', async (req, res) => {
       date: new Date(order.createdAt || Date.now()).toLocaleDateString('en-IN')
     };
     serverOrdersStore.unshift(formattedServerOrder);
-    if (!cloudCache.orders.some(o => String(o.id) === String(formattedServerOrder.id))) {
-      cloudCache.orders.unshift(formattedServerOrder);
-    }
-    if (custEmail && !cloudCache.users.some(u => u.email === custEmail)) {
-      cloudCache.users.unshift({
+    
+    // Save to Cloud Store with await so Vercel Serverless Lambdas do not terminate before completion
+    await pushToCloudStore('order', formattedServerOrder);
+    if (custEmail) {
+      await pushToCloudStore('user', {
         id: dbUser ? dbUser.id : Date.now(),
         name: custName,
         email: custEmail,
@@ -1287,7 +1305,7 @@ app.post('/api/user/checkout', async (req, res) => {
         regDate: new Date().toISOString()
       });
     }
-    cloudCache.logs.unshift({
+    await pushToCloudStore('log', {
       id: Date.now(),
       action: `Place Order ${formattedServerOrder.id} (₹${grandTotal})`,
       ip: req.ip || '127.0.0.1',
@@ -1296,7 +1314,6 @@ app.post('/api/user/checkout', async (req, res) => {
       os: 'Windows',
       createdAt: new Date().toISOString()
     });
-    syncCloudPut().catch(() => {});
     console.log('[ORDER DEBUG] Database insert successful. Order ID: ACH-' + order.id);
 
     if (dbUser) {
@@ -1391,10 +1408,8 @@ app.post('/api/user/contact', async (req, res) => {
   }
 
   if (m) {
-    if (!cloudCache.enquiries.some(e => String(e.id) === String(m.id))) {
-      cloudCache.enquiries.unshift(m);
-    }
-    cloudCache.logs.unshift({
+    await pushToCloudStore('enquiry', m);
+    await pushToCloudStore('log', {
       id: Date.now(),
       action: `Contact Query (${m.name} - ${m.subject})`,
       ip: req.ip || '127.0.0.1',
@@ -1403,7 +1418,6 @@ app.post('/api/user/contact', async (req, res) => {
       os: 'Windows',
       createdAt: new Date().toISOString()
     });
-    syncCloudPut().catch(() => {});
   }
   return res.json({ message: 'Enquiry submitted.', enquiry: m });
 });
