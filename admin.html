@@ -813,30 +813,26 @@
                 return;
             }
 
-            try {
-                const res = await fetch(`${API_BASE}/api/admin/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await res.json();
-                if (res.ok && data.token) {
-                    localStorage.setItem('adminLoggedIn', 'true');
-                    localStorage.setItem('adminToken', data.token);
-                    const loginOverlay = document.getElementById('loginOverlay');
-                    if (loginOverlay) loginOverlay.style.display = 'none';
-                    fetchLiveData();
-                    return;
-                }
-            } catch (err) {
-                console.warn('Backend API login offline, using local fallback auth.');
-            }
-
-            // Fallback for valid inputs
+            // Immediately unlock dashboard
             localStorage.setItem('adminLoggedIn', 'true');
             localStorage.setItem('adminToken', 'admin-session-' + Date.now());
             const loginOverlay = document.getElementById('loginOverlay');
             if (loginOverlay) loginOverlay.style.display = 'none';
+
+            // Background API token sync
+            fetch(`${API_BASE}/api/admin/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.token) {
+                    localStorage.setItem('adminToken', data.token);
+                }
+            })
+            .catch(() => {});
+
             fetchLiveData();
         }
 
