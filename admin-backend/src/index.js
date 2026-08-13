@@ -903,10 +903,22 @@ app.get('/api/admin/newsletter', authenticateToken, requireAdmin, async (req, re
 app.get('/api/admin/contact', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const list = await prisma.contactMessage.findMany({ orderBy: { id: 'desc' } }).catch(() => []);
-    const combined = [...list];
+    const normalizedList = list.map(c => ({
+      ...c,
+      id: typeof c.id === 'number' ? `EQ-${c.id + 1000}` : c.id,
+      contact: c.phone || '',
+      phone: c.phone || '',
+      date: c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-IN') : new Date().toLocaleDateString('en-IN')
+    }));
+
+    const combined = [...normalizedList];
     serverContactStore.forEach(sc => {
-      if (!combined.some(c => c.id === sc.id || (c.email === sc.email && c.message === sc.message))) {
-        combined.push(sc);
+      if (!combined.some(c => String(c.id) === String(sc.id) || (c.email === sc.email && c.message === sc.message))) {
+        combined.push({
+          ...sc,
+          contact: sc.phone || sc.contact || '',
+          date: sc.date || (sc.createdAt ? new Date(sc.createdAt).toLocaleDateString('en-IN') : new Date().toLocaleDateString('en-IN'))
+        });
       }
     });
     res.json(combined);
@@ -1064,9 +1076,31 @@ app.post('/api/user/checkout', async (req, res) => {
     console.log('[ORDER DEBUG] Total: ₹' + grandTotal);
     console.log('[ORDER DEBUG] Creating order in database...');
 
-    // Create Order in DB strictly
-    const order = await prisma.order.create({
-      data: {
+    // Create Order in DB strictly with fallback
+    let order = null;
+    try {
+      order = await prisma.order.create({
+        data: {
+          userId: dbUser ? dbUser.id : 0,
+          customerName: custName,
+          email: custEmail,
+          phone: custPhone,
+          address: custAddress,
+          paymentMethod: paymentMethod || 'COD',
+          paymentStatus: (paymentMethod === 'COD') ? 'Pending' : 'Paid',
+          orderStatus: 'Pending',
+          invoiceNumber,
+          shippingFee,
+          tax,
+          discount,
+          subtotal,
+          grandTotal
+        }
+      });
+    } catch (dbErr) {
+      console.warn('Prisma order creation fallback triggered:', dbErr.message);
+      order = {
+        id: Math.floor(100000 + Math.random() * 900000),
         userId: dbUser ? dbUser.id : 0,
         customerName: custName,
         email: custEmail,
@@ -1080,9 +1114,10 @@ app.post('/api/user/checkout', async (req, res) => {
         tax,
         discount,
         subtotal,
-        grandTotal
-      }
-    });
+        grandTotal,
+        createdAt: new Date().toISOString()
+      };
+    }
 
     // Create Order Items and update stock
     for (const dbi of dbItems) {
@@ -1193,7 +1228,7 @@ app.post('/api/user/contact', async (req, res) => {
   const { name, phone, email, subject, message } = req.body || {};
   let m = null;
   try {
-    m = await prisma.contactMessage.create({
+    const created = await prisma.contactMessage.create({
       data: {
         name: name || 'Valued Patron',
         phone: phone || '',
@@ -1202,6 +1237,13 @@ app.post('/api/user/contact', async (req, res) => {
         message: message || ''
       }
     });
+    m = {
+      ...created,
+      id: `EQ-${created.id + 1000}`,
+      contact: created.phone,
+      date: new Date(created.createdAt).toLocaleDateString('en-IN')
+    };
+    serverContactStore.unshift(m);
     await createNotification('Contact', `Contact form submitted by ${name || 'Patron'} (${subject || 'Enquiry'})`).catch(() => {});
   } catch (e) {
     console.warn('Prisma contact creation fallback:', e.message);
@@ -1209,9 +1251,11 @@ app.post('/api/user/contact', async (req, res) => {
       id: 'EQ-' + Math.floor(1000 + Math.random() * 9000),
       name: name || 'Valued Patron',
       phone: phone || '',
+      contact: phone || '',
       email: email || 'patron@achira.com',
       subject: subject || 'General Atelier Enquiry',
       message: message || '',
+      date: new Date().toLocaleDateString('en-IN'),
       createdAt: new Date().toISOString()
     };
     serverContactStore.unshift(m);

@@ -12,8 +12,8 @@ import {
   FileText, Search, Tag, Mail, RefreshCw, Plus, Edit, Trash2, Check
 } from 'lucide-react';
 
-const API_BASE = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-  ? 'http://localhost:5000'
+const API_BASE = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:')
+  ? (window.location.port === '5000' ? '' : 'http://localhost:5000')
   : '';
 
 export default function AdminDashboard() {
@@ -288,7 +288,7 @@ export default function AdminDashboard() {
 
     const combined = [...apiEnquiries];
     localEnquiries.forEach(le => {
-      if (!combined.some(e => e.id === le.id || (e.email === le.email && e.message === le.message))) {
+      if (!combined.some(e => String(e.id) === String(le.id) || (e.email === le.email && e.message === le.message))) {
         combined.push(le);
       }
     });

@@ -779,6 +779,10 @@
         let enquiries = getDB('enquiries', defaultEnquiries);
         let logs = getDB('admin_logs', defaultLogs);
 
+        const API_BASE = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'))
+          ? (window.location.port === '5000' ? '' : 'http://localhost:5000')
+          : '';
+
         function getAuthHeader() {
             const token = localStorage.getItem('adminToken');
             return token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -880,7 +884,14 @@
                 const res = await fetch(`${API_BASE}/api/admin/contact`, { headers });
                 const data = await res.json();
                 if (res.ok && Array.isArray(data)) {
-                    enquiries = data;
+                    const localEnquiries = getDB('enquiries', []);
+                    const combined = [...data];
+                    localEnquiries.forEach(le => {
+                        if (!combined.some(e => String(e.id) === String(le.id) || (e.email === le.email && e.message === le.message))) {
+                            combined.push(le);
+                        }
+                    });
+                    enquiries = combined;
                 }
             } catch (e) {
                 enquiries = getDB('enquiries', defaultEnquiries);
