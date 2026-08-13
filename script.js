@@ -1297,8 +1297,16 @@ function handlePlaceOrder(e) {
             phone: formattedPhone,
             address: fullAddress,
             paymentMethod: payMode,
-            couponCode: appliedCouponCode,
-            items: cart
+            items: cart.map(item => {
+                const p = products.find(prod => String(prod.id) === String(item.productId) || String(prod.id) === String(item.id));
+                return {
+                    productId: item.productId || item.id || 1,
+                    name: p ? p.name : (item.name || 'Couture Item'),
+                    qty: item.qty || 1,
+                    price: p ? p.price : (item.price || 1000),
+                    image: p ? p.image : (item.image || '')
+                };
+            })
         })
     })
     .then(async res => {

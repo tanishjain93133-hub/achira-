@@ -799,7 +799,14 @@
             try {
                 const res = await fetch(`${API_BASE}/api/admin/orders`, { headers });
                 const data = await res.json();
-                if (res.ok && Array.isArray(data)) orders = data;
+                const localOrders = getDB('admin_orders', []);
+                const combined = Array.isArray(data) ? [...data] : [];
+                localOrders.forEach(lo => {
+                    if (!combined.some(o => String(o.id) === String(lo.id))) {
+                        combined.push(lo);
+                    }
+                });
+                if (combined.length > 0) orders = combined;
             } catch (e) {}
 
             try {
@@ -810,6 +817,14 @@
 
             renderAllData();
         }
+
+        // Live Auto-Refresh Data Sync every 6 seconds
+        setInterval(function() {
+            const savedToken = localStorage.getItem('adminToken');
+            if (savedToken || localStorage.getItem('adminLoggedIn') === 'true') {
+                fetchLiveData();
+            }
+        }, 6000);
 
         function hideLoginOverlay() {
             const loginOverlay = document.getElementById('loginOverlay');

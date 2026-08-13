@@ -869,8 +869,15 @@
             try {
                 const res = await fetch(`${API_BASE}/api/admin/orders`, { headers });
                 const data = await res.json();
-                if (res.ok && Array.isArray(data)) {
-                    orders = data;
+                const localOrders = getDB('admin_orders', []);
+                const combined = Array.isArray(data) ? [...data] : [];
+                localOrders.forEach(lo => {
+                    if (!combined.some(o => String(o.id) === String(lo.id))) {
+                        combined.push(lo);
+                    }
+                });
+                if (combined.length > 0) {
+                    orders = combined;
                 }
             } catch (e) {
                 console.error('Error fetching admin orders:', e);
