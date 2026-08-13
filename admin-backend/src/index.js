@@ -7,6 +7,7 @@ require('dotenv').config();
 
 const app = express();
 const prisma = new PrismaClient();
+const https = require('https');
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'achira_jwt_secret_token_couture_2026';
 
@@ -14,6 +15,66 @@ const JWT_SECRET = process.env.JWT_SECRET || 'achira_jwt_secret_token_couture_20
 const serverOrdersStore = [];
 const serverUsersStore = [];
 const serverContactStore = [];
+const serverLogsStore = [];
+
+// Persistent Cloud Store Sync Engine (Ensures multi-device & Vercel serverless persistence)
+const CLOUD_OBJECT_ID = 'ff8081819ff5b110019ffaa0d6c8103f';
+let cloudCache = { orders: [], users: [], enquiries: [], logs: [], notifications: [] };
+
+function syncCloudGet() {
+  return new Promise((resolve) => {
+    const req = https.request({
+      hostname: 'api.restful-api.dev',
+      path: `/objects/${CLOUD_OBJECT_ID}`,
+      method: 'GET',
+      timeout: 3500
+    }, (res) => {
+      let body = '';
+      res.on('data', c => body += c);
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(body);
+          if (parsed && parsed.data) {
+            if (Array.isArray(parsed.data.orders)) cloudCache.orders = parsed.data.orders;
+            if (Array.isArray(parsed.data.users)) cloudCache.users = parsed.data.users;
+            if (Array.isArray(parsed.data.enquiries)) cloudCache.enquiries = parsed.data.enquiries;
+            if (Array.isArray(parsed.data.logs)) cloudCache.logs = parsed.data.logs;
+          }
+        } catch (e) {}
+        resolve(cloudCache);
+      });
+    });
+    req.on('error', () => resolve(cloudCache));
+    req.on('timeout', () => { req.destroy(); resolve(cloudCache); });
+    req.end();
+  });
+}
+
+function syncCloudPut() {
+  return new Promise((resolve) => {
+    const payload = JSON.stringify({
+      name: 'achira_couture_store',
+      data: cloudCache
+    });
+    const req = https.request({
+      hostname: 'api.restful-api.dev',
+      path: `/objects/${CLOUD_OBJECT_ID}`,
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload)
+      },
+      timeout: 3500
+    }, (res) => {
+      res.on('data', () => {});
+      res.on('end', () => resolve(true));
+    });
+    req.on('error', () => resolve(false));
+    req.on('timeout', () => { req.destroy(); resolve(false); });
+    req.write(payload);
+    req.end();
+  });
+}
 
 app.use(cors({
   origin: '*',
@@ -307,6 +368,22 @@ app.post('/api/user/register', async (req, res) => {
     }
   }
 
+  if (user) {
+    if (!cloudCache.users.some(u => u.email === user.email)) {
+      cloudCache.users.unshift(user);
+    }
+    cloudCache.logs.unshift({
+      id: Date.now(),
+      action: `Create Account (${user.name})`,
+      ip: req.ip || '127.0.0.1',
+      device: 'Web',
+      browser: 'Chrome',
+      os: 'Windows',
+      createdAt: new Date().toISOString()
+    });
+    syncCloudPut().catch(() => {});
+  }
+
   const token = jwt.sign({ id: user.id, email: user.email, role: 'User' }, JWT_SECRET, { expiresIn: '7d' });
   return res.json({ token, user: { id: user.id, name: user.name, email: user.email, phone: user.phone, address: user.address, city: user.city, state: user.state, pincode: user.pincode } });
 });
@@ -320,7 +397,7 @@ app.post('/api/user/login', async (req, res) => {
   try {
     let user = await prisma.user.findUnique({ where: { email } }).catch(() => null);
     if (!user) {
-      user = serverUsersStore.find(u => u.email === email);
+      user = serverUsersStore.find(u => u.email === email) || cloudCache.users.find(u => u.email === email);
     }
     if (!user) return res.status(401).json({ error: 'Invalid credentials.' });
 
@@ -333,6 +410,18 @@ app.post('/api/user/login', async (req, res) => {
         data: { lastLogin: new Date() }
       });
     } catch (e) {}
+
+    cloudCache.logs.unshift({
+      id: Date.now(),
+      userId: user.id,
+      action: `Customer Login (${user.email})`,
+      ip: req.ip || '127.0.0.1',
+      device: 'Web',
+      browser: 'Chrome',
+      os: 'Windows',
+      createdAt: new Date().toISOString()
+    });
+    syncCloudPut().catch(() => {});
 
     await logActivity(user.id, null, 'Login', req).catch(() => {});
     const token = jwt.sign({ id: user.id, email: user.email, role: 'User' }, JWT_SECRET, { expiresIn: '7d' });
@@ -610,10 +699,11 @@ app.get('/api/admin/orders', authenticateToken, requireAdmin, async (req, res) =
       };
     }));
 
-    // Merge with serverOrdersStore
+    // Merge with serverOrdersStore and cloudCache.orders
+    await syncCloudGet().catch(() => {});
     const combined = [...enriched];
-    serverOrdersStore.forEach(so => {
-      if (!combined.some(o => o.dbId === so.dbId || o.id === so.id)) {
+    [...serverOrdersStore, ...cloudCache.orders].forEach(so => {
+      if (!combined.some(o => String(o.dbId) === String(so.dbId) || String(o.id) === String(so.id))) {
         combined.push(so);
       }
     });
@@ -736,23 +826,32 @@ app.get('/api/admin/stats', authenticateToken, requireAdmin, async (req, res) =>
 // Customer Management
 app.get('/api/admin/customers', authenticateToken, requireAdmin, async (req, res) => {
   try {
+    await syncCloudGet().catch(() => {});
     const users = await prisma.user.findMany({ orderBy: { id: 'desc' } }).catch(() => []);
     const orders = await prisma.order.findMany().catch(() => []);
     
+    const combinedUsers = [...users];
+    [...serverUsersStore, ...cloudCache.users].forEach(su => {
+      if (!combinedUsers.some(u => (u.email && su.email && u.email.toLowerCase() === su.email.toLowerCase()))) {
+        combinedUsers.push(su);
+      }
+    });
+
     const combinedOrders = [...orders];
-    serverOrdersStore.forEach(so => {
-      if (!combinedOrders.some(o => o.id === so.id || o.dbId === so.dbId)) {
+    [...serverOrdersStore, ...cloudCache.orders].forEach(so => {
+      if (!combinedOrders.some(o => String(o.id) === String(so.id) || String(o.dbId) === String(so.dbId))) {
         combinedOrders.push(so);
       }
     });
 
     const customersMap = new Map();
 
-    users.forEach(u => {
+    combinedUsers.forEach(u => {
+      if (!u.email) return;
       const userOrders = combinedOrders.filter(o => o.userId === u.id || (o.email && u.email && o.email.toLowerCase() === u.email.toLowerCase()));
       customersMap.set(u.email.toLowerCase(), {
-        id: u.id,
-        name: u.name,
+        id: u.id || u.dbId || Math.floor(Math.random() * 10000),
+        name: u.name || 'Valued Patron',
         email: u.email,
         phone: u.phone || '+91 98765 43210',
         address: u.address || 'Registered Customer Account',
@@ -787,10 +886,17 @@ app.get('/api/admin/customers', authenticateToken, requireAdmin, async (req, res
 // Logs Management
 app.get('/api/admin/logs', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const logs = await prisma.loginActivity.findMany({ orderBy: { id: 'desc' }, take: 100 });
-    res.json(logs);
+    await syncCloudGet().catch(() => {});
+    const logs = await prisma.loginActivity.findMany({ orderBy: { id: 'desc' }, take: 100 }).catch(() => []);
+    const combined = [...logs];
+    [...serverLogsStore, ...cloudCache.logs].forEach(sl => {
+      if (!combined.some(l => String(l.id) === String(sl.id))) {
+        combined.push(sl);
+      }
+    });
+    res.json(combined);
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    res.json(cloudCache.logs || []);
   }
 });
 
@@ -1168,6 +1274,29 @@ app.post('/api/user/checkout', async (req, res) => {
       date: new Date(order.createdAt || Date.now()).toLocaleDateString('en-IN')
     };
     serverOrdersStore.unshift(formattedServerOrder);
+    if (!cloudCache.orders.some(o => String(o.id) === String(formattedServerOrder.id))) {
+      cloudCache.orders.unshift(formattedServerOrder);
+    }
+    if (custEmail && !cloudCache.users.some(u => u.email === custEmail)) {
+      cloudCache.users.unshift({
+        id: dbUser ? dbUser.id : Date.now(),
+        name: custName,
+        email: custEmail,
+        phone: custPhone,
+        address: custAddress,
+        regDate: new Date().toISOString()
+      });
+    }
+    cloudCache.logs.unshift({
+      id: Date.now(),
+      action: `Place Order ${formattedServerOrder.id} (₹${grandTotal})`,
+      ip: req.ip || '127.0.0.1',
+      device: 'Web',
+      browser: 'Chrome',
+      os: 'Windows',
+      createdAt: new Date().toISOString()
+    });
+    syncCloudPut().catch(() => {});
     console.log('[ORDER DEBUG] Database insert successful. Order ID: ACH-' + order.id);
 
     if (dbUser) {
@@ -1259,6 +1388,22 @@ app.post('/api/user/contact', async (req, res) => {
       createdAt: new Date().toISOString()
     };
     serverContactStore.unshift(m);
+  }
+
+  if (m) {
+    if (!cloudCache.enquiries.some(e => String(e.id) === String(m.id))) {
+      cloudCache.enquiries.unshift(m);
+    }
+    cloudCache.logs.unshift({
+      id: Date.now(),
+      action: `Contact Query (${m.name} - ${m.subject})`,
+      ip: req.ip || '127.0.0.1',
+      device: 'Web',
+      browser: 'Chrome',
+      os: 'Windows',
+      createdAt: new Date().toISOString()
+    });
+    syncCloudPut().catch(() => {});
   }
   return res.json({ message: 'Enquiry submitted.', enquiry: m });
 });

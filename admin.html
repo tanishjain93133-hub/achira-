@@ -924,6 +924,14 @@
             renderAllData();
         }
 
+        // Live Auto-Refresh Data Sync every 6 seconds
+        setInterval(function() {
+            const savedToken = localStorage.getItem('adminToken');
+            if (savedToken || localStorage.getItem('adminLoggedIn') === 'true') {
+                fetchLiveData();
+            }
+        }, 6000);
+
         function switchTab(tabId, el) {
             document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
             document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
