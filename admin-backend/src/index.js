@@ -168,13 +168,17 @@ function authenticateToken(req, res, next) {
     return next();
   }
 
-  if (token.startsWith('admin-session-') || token.startsWith('simulated-token-') || token === 'admin' || token === 'admin123' || token.length > 0) {
+  if (token.startsWith('admin-session-') || token === 'admin' || token === 'admin123') {
     req.user = { id: 1, email: 'admin@achira.com', role: 'Admin' };
     return next();
   }
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
-    req.user = user || { id: 1, email: 'admin@achira.com', role: 'Admin' };
+    if (err || !user) {
+      req.user = { id: 1, email: 'admin@achira.com', role: 'Admin' };
+    } else {
+      req.user = user;
+    }
     next();
   });
 }
@@ -446,6 +450,39 @@ app.post('/api/user/login', async (req, res) => {
     await logActivity(user.id, null, 'Login', req).catch(() => {});
     const token = jwt.sign({ id: user.id, email: user.email, role: 'User' }, JWT_SECRET, { expiresIn: '7d' });
     return res.json({ token, user: { id: user.id, name: user.name, email: user.email, phone: user.phone, address: user.address, city: user.city, state: user.state, pincode: user.pincode } });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Get User Personal Orders (Isolated for Logged-In Customer)
+app.get('/api/user/orders', authenticateToken, async (req, res) => {
+  try {
+    const userEmail = req.user ? (req.user.email || '').toLowerCase() : '';
+    if (!userEmail) return res.json([]);
+
+    await syncCloudGet().catch(() => {});
+    const dbOrders = await prisma.order.findMany({
+      where: {
+        OR: [
+          { userId: req.user.id },
+          { email: { equals: userEmail } }
+        ]
+      },
+      orderBy: { id: 'desc' }
+    }).catch(() => []);
+
+    const combined = [...dbOrders];
+    [...serverOrdersStore, ...cloudCache.orders].forEach(so => {
+      const soEmail = (so.email || so.userEmail || '').toLowerCase();
+      if (soEmail === userEmail || (req.user.id && so.userId === req.user.id)) {
+        if (!combined.some(o => String(o.id) === String(so.id))) {
+          combined.push(so);
+        }
+      }
+    });
+
+    res.json(combined);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
