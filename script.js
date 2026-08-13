@@ -1502,6 +1502,11 @@ function renderNewArrivals() {
 
 // --- Admin Panel Functions ---
 function openAdminModal(e) {
+    // If clicked on link, navigate directly to admin.html page
+    if (e && e.target && e.target.tagName === 'A') {
+        window.location.href = 'admin.html';
+        return;
+    }
     if (e) e.preventDefault();
     const modal = document.getElementById('adminModal');
     if (modal) {
@@ -1518,17 +1523,22 @@ function openAdminModal(e) {
 }
 
 function closeAdminModal() {
-    document.getElementById('adminModal').classList.remove('active');
+    const modal = document.getElementById('adminModal');
+    if (modal) modal.classList.remove('active');
 }
 
 function showAdminLoginView() {
-    document.getElementById('adminLoginView').classList.add('active');
-    document.getElementById('adminMainView').classList.remove('active');
+    const loginV = document.getElementById('adminLoginView');
+    const mainV = document.getElementById('adminMainView');
+    if (loginV) loginV.classList.add('active');
+    if (mainV) mainV.classList.remove('active');
 }
 
 function showAdminMainDashboard() {
-    document.getElementById('adminLoginView').classList.remove('active');
-    document.getElementById('adminMainView').classList.add('active');
+    const loginV = document.getElementById('adminLoginView');
+    const mainV = document.getElementById('adminMainView');
+    if (loginV) loginV.classList.remove('active');
+    if (mainV) mainV.classList.add('active');
     
     // Render default tabs
     renderAdminStats();
@@ -1549,28 +1559,26 @@ async function handleAdminLogin(e) {
     const pass = passEl ? passEl.value.trim() : 'admin123';
 
     if (user.length > 0 && pass.length > 0) {
-        try {
-            const res = await fetch(`${API_BASE}/api/admin/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: user, password: pass })
-            });
-            const data = await res.json();
-            if (res.ok && data.token) {
-                localStorage.setItem('adminToken', data.token);
-                localStorage.setItem('adminLoggedIn', 'true');
-                showToast("Gateway connection established.");
-                showAdminMainDashboard();
-                return;
-            }
-        } catch (err) { console.warn('Backend login fallback used'); }
-
         currentAdmin = { username: user, role: 'Admin' };
         localStorage.setItem('currentAdmin', JSON.stringify(currentAdmin));
         localStorage.setItem('adminToken', 'admin-session-' + Date.now());
         localStorage.setItem('adminLoggedIn', 'true');
         showToast("Gateway connection established.");
         showAdminMainDashboard();
+
+        // Background API sync
+        fetch(`${API_BASE}/api/admin/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: user, password: pass })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.token) {
+                localStorage.setItem('adminToken', data.token);
+            }
+        })
+        .catch(() => {});
         return;
     }
     alert("Please enter username and password.");
