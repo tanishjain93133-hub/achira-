@@ -884,10 +884,8 @@
                 }
             } catch (e) {}
 
-            const localEnquiries = getDB('enquiries', []);
-            const adminEnquiries = getDB('admin_enquiries', []);
             const enqMap = new Map();
-            [...fetchedEnquiries, ...cloudEnquiries, ...localEnquiries, ...adminEnquiries].forEach(e => {
+            [...fetchedEnquiries, ...cloudEnquiries].forEach(e => {
                 if (!e) return;
                 const key = String(e.id || (e.email + '_' + e.message));
                 if (!enqMap.has(key)) enqMap.set(key, e);
