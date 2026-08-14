@@ -3,8 +3,15 @@ require('dotenv').config({ path: path.join(__dirname, '../.env') });
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 require('dotenv').config();
 
-// Ensure DATABASE_URL fallback if environment variable is missing in serverless context
-if (!process.env.DATABASE_URL || process.env.DATABASE_URL.startsWith('file:')) {
+// Sanitize & normalize DATABASE_URL for Prisma PostgreSQL
+if (process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = process.env.DATABASE_URL.replace(/^["']|["']$/g, '').trim();
+  if (process.env.DATABASE_URL.startsWith('postgres://')) {
+    process.env.DATABASE_URL = process.env.DATABASE_URL.replace('postgres://', 'postgresql://');
+  }
+}
+
+if (!process.env.DATABASE_URL || !process.env.DATABASE_URL.startsWith('postgresql://')) {
   process.env.DATABASE_URL = process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL || "postgresql://postgres:postgres@localhost:5432/achira";
 }
 
@@ -15,7 +22,7 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 
 const app = express();
-let prisma;
+let prisma = null;
 try {
   prisma = new PrismaClient();
 } catch (e) {
@@ -554,10 +561,10 @@ app.get('/api/user/orders', authenticateToken, async (req, res) => {
 
 app.get('/api/admin/settings', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const sets = await prisma.settings.findFirst();
-    res.json(sets || {});
+    const sets = await prisma.settings.findFirst().catch(() => null);
+    res.json(sets || { gst: 18, shipping: 150, email: 'atelier@achira.com', phone: '+91 98765 43210' });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    res.json({ gst: 18, shipping: 150, email: 'atelier@achira.com', phone: '+91 98765 43210' });
   }
 });
 
