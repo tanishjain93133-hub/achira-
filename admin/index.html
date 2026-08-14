@@ -755,14 +755,8 @@
             { code: "FESTIVE20", discount: "20% OFF", expiry: "2026-10-30", status: "Active" }
         ];
 
-        let defaultEnquiries = [
-            { name: "Ritu Kapoor", contact: "+91 98765 43210", subject: "Custom Bridal Fitting", message: "Looking for customized fitting for Bridal Lehenga in Mumbai.", date: "2026-08-02" }
-        ];
-
-        let defaultLogs = [
-            { timestamp: "2026-08-02 22:40", action: "ADMIN_LOGIN", user: "admin", details: "Successful authentication from web" },
-            { timestamp: "2026-08-02 22:45", action: "UPDATE_PRODUCT", user: "admin", details: "Updated product Gown details" }
-        ];
+        let defaultEnquiries = [];
+        let defaultLogs = [];
 
         function getDB(table, defaultVal = []) {
             try {
@@ -1194,20 +1188,23 @@
             // Render Enquiries
             const enqBody = document.getElementById('enquiriesBody');
             if (enqBody) {
-                enquiries = getDB('enquiries', defaultEnquiries);
-                enqBody.innerHTML = enquiries.map((eq, idx) => `
-                    <tr>
-                        <td><strong style="color: var(--gold);">${eq.id || 'EQ-100' + (idx+1)}</strong></td>
-                        <td><strong>${eq.name}</strong><br><span style="font-size: 0.75rem; color: var(--text-muted);">${eq.email || 'N/A'}</span></td>
-                        <td>${eq.contact || eq.phone || '+91 98765 43210'}</td>
-                        <td><span class="badge badge-info">${eq.subject || 'General Inquiry'}</span></td>
-                        <td style="max-width: 250px; font-size: 0.82rem; line-height: 1.4;">${eq.message}</td>
-                        <td>${eq.date || 'Recent'}</td>
-                        <td>
-                            <button onclick="deleteEnquiry('${eq.id || eq.name}')" style="background: var(--danger); color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
-                        </td>
-                    </tr>
-                `).join('');
+                if (enquiries.length === 0) {
+                    enqBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">No customer enquiries yet. Real customer queries submitted on the website will appear here.</td></tr>`;
+                } else {
+                    enqBody.innerHTML = enquiries.map((eq, idx) => `
+                        <tr>
+                            <td><strong style="color: var(--gold);">${eq.id || 'EQ-100' + (idx+1)}</strong></td>
+                            <td><strong>${eq.name}</strong><br><a href="mailto:${eq.email || ''}" style="font-size: 0.75rem; color: var(--primary); text-decoration: none;">${eq.email || 'N/A'}</a></td>
+                            <td>${eq.contact || eq.phone || '+91 98765 43210'}</td>
+                            <td><span class="badge badge-info">${eq.subject || 'General Inquiry'}</span></td>
+                            <td style="max-width: 250px; font-size: 0.82rem; line-height: 1.4;">${eq.message}</td>
+                            <td>${eq.date || 'Recent'}</td>
+                            <td>
+                                <button onclick="deleteEnquiry('${eq.id || eq.name}')" style="background: var(--danger); color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
             }
 
             // Render Logs
