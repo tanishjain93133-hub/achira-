@@ -896,21 +896,16 @@
                 }
             } catch (err) {}
 
-            const localOrders = getDB('admin_orders', []);
-            const userOrders = getDB('orders', []);
-            const allOrdersList = [...fetchedOrders, ...cloudOrders, ...localOrders, ...userOrders];
-            const ordersMap = new Map();
-            allOrdersList.forEach(o => {
-                if (!o) return;
-                const key = String(o.id || o.dbId || '');
-                if (key && !ordersMap.has(key)) {
-                    ordersMap.set(key, o);
-                }
-            });
-            orders = Array.from(ordersMap.values());
+            let allOrdersList = [];
+            if (Array.isArray(fetchedOrders)) {
+                allOrdersList = fetchedOrders;
+            } else if (Array.isArray(cloudOrders) && cloudOrders.length > 0) {
+                allOrdersList = cloudOrders;
+            }
+            orders = allOrdersList;
             setDB('admin_orders', orders);
 
-            // 3. Fetch Customers (Backend API + Cloud Users + Local Users/Customers + Order Purchasers)
+            // 3. Fetch Customers (Real Backend API + Cloud Users)
             let fetchedCustomers = [];
             try {
                 const res = await fetch(`${API_BASE}/api/admin/customers`, { headers });
@@ -920,48 +915,10 @@
                 }
             } catch (e) {}
 
-            const localCustomers = getDB('admin_customers', []);
-            const localUsers = getDB('users', []);
             const custMap = new Map();
-
-            // Load from backend API
             fetchedCustomers.forEach(c => {
                 const em = (c.email || '').toLowerCase().trim();
                 if (em) custMap.set(em, c);
-            });
-
-            // Merge from Cloud Storage
-            cloudUsers.forEach(u => {
-                const em = (u.email || '').toLowerCase().trim();
-                if (em && !custMap.has(em)) {
-                    custMap.set(em, {
-                        id: u.id || ('CUST-' + Math.floor(1000 + Math.random() * 9000)),
-                        name: u.name || 'Valued Patron',
-                        email: u.email,
-                        phone: u.phone || '+91 98765 43210',
-                        address: u.address || 'Registered Online Customer',
-                        ordersCount: u.ordersCount || 0,
-                        totalSpent: u.totalSpent || 0,
-                        status: 'Active'
-                    });
-                }
-            });
-
-            // Merge from Local DB
-            [...localCustomers, ...localUsers].forEach(u => {
-                const em = (u.email || '').toLowerCase().trim();
-                if (em && !custMap.has(em)) {
-                    custMap.set(em, {
-                        id: u.id || ('CUST-' + Math.floor(1000 + Math.random() * 9000)),
-                        name: u.name || 'Valued Patron',
-                        email: u.email,
-                        phone: u.phone || '+91 98765 43210',
-                        address: u.address || 'Registered Online Customer',
-                        ordersCount: u.ordersCount || 0,
-                        totalSpent: u.totalSpent || 0,
-                        status: 'Active'
-                    });
-                }
             });
 
             // Auto-derive all purchasers from Orders to ensure 100% visibility

@@ -35,34 +35,10 @@ function syncCloudGet() {
         try {
           const parsed = JSON.parse(body);
           if (parsed && typeof parsed === 'object') {
-            if (Array.isArray(parsed.orders)) {
-              parsed.orders.forEach(o => {
-                if (o && !cloudCache.orders.some(x => String(x.id) === String(o.id))) {
-                  cloudCache.orders.push(o);
-                }
-              });
-            }
-            if (Array.isArray(parsed.users)) {
-              parsed.users.forEach(u => {
-                if (u && u.email && !cloudCache.users.some(x => x.email && x.email.toLowerCase() === u.email.toLowerCase())) {
-                  cloudCache.users.push(u);
-                }
-              });
-            }
-            if (Array.isArray(parsed.enquiries)) {
-              parsed.enquiries.forEach(e => {
-                if (e && !cloudCache.enquiries.some(x => String(x.id) === String(e.id))) {
-                  cloudCache.enquiries.push(e);
-                }
-              });
-            }
-            if (Array.isArray(parsed.logs)) {
-              parsed.logs.forEach(l => {
-                if (l && !cloudCache.logs.some(x => String(x.id) === String(l.id))) {
-                  cloudCache.logs.push(l);
-                }
-              });
-            }
+            if (Array.isArray(parsed.orders)) cloudCache.orders = parsed.orders;
+            if (Array.isArray(parsed.users)) cloudCache.users = parsed.users;
+            if (Array.isArray(parsed.enquiries)) cloudCache.enquiries = parsed.enquiries;
+            if (Array.isArray(parsed.logs)) cloudCache.logs = parsed.logs;
           }
         } catch (e) {}
         resolve(cloudCache);
