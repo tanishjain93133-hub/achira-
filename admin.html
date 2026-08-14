@@ -896,13 +896,15 @@
                 }
             } catch (err) {}
 
-            let allOrdersList = [];
-            if (Array.isArray(fetchedOrders)) {
-                allOrdersList = fetchedOrders;
-            } else if (Array.isArray(cloudOrders) && cloudOrders.length > 0) {
-                allOrdersList = cloudOrders;
+            const combinedOrders = [...(Array.isArray(fetchedOrders) ? fetchedOrders : [])];
+            if (Array.isArray(cloudOrders)) {
+                cloudOrders.forEach(co => {
+                    if (co && co.id && !combinedOrders.some(o => String(o.id) === String(co.id))) {
+                        combinedOrders.push(co);
+                    }
+                });
             }
-            orders = allOrdersList;
+            orders = combinedOrders;
             setDB('admin_orders', orders);
 
             // 3. Fetch Customers (Real Backend API + Cloud Users)
