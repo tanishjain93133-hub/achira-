@@ -7,7 +7,7 @@
     "start": "node admin-backend/src/index.js",
     "dev": "node admin-backend/src/index.js",
     "postinstall": "prisma generate --schema=./admin-backend/prisma/schema.prisma",
-    "vercel-build": "prisma generate --schema=./admin-backend/prisma/schema.prisma"
+    "vercel-build": "prisma db push --schema=./admin-backend/prisma/schema.prisma --accept-data-loss && prisma generate --schema=./admin-backend/prisma/schema.prisma"
   },
   "dependencies": {
     "@prisma/client": "^5.10.2",
