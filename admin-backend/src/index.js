@@ -1,12 +1,26 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
+require('dotenv').config();
+
+// Ensure DATABASE_URL fallback if environment variable is missing in serverless context
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = `file:${path.join(__dirname, '../prisma/dev.db')}`;
+}
+
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
-require('dotenv').config();
 
 const app = express();
-const prisma = new PrismaClient();
+let prisma;
+try {
+  prisma = new PrismaClient();
+} catch (e) {
+  console.warn('PrismaClient initialization warning:', e.message);
+}
 const https = require('https');
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'achira_jwt_secret_token_couture_2026';
