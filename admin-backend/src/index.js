@@ -1392,27 +1392,32 @@ app.post('/api/user/checkout', async (req, res) => {
     };
     serverOrdersStore.unshift(formattedServerOrder);
     
-    // Save to Cloud Store asynchronously in background
-    pushToCloudStore('order', formattedServerOrder).catch(() => {});
-    if (custEmail) {
-      pushToCloudStore('user', {
-        id: dbUser ? dbUser.id : Date.now(),
-        name: custName,
-        email: custEmail,
-        phone: custPhone,
-        address: custAddress,
-        regDate: new Date().toISOString()
-      }).catch(() => {});
-    }
-    pushToCloudStore('log', {
-      id: Date.now(),
-      action: `Place Order ${formattedServerOrder.id} (₹${grandTotal})`,
-      ip: req.ip || '127.0.0.1',
-      device: 'Web',
-      browser: 'Chrome',
-      os: 'Windows',
-      createdAt: new Date().toISOString()
-    }).catch(() => {});
+    // Save to Cloud Store and await completion before Vercel serverless freeze
+    try {
+      await Promise.race([
+        Promise.all([
+          pushToCloudStore('order', formattedServerOrder),
+          custEmail ? pushToCloudStore('user', {
+            id: dbUser ? dbUser.id : Date.now(),
+            name: custName,
+            email: custEmail,
+            phone: custPhone,
+            address: custAddress,
+            regDate: new Date().toISOString()
+          }) : Promise.resolve(),
+          pushToCloudStore('log', {
+            id: Date.now(),
+            action: `Place Order ${formattedServerOrder.id} (₹${grandTotal})`,
+            ip: req.ip || '127.0.0.1',
+            device: 'Web',
+            browser: 'Chrome',
+            os: 'Windows',
+            createdAt: new Date().toISOString()
+          })
+        ]),
+        new Promise(r => setTimeout(r, 2500))
+      ]);
+    } catch (e) {}
     console.log('[ORDER DEBUG] Database insert successful. Order ID: ACH-' + order.id);
 
     if (dbUser) {
@@ -1609,7 +1614,7 @@ async function seedInitialProducts() {
 seedInitialProducts();
 
 // Server Initialization
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+if (require.main === module && !process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`⚜ :: ACHIRA Atelier APIs running on http://localhost:${PORT}`);
   });
