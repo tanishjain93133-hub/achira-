@@ -617,23 +617,38 @@ app.put('/api/admin/settings', authenticateToken, requireAdmin, async (req, res)
 // --- ADMIN DASHBOARD ANALYTICS API ---
 app.get('/api/admin/stats', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const orders = await prisma.order.findMany();
-    const customers = await prisma.user.count();
-    const products = await prisma.product.findMany();
+    await syncCloudGet().catch(() => {});
+    const orders = await prisma.order.findMany().catch(() => []);
+    const combinedOrders = [...orders];
+    [...serverOrdersStore, ...cloudCache.orders].forEach(so => {
+      if (!combinedOrders.some(o => String(o.id) === String(so.id) || String(o.dbId) === String(so.dbId))) {
+        combinedOrders.push(so);
+      }
+    });
 
-    const revenue = orders.reduce((sum, o) => o.orderStatus !== 'Cancelled' ? sum + o.grandTotal : sum, 0);
+    const customersCount = (await prisma.user.count().catch(() => 0)) || cloudCache.users.length;
+    const products = await prisma.product.findMany().catch(() => []);
+
+    const revenue = combinedOrders.reduce((sum, o) => {
+      const st = (o.orderStatus || o.status || '');
+      return st !== 'Cancelled' ? sum + (o.grandTotal || o.total || 0) : sum;
+    }, 0);
     
     const todayStr = new Date().toDateString();
-    const todaySales = orders
-      .filter(o => new Date(o.createdAt).toDateString() === todayStr && o.orderStatus !== 'Cancelled')
-      .reduce((sum, o) => sum + o.grandTotal, 0);
+    const todaySales = combinedOrders
+      .filter(o => {
+        const d = o.createdAt ? new Date(o.createdAt).toDateString() : '';
+        const st = (o.orderStatus || o.status || '');
+        return d === todayStr && st !== 'Cancelled';
+      })
+      .reduce((sum, o) => sum + (o.grandTotal || o.total || 0), 0);
 
-    const pending = orders.filter(o => o.orderStatus === 'Pending').length;
-    const confirmed = orders.filter(o => o.orderStatus === 'Confirmed').length;
-    const packed = orders.filter(o => o.orderStatus === 'Packed').length;
-    const shipped = orders.filter(o => o.orderStatus === 'Shipped').length;
-    const delivered = orders.filter(o => o.orderStatus === 'Delivered').length;
-    const cancelled = orders.filter(o => o.orderStatus === 'Cancelled').length;
+    const pending = combinedOrders.filter(o => (o.orderStatus || o.status) === 'Pending').length;
+    const confirmed = combinedOrders.filter(o => (o.orderStatus || o.status) === 'Confirmed').length;
+    const packed = combinedOrders.filter(o => (o.orderStatus || o.status) === 'Packed').length;
+    const shipped = combinedOrders.filter(o => (o.orderStatus || o.status) === 'Shipped').length;
+    const delivered = combinedOrders.filter(o => (o.orderStatus || o.status) === 'Delivered').length;
+    const cancelled = combinedOrders.filter(o => (o.orderStatus || o.status) === 'Cancelled').length;
 
     const lowStock = products.filter(p => p.stock > 0 && p.stock <= 5).length;
     const outOfStock = products.filter(p => p.stock === 0).length;
@@ -1140,6 +1155,34 @@ app.get('/api/admin/newsletter', authenticateToken, requireAdmin, async (req, re
 
 // Enquiries list
 app.get('/api/admin/contact', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await syncCloudGet().catch(() => {});
+    const list = await prisma.contactMessage.findMany({ orderBy: { id: 'desc' } }).catch(() => []);
+    const normalizedList = list.map(c => ({
+      ...c,
+      id: typeof c.id === 'number' ? `EQ-${c.id + 1000}` : c.id,
+      contact: c.phone || '',
+      phone: c.phone || '',
+      date: c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-IN') : new Date().toLocaleDateString('en-IN')
+    }));
+
+    const combined = [...normalizedList];
+    [...serverContactStore, ...(cloudCache.enquiries || [])].forEach(sc => {
+      if (sc && sc.id && !combined.some(c => String(c.id) === String(sc.id))) {
+        combined.push({
+          ...sc,
+          contact: sc.phone || sc.contact || '',
+          date: sc.date || (sc.createdAt ? new Date(sc.createdAt).toLocaleDateString('en-IN') : new Date().toLocaleDateString('en-IN'))
+        });
+      }
+    });
+    res.json(combined);
+  } catch (e) {
+    res.json([...serverContactStore, ...(cloudCache.enquiries || [])]);
+  }
+});
+
+app.get('/api/admin/enquiries', authenticateToken, requireAdmin, async (req, res) => {
   try {
     await syncCloudGet().catch(() => {});
     const list = await prisma.contactMessage.findMany({ orderBy: { id: 'desc' } }).catch(() => []);
