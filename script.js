@@ -79,7 +79,7 @@ function initDatabase() {
 }
 
 const API_BASE = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'))
-  ? 'http://localhost:5000'
+  ? (window.location.port === '5000' ? '' : 'http://localhost:5000')
   : '';
 
 // Global active session state
@@ -622,6 +622,36 @@ function handleUserLogin(e) {
     });
 }
 
+function syncUserToCloudStorage(userObj) {
+    if (!userObj || !userObj.email) return;
+    try {
+        fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`)
+            .then(res => res.json())
+            .then(cloudData => {
+                const existing = (cloudData && Array.isArray(cloudData.users)) ? cloudData.users : [];
+                const idx = existing.findIndex(u => (u.email || '').toLowerCase() === userObj.email.toLowerCase());
+                if (idx !== -1) {
+                    existing[idx] = { ...existing[idx], ...userObj };
+                } else {
+                    existing.unshift(userObj);
+                }
+                const logs = (cloudData && Array.isArray(cloudData.logs)) ? cloudData.logs : [];
+                logs.unshift({
+                    id: Date.now(),
+                    action: `Customer Registered (${userObj.name || userObj.email})`,
+                    ip: 'Web',
+                    device: 'Online Storefront',
+                    createdAt: new Date().toISOString()
+                });
+                return fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...(cloudData || {}), users: existing, logs: logs.slice(0, 50) })
+                });
+            }).catch(() => {});
+    } catch (e) {}
+}
+
 function performLocalLogin(email, pass) {
     const users = getDB('users');
     let matched = users.find(u => u.email.toLowerCase() === email.toLowerCase());
@@ -632,6 +662,23 @@ function performLocalLogin(email, pass) {
         matched = { id: Date.now(), name: name, email: email, phone: "+91 98765 43210" };
         users.push({ ...matched, password: pass });
         setDB('users', users);
+
+        const adminCustomers = getDB('admin_customers');
+        if (!adminCustomers.some(c => (c.email || '').toLowerCase() === email.toLowerCase())) {
+            adminCustomers.unshift({
+                id: 'CUST-' + Math.floor(1000 + Math.random() * 9000),
+                name: name,
+                email: email,
+                phone: "+91 98765 43210",
+                address: 'Registered Online Customer',
+                ordersCount: 0,
+                totalSpent: 0,
+                status: 'Active',
+                regDate: new Date().toISOString()
+            });
+            setDB('admin_customers', adminCustomers);
+        }
+        syncUserToCloudStorage(matched);
     }
     
     const token = 'simulated-token-' + Date.now();
@@ -639,12 +686,69 @@ function performLocalLogin(email, pass) {
 }
 
 function handleUserSignup(e) {
-    e.preventDefault();
-    const name = document.getElementById('signupName').value.trim();
-    const email = document.getElementById('signupEmail').value.trim();
-    const pass = document.getElementById('signupPassword').value.trim();
-    const phone = "+91 98765 43210";
+    if (e) e.preventDefault();
+    const nameInput = document.getElementById('signupName');
+    const emailInput = document.getElementById('signupEmail');
+    const passInput = document.getElementById('signupPassword');
+    const phoneInput = document.getElementById('signupPhone');
+
+    const name = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : 'Valued Patron';
+    const email = (emailInput && emailInput.value.trim()) ? emailInput.value.trim() : '';
+    const pass = (passInput && passInput.value.trim()) ? passInput.value.trim() : 'achira123';
+    const phone = (phoneInput && phoneInput.value.trim()) ? phoneInput.value.trim() : "+91 98765 43210";
     
+    if (!email) {
+        showToast("Please enter a valid email address.");
+        return;
+    }
+
+    const newCustomerObj = {
+        id: 'CUST-' + Math.floor(1000 + Math.random() * 9000),
+        name: name,
+        email: email,
+        phone: phone,
+        address: 'Registered Customer Account',
+        ordersCount: 0,
+        totalSpent: 0,
+        status: 'Active',
+        regDate: new Date().toISOString(),
+        createdAt: new Date().toISOString()
+    };
+
+    // Save to users in localStorage
+    const users = getDB('users');
+    const existingIdx = users.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
+    if (existingIdx !== -1) {
+        users[existingIdx] = { ...users[existingIdx], name, phone, password: pass };
+    } else {
+        users.push({ id: Date.now(), name, email, phone, password: pass });
+    }
+    setDB('users', users);
+
+    // Save to admin_customers in localStorage
+    const adminCustomers = getDB('admin_customers');
+    const existingCustIdx = adminCustomers.findIndex(c => (c.email || '').toLowerCase() === email.toLowerCase());
+    if (existingCustIdx !== -1) {
+        adminCustomers[existingCustIdx] = { ...adminCustomers[existingCustIdx], name, phone };
+    } else {
+        adminCustomers.unshift(newCustomerObj);
+    }
+    setDB('admin_customers', adminCustomers);
+
+    // Add to admin audit logs
+    const adminLogs = getDB('admin_logs');
+    adminLogs.unshift({
+        id: Date.now(),
+        timestamp: new Date().toLocaleString('en-IN'),
+        action: `Customer Registered (${name})`,
+        user: email,
+        details: `Customer registered account with email ${email}`
+    });
+    setDB('admin_logs', adminLogs);
+
+    // Direct multi-device cloud backup
+    syncUserToCloudStorage(newCustomerObj);
+
     fetch(`${API_BASE}/api/user/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -676,6 +780,23 @@ function performLocalSignup(name, email, pass, phone) {
         setDB('users', users);
         user = { id: newUser.id, name, email, phone };
     }
+
+    const adminCustomers = getDB('admin_customers');
+    if (!adminCustomers.some(c => (c.email || '').toLowerCase() === email.toLowerCase())) {
+        adminCustomers.unshift({
+            id: 'CUST-' + Math.floor(1000 + Math.random() * 9000),
+            name: name,
+            email: email,
+            phone: phone,
+            address: 'Registered Customer Account',
+            ordersCount: 0,
+            totalSpent: 0,
+            status: 'Active',
+            regDate: new Date().toISOString()
+        });
+        setDB('admin_customers', adminCustomers);
+    }
+    syncUserToCloudStorage({ id: user.id, name, email, phone, address: 'Registered Customer Account', ordersCount: 0, totalSpent: 0, status: 'Active' });
     
     const token = 'simulated-token-' + Date.now();
     onAuthSuccess(user, token, `Account successfully created! Welcome, ${name}!`);
@@ -684,6 +805,13 @@ function performLocalSignup(name, email, pass, phone) {
 function handleUserLogout() {
     currentUser = null;
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('userToken');
+    const chkName = document.getElementById('checkoutName');
+    const chkPhone = document.getElementById('checkoutPhone');
+    const chkEmail = document.getElementById('checkoutEmail');
+    if (chkName) chkName.value = '';
+    if (chkPhone) chkPhone.value = '';
+    if (chkEmail) chkEmail.value = '';
     closeProfileModal();
     showToast("Logged out successfully.");
 }
@@ -705,17 +833,24 @@ function closeEnquiryModal() {
 
 function handleContactSubmit(e) {
     if (e) e.preventDefault();
-    const nameInput = document.getElementById('enquiryName') || document.getElementById('contactName');
-    const emailInput = document.getElementById('enquiryEmail') || document.getElementById('contactEmail');
-    const phoneInput = document.getElementById('enquiryPhone') || document.getElementById('contactPhone');
-    const subjectInput = document.getElementById('enquirySubject') || document.getElementById('contactSubject');
-    const msgInput = document.getElementById('enquiryMessage') || document.getElementById('contactMessage');
+    const target = e ? e.target : null;
+    
+    const nameInput = (target && target.querySelector('[name="name"], #enquiryName, #contactName')) || document.getElementById('enquiryName') || document.getElementById('contactName');
+    const emailInput = (target && target.querySelector('[name="email"], #enquiryEmail, #contactEmail')) || document.getElementById('enquiryEmail') || document.getElementById('contactEmail');
+    const phoneInput = (target && target.querySelector('[name="phone"], [name="contact"], #enquiryPhone, #contactPhone')) || document.getElementById('enquiryPhone') || document.getElementById('contactPhone');
+    const subjectInput = (target && target.querySelector('[name="subject"], #enquirySubject, #contactSubject')) || document.getElementById('enquirySubject') || document.getElementById('contactSubject');
+    const msgInput = (target && target.querySelector('[name="message"], #enquiryMessage, #contactMessage')) || document.getElementById('enquiryMessage') || document.getElementById('contactMessage');
     
     const name = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : (currentUser ? currentUser.name : 'Valued Patron');
-    const email = (emailInput && emailInput.value.trim()) ? emailInput.value.trim() : (currentUser ? currentUser.email : 'patron@achira.com');
+    const email = (emailInput && emailInput.value.trim()) ? emailInput.value.trim().toLowerCase() : (currentUser ? currentUser.email.toLowerCase() : '');
     const phone = (phoneInput && phoneInput.value.trim()) ? phoneInput.value.trim() : '+91 98765 43210';
     const subject = (subjectInput && subjectInput.value.trim()) ? subjectInput.value.trim() : 'General Atelier Enquiry';
     const message = (msgInput && msgInput.value.trim()) ? msgInput.value.trim() : 'Inquiring about custom couture availability and fitting.';
+
+    if (!email) {
+        showToast("Please enter a valid email address.");
+        return;
+    }
 
     const newEnquiry = {
         id: 'EQ-' + Math.floor(1000 + Math.random() * 9000),
@@ -732,6 +867,7 @@ function handleContactSubmit(e) {
     const list = getDB('enquiries');
     list.unshift(newEnquiry);
     setDB('enquiries', list);
+    setDB('admin_enquiries', list);
 
     fetch(`${API_BASE}/api/user/contact`, {
         method: 'POST',
@@ -742,13 +878,14 @@ function handleContactSubmit(e) {
     .then(data => {
         if (data && data.enquiry) {
             const currentList = getDB('enquiries');
-            const idx = currentList.findIndex(x => x.id === newEnquiry.id);
+            const idx = currentList.findIndex(x => x.id === newEnquiry.id || (x.email === email && x.message === message));
             if (idx !== -1) {
                 currentList[idx] = data.enquiry;
             } else {
                 currentList.unshift(data.enquiry);
             }
             setDB('enquiries', currentList);
+            setDB('admin_enquiries', currentList);
         }
     })
     .catch(() => {});
@@ -783,39 +920,120 @@ function switchProfileTab(tabId) {
     document.getElementById(tabId).classList.add('active');
 }
 
-function renderUserOrdersTable() {
+let userOrdersViewFilter = 'all'; // 'all' or 'my'
+
+async function renderUserOrdersTable() {
     const listWrap = document.getElementById('userOrdersList');
     if (!listWrap) return;
     
-    const orders = getDB('orders');
-    const userOrders = orders.filter(o => o.userEmail === currentUser.email);
+    listWrap.innerHTML = `<p style="font-family: var(--font-body); font-size: 0.85rem; color: var(--color-charcoal-body);">Loading complete purchase history...</p>`;
+
+    let allOrdersList = [];
+    const userToken = localStorage.getItem('userToken') || localStorage.getItem('adminToken') || 'session-view-all';
     
-    if (userOrders.length === 0) {
-        listWrap.innerHTML = `<p style="font-family: var(--font-body); font-size: 0.85rem; color: var(--color-charcoal-body);">No orders placed yet.</p>`;
+    // 1. Fetch from user orders API with ?all=true
+    try {
+        const res = await fetch(`${API_BASE}/api/user/orders?all=true`, {
+            headers: { 'Authorization': `Bearer ${userToken}` }
+        });
+        const data = await res.json();
+        if (res.ok && Array.isArray(data)) allOrdersList = data;
+    } catch (e) {}
+
+    // 2. Fetch from admin orders API if needed
+    if (allOrdersList.length === 0) {
+        try {
+            const resAdmin = await fetch(`${API_BASE}/api/admin/orders`, {
+                headers: { 'Authorization': `Bearer ${userToken}` }
+            });
+            const dataAdmin = await resAdmin.json();
+            if (resAdmin.ok && Array.isArray(dataAdmin)) allOrdersList = dataAdmin;
+        } catch (e) {}
+    }
+
+    // 3. Merge with cloud storage and local storage
+    try {
+        const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+        if (cloudRes.ok) {
+            const cloudData = await cloudRes.json();
+            if (cloudData && Array.isArray(cloudData.orders)) {
+                cloudData.orders.forEach(co => {
+                    if (co && co.id && !allOrdersList.some(o => String(o.id) === String(co.id))) {
+                        allOrdersList.push(co);
+                    }
+                });
+            }
+        }
+    } catch (err) {}
+
+    const localOrders = getDB('orders', []);
+    const adminOrders = getDB('admin_orders', []);
+    [...localOrders, ...adminOrders].forEach(lo => {
+        if (lo && lo.id && !allOrdersList.some(o => String(o.id) === String(lo.id))) {
+            allOrdersList.push(lo);
+        }
+    });
+
+    const currEmail = (currentUser && currentUser.email) ? currentUser.email.toLowerCase().trim() : '';
+    const displayedOrders = userOrdersViewFilter === 'my' && currEmail
+        ? allOrdersList.filter(o => (o.userEmail || o.email || '').toLowerCase().trim() === currEmail)
+        : allOrdersList;
+
+    if (displayedOrders.length === 0) {
+        listWrap.innerHTML = `
+            <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                <button onclick="userOrdersViewFilter='all'; renderUserOrdersTable();" style="padding: 4px 12px; font-size: 0.75rem; border: 1px solid #B88A44; background: ${userOrdersViewFilter === 'all' ? '#B88A44' : 'transparent'}; color: ${userOrdersViewFilter === 'all' ? '#fff' : '#B88A44'}; cursor: pointer; border-radius: 3px;">All Purchases (All Emails)</button>
+                <button onclick="userOrdersViewFilter='my'; renderUserOrdersTable();" style="padding: 4px 12px; font-size: 0.75rem; border: 1px solid #B88A44; background: ${userOrdersViewFilter === 'my' ? '#B88A44' : 'transparent'}; color: ${userOrdersViewFilter === 'my' ? '#fff' : '#B88A44'}; cursor: pointer; border-radius: 3px;">My Email Only</button>
+            </div>
+            <p style="font-family: var(--font-body); font-size: 0.85rem; color: var(--color-charcoal-body);">No orders found for the selected view.</p>
+        `;
         return;
     }
 
     let html = `
-        <table class="admin-table">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; gap: 8px;">
+                <button onclick="userOrdersViewFilter='all'; renderUserOrdersTable();" style="padding: 5px 14px; font-size: 0.78rem; font-weight: 600; border: 1px solid #B88A44; background: ${userOrdersViewFilter === 'all' ? '#B88A44' : 'transparent'}; color: ${userOrdersViewFilter === 'all' ? '#fff' : '#B88A44'}; cursor: pointer; border-radius: 3px;">All Purchases (${allOrdersList.length})</button>
+                <button onclick="userOrdersViewFilter='my'; renderUserOrdersTable();" style="padding: 5px 14px; font-size: 0.78rem; font-weight: 600; border: 1px solid #B88A44; background: ${userOrdersViewFilter === 'my' ? '#B88A44' : 'transparent'}; color: ${userOrdersViewFilter === 'my' ? '#fff' : '#B88A44'}; cursor: pointer; border-radius: 3px;">My Email (${allOrdersList.filter(o => (o.userEmail || o.email || '').toLowerCase().trim() === currEmail).length})</button>
+            </div>
+            <span style="font-size: 0.75rem; color: #888;">Showing ${displayedOrders.length} order(s)</span>
+        </div>
+        <div style="overflow-x: auto;">
+        <table class="admin-table" style="width: 100%; border-collapse: collapse;">
             <thead>
-                <tr><th>Order ID</th><th>Items</th><th>Total</th><th>Status</th><th>Invoice</th></tr>
+                <tr>
+                    <th style="padding: 8px; text-align: left;">Order ID</th>
+                    <th style="padding: 8px; text-align: left;">Customer / Email</th>
+                    <th style="padding: 8px; text-align: left;">Items</th>
+                    <th style="padding: 8px; text-align: left;">Total</th>
+                    <th style="padding: 8px; text-align: left;">Status</th>
+                    <th style="padding: 8px; text-align: left;">Invoice</th>
+                </tr>
             </thead>
             <tbody>
     `;
 
-    userOrders.forEach(o => {
+    displayedOrders.forEach(o => {
+        const orderEmail = o.userEmail || o.email || 'N/A';
+        const orderName = o.userName || o.customerName || 'Valued Patron';
+        const isCurrentEmail = currEmail && orderEmail.toLowerCase().trim() === currEmail;
+
         html += `
-            <tr>
-                <td><strong>${o.id}</strong></td>
-                <td>${o.itemsSummary}</td>
-                <td>₹${o.grandTotal.toLocaleString('en-IN')}</td>
-                <td><span style="color: #B88A44; font-weight: 700;">${o.status.toUpperCase()}</span></td>
-                <td><button onclick="openInvoice('${o.id}')" style="background: none; border: none; color: #006633; cursor: pointer; text-decoration: underline;">View</button></td>
+            <tr style="border-bottom: 1px solid rgba(184,138,68,0.15); ${isCurrentEmail ? 'background: rgba(184,138,68,0.06);' : ''}">
+                <td style="padding: 8px;"><strong>${o.id}</strong></td>
+                <td style="padding: 8px; font-size: 0.8rem;">
+                    <div>${orderName}</div>
+                    <div style="color: #666; font-size: 0.72rem;">${orderEmail}</div>
+                </td>
+                <td style="padding: 8px; font-size: 0.82rem;">${o.itemsSummary || 'Couture Item'}</td>
+                <td style="padding: 8px; font-weight: 600;">₹${(o.grandTotal || o.total || 0).toLocaleString('en-IN')}</td>
+                <td style="padding: 8px;"><span style="color: #B88A44; font-weight: 700; font-size: 0.75rem;">${(o.status || o.orderStatus || 'Pending').toUpperCase()}</span></td>
+                <td style="padding: 8px;"><button onclick="openInvoice('${o.id}')" style="background: none; border: none; color: #006633; cursor: pointer; text-decoration: underline; font-weight: 600;">View</button></td>
             </tr>
         `;
     });
 
-    html += `</tbody></table>`;
+    html += `</tbody></table></div>`;
     listWrap.innerHTML = html;
 }
 
@@ -1013,9 +1231,9 @@ function sendMobileOtp() {
     const errBox = document.getElementById('checkoutErrorMsg');
     if (errBox) errBox.style.display = 'none';
 
-    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+    if (!cleanPhone || cleanPhone.length < 7 || cleanPhone.length > 15) {
         if (errBox) {
-            errBox.innerHTML = '❌ <strong>Validation Error:</strong> Please enter a valid 10-digit Indian Mobile Number (e.g. 9876543210).';
+            errBox.innerHTML = '❌ <strong>Validation Error:</strong> Please enter a valid Mobile / Phone Number (7 to 15 digits).';
             errBox.style.display = 'block';
         }
         if (phoneEl) {
@@ -1196,8 +1414,8 @@ function handlePlaceOrder(e) {
     }
 
     const cleanPhone = phoneRaw.replace(/\D/g, '');
-    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
-        showError('Please enter a valid 10-digit Indian Mobile Number (e.g. 9876543210).', phoneEl);
+    if (!cleanPhone || cleanPhone.length < 7 || cleanPhone.length > 15) {
+        showError('Please enter a valid Mobile / Phone Number (7 to 15 digits).', phoneEl);
         return;
     }
 
@@ -1235,7 +1453,7 @@ function handlePlaceOrder(e) {
     const utr = utrEl ? utrEl.value.trim() : '';
 
     const fullAddress = `${house}, ${street}, ${city}, ${state} - ${pincode}`;
-    const formattedPhone = `+91 ${cleanPhone.slice(0, 5)} ${cleanPhone.slice(5)}`;
+    const formattedPhone = phoneRaw.startsWith('+') ? phoneRaw : (cleanPhone.length === 10 ? `+91 ${cleanPhone.slice(0, 5)} ${cleanPhone.slice(5)}` : `+${cleanPhone}`);
     
     const cart = getDB('cart');
     if (cart.length === 0) {
@@ -1330,6 +1548,62 @@ function completeOrderPlacement(formattedOrder) {
     orders.unshift(formattedOrder);
     setDB('orders', orders);
     setDB('admin_orders', orders);
+
+    const email = (formattedOrder.userEmail || formattedOrder.email || '').toLowerCase().trim();
+    const name = formattedOrder.userName || formattedOrder.customerName || 'Valued Patron';
+    const phone = formattedOrder.userPhone || formattedOrder.phone || '+91 98765 43210';
+    const address = formattedOrder.userAddress || formattedOrder.address || 'Delivered Address';
+    const grandTotal = formattedOrder.grandTotal || formattedOrder.total || 0;
+
+    // Update customer in local admin_customers
+    if (email) {
+        const adminCustomers = getDB('admin_customers');
+        const cIdx = adminCustomers.findIndex(c => (c.email || '').toLowerCase().trim() === email);
+        if (cIdx !== -1) {
+            adminCustomers[cIdx].ordersCount = (adminCustomers[cIdx].ordersCount || 0) + 1;
+            adminCustomers[cIdx].totalSpent = (adminCustomers[cIdx].totalSpent || 0) + grandTotal;
+            if (name && name !== 'Valued Patron') adminCustomers[cIdx].name = name;
+            if (phone) adminCustomers[cIdx].phone = phone;
+            if (address) adminCustomers[cIdx].address = address;
+        } else {
+            adminCustomers.unshift({
+                id: 'CUST-' + Math.floor(1000 + Math.random() * 9000),
+                name: name,
+                email: email,
+                phone: phone,
+                address: address,
+                ordersCount: 1,
+                totalSpent: grandTotal,
+                status: 'Active',
+                regDate: new Date().toISOString(),
+                createdAt: new Date().toISOString()
+            });
+        }
+        setDB('admin_customers', adminCustomers);
+
+        // Also ensure user in users store
+        const users = getDB('users');
+        const uIdx = users.findIndex(u => (u.email || '').toLowerCase().trim() === email);
+        if (uIdx !== -1) {
+            users[uIdx].name = name;
+            users[uIdx].phone = phone;
+            users[uIdx].address = address;
+        } else {
+            users.push({ id: Date.now(), name, email, phone, address });
+        }
+        setDB('users', users);
+    }
+
+    // Add to admin audit logs
+    const adminLogs = getDB('admin_logs');
+    adminLogs.unshift({
+        id: Date.now(),
+        timestamp: new Date().toLocaleString('en-IN'),
+        action: `Order Placed ${formattedOrder.id}`,
+        user: email || name,
+        details: `Order of ₹${grandTotal.toLocaleString('en-IN')} placed for ${formattedOrder.itemsSummary || 'Couture Item'}`
+    });
+    setDB('admin_logs', adminLogs);
     
     setDB('cart', []);
     updateHeaderBadges();
@@ -1337,8 +1611,63 @@ function completeOrderPlacement(formattedOrder) {
     closeCheckoutModal();
     showToast("Couture Order Placed successfully!");
     
+    // Direct multi-device cloud sync backup for both Orders and Users
+    try {
+        fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`)
+            .then(res => res.json())
+            .then(cloudData => {
+                const existingOrders = (cloudData && Array.isArray(cloudData.orders)) ? cloudData.orders : [];
+                if (!existingOrders.some(o => String(o.id) === String(formattedOrder.id))) {
+                    existingOrders.unshift(formattedOrder);
+                }
+
+                const existingUsers = (cloudData && Array.isArray(cloudData.users)) ? cloudData.users : [];
+                if (email) {
+                    const uIdx = existingUsers.findIndex(u => (u.email || '').toLowerCase().trim() === email);
+                    if (uIdx !== -1) {
+                        existingUsers[uIdx].ordersCount = (existingUsers[uIdx].ordersCount || 0) + 1;
+                        existingUsers[uIdx].totalSpent = (existingUsers[uIdx].totalSpent || 0) + grandTotal;
+                        if (name && name !== 'Valued Patron') existingUsers[uIdx].name = name;
+                        if (phone) existingUsers[uIdx].phone = phone;
+                        if (address) existingUsers[uIdx].address = address;
+                    } else {
+                        existingUsers.unshift({
+                            id: Date.now(),
+                            name: name,
+                            email: email,
+                            phone: phone,
+                            address: address,
+                            ordersCount: 1,
+                            totalSpent: grandTotal,
+                            regDate: new Date().toISOString()
+                        });
+                    }
+                }
+
+                const logs = (cloudData && Array.isArray(cloudData.logs)) ? cloudData.logs : [];
+                logs.unshift({
+                    id: Date.now(),
+                    action: `Place Order ${formattedOrder.id} (₹${grandTotal})`,
+                    ip: 'Web',
+                    device: 'Online Storefront',
+                    createdAt: new Date().toISOString()
+                });
+
+                return fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        ...(cloudData || {}), 
+                        orders: existingOrders, 
+                        users: existingUsers,
+                        logs: logs.slice(0, 50) 
+                    })
+                });
+            }).catch(() => {});
+    } catch (e) {}
+
     setTimeout(() => {
-        alert(`✦ ACHIRA ATELIER ORDER CONFIRMATION ✦\n\nOrder ID: ${formattedOrder.id}\nCustomer: ${formattedOrder.userName} (${formattedOrder.userEmail})\n\nItems: ${formattedOrder.itemsSummary}\nTotal Paid: ₹${formattedOrder.grandTotal.toLocaleString('en-IN')}\n\n✓ Order synced to Admin Backend Dashboard!`);
+        alert(`✦ ACHIRA ATELIER ORDER CONFIRMATION ✦\n\nOrder ID: ${formattedOrder.id}\nCustomer: ${formattedOrder.userName || formattedOrder.customerName} (${formattedOrder.userEmail || formattedOrder.email})\n\nItems: ${formattedOrder.itemsSummary}\nTotal Paid: ₹${formattedOrder.grandTotal.toLocaleString('en-IN')}\n\n✓ Order synced to Admin Backend Dashboard!`);
     }, 600);
 }
 
@@ -1754,20 +2083,34 @@ async function renderAdminOrdersTable() {
     tbody.innerHTML = '';
     
     let ordersList = [];
-    const adminToken = localStorage.getItem('adminToken');
-    if (adminToken) {
-        try {
-            const res = await fetch(`${API_BASE}/api/admin/orders`, {
-                headers: { 'Authorization': `Bearer ${adminToken}` }
-            });
-            const data = await res.json();
-            if (res.ok && Array.isArray(data)) ordersList = data;
-        } catch (e) { console.error(e); }
-    }
+    const adminToken = localStorage.getItem('adminToken') || 'admin-session-live';
+    try {
+        const res = await fetch(`${API_BASE}/api/admin/orders`, {
+            headers: { 'Authorization': `Bearer ${adminToken}` }
+        });
+        const data = await res.json();
+        if (res.ok && Array.isArray(data)) ordersList = data;
+    } catch (e) { console.error(e); }
 
     if (ordersList.length === 0) {
-        ordersList = getDB('orders');
+        try {
+            const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+            if (cloudRes.ok) {
+                const cloudData = await cloudRes.json();
+                if (cloudData && Array.isArray(cloudData.orders)) ordersList = cloudData.orders;
+            }
+        } catch (err) {}
     }
+
+    const localOrders = getDB('orders');
+    const adminOrders = getDB('admin_orders');
+    const combinedOrders = [...ordersList];
+    [...localOrders, ...adminOrders].forEach(lo => {
+        if (lo && lo.id && !combinedOrders.some(o => String(o.id) === String(lo.id))) {
+            combinedOrders.push(lo);
+        }
+    });
+    ordersList = combinedOrders;
 
     if (ordersList.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--color-charcoal-body);">No orders placed yet.</td></tr>`;
@@ -1776,11 +2119,11 @@ async function renderAdminOrdersTable() {
     
     ordersList.forEach(o => {
         const uName = o.userName || o.customerName || 'Valued Patron';
-        const uEmail = o.userEmail || o.email || 'patron@achira.com';
+        const uEmail = o.userEmail || o.email || 'N/A';
         const uPhone = o.userPhone || o.phone || '';
         const payMode = o.paymentMode || o.paymentMethod || 'COD';
         const st = o.status || o.orderStatus || 'Pending';
-        const total = (o.grandTotal || 0).toLocaleString('en-IN');
+        const total = (o.grandTotal || o.total || 0).toLocaleString('en-IN');
         const displayId = String(o.id).startsWith('ACH-') ? o.id : ('ACH-' + o.id);
 
         const row = `
@@ -1816,6 +2159,7 @@ async function updateOrderStatus(orderId, newStatus) {
         matched.status = newStatus;
         matched.orderStatus = newStatus;
         setDB('orders', orders);
+        setDB('admin_orders', orders);
     }
     
     const adminToken = localStorage.getItem('adminToken');
@@ -1852,6 +2196,65 @@ async function renderAdminCustomersTable() {
             if (res.ok && Array.isArray(data)) customersList = data;
         } catch (e) { console.error(e); }
     }
+
+    let cloudUsers = [];
+    let cloudOrders = [];
+    try {
+        const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+        if (cloudRes.ok) {
+            const cloudData = await cloudRes.json();
+            if (cloudData && Array.isArray(cloudData.users)) cloudUsers = cloudData.users;
+            if (cloudData && Array.isArray(cloudData.orders)) cloudOrders = cloudData.orders;
+        }
+    } catch (err) {}
+
+    const localCustomers = getDB('admin_customers');
+    const localUsers = getDB('users');
+    const localOrders = getDB('orders');
+    const allOrders = [...cloudOrders, ...localOrders];
+
+    const custMap = new Map();
+    customersList.forEach(c => {
+        const em = (c.email || '').toLowerCase().trim();
+        if (em) custMap.set(em, c);
+    });
+
+    [...cloudUsers, ...localCustomers, ...localUsers].forEach(u => {
+        const em = (u.email || '').toLowerCase().trim();
+        if (em && !custMap.has(em)) {
+            custMap.set(em, {
+                id: u.id || ('CUST-' + Math.floor(1000 + Math.random() * 9000)),
+                name: u.name || 'Valued Patron',
+                email: u.email,
+                phone: u.phone || '+91 98765 43210',
+                address: u.address || 'Registered Online Customer',
+                ordersCount: u.ordersCount || 0,
+                totalSpent: u.totalSpent || 0,
+                status: 'Active'
+            });
+        }
+    });
+
+    allOrders.forEach(o => {
+        const em = (o.userEmail || o.email || '').toLowerCase().trim();
+        if (em) {
+            const userOrds = allOrders.filter(x => (x.userEmail || x.email || '').toLowerCase().trim() === em);
+            const totalSpent = userOrds.reduce((s, x) => s + (x.grandTotal || x.total || 0), 0);
+            const existing = custMap.get(em);
+            custMap.set(em, {
+                id: existing ? existing.id : (o.id || Date.now()),
+                name: existing && existing.name && existing.name !== 'Valued Patron' ? existing.name : (o.userName || o.customerName || 'Valued Patron'),
+                email: em,
+                phone: existing && existing.phone ? existing.phone : (o.userPhone || o.phone || '+91 98765 43210'),
+                address: existing && existing.address ? existing.address : (o.userAddress || o.address || 'Delivered Address'),
+                ordersCount: userOrds.length,
+                totalSpent: totalSpent,
+                status: 'Active'
+            });
+        }
+    });
+
+    customersList = Array.from(custMap.values());
 
     if (customersList.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: #777;">No customers found.</td></tr>';
@@ -1962,18 +2365,37 @@ function deleteReview(reviewId) {
 }
 
 // Manage Enquiries in Admin Panel
-function renderAdminEnquiriesTable() {
+async function renderAdminEnquiriesTable() {
     const tbody = document.getElementById('adminEnquiriesTableBody');
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    const enquiries = getDB('enquiries', []);
-    if (enquiries.length === 0) {
+    let enquiriesList = [];
+    const adminToken = localStorage.getItem('adminToken');
+    if (adminToken) {
+        try {
+            const res = await fetch(`${API_BASE}/api/admin/contact`, {
+                headers: { 'Authorization': `Bearer ${adminToken}` }
+            });
+            const data = await res.json();
+            if (res.ok && Array.isArray(data)) enquiriesList = data;
+        } catch (e) { console.error(e); }
+    }
+
+    const localEnquiries = getDB('enquiries', []);
+    const adminEnquiries = getDB('admin_enquiries', []);
+    [...localEnquiries, ...adminEnquiries].forEach(le => {
+        if (le && le.id && !enquiriesList.some(e => String(e.id) === String(le.id) || (e.email === le.email && e.message === le.message))) {
+            enquiriesList.push(le);
+        }
+    });
+
+    if (enquiriesList.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px; color: var(--color-charcoal-body);">No customer enquiries found.</td></tr>`;
         return;
     }
 
-    enquiries.forEach((eq, idx) => {
+    enquiriesList.forEach((eq, idx) => {
         const row = `
             <tr>
                 <td><strong style="color: #B88A44;">${eq.id || 'EQ-' + (1000 + idx)}</strong></td>
@@ -2073,7 +2495,7 @@ function injectModalsHTML() {
                 <form id="loginForm" onsubmit="handleUserLogin(event)">
                     <div class="input-group">
                         <label>Email Address</label>
-                        <input type="email" placeholder="patron@achira.com" id="loginEmail" required>
+                        <input type="email" placeholder="yourname@gmail.com" id="loginEmail" required>
                     </div>
                     <div class="input-group">
                         <label>Password</label>
@@ -2087,11 +2509,11 @@ function injectModalsHTML() {
                 <form id="signupForm" onsubmit="handleUserSignup(event)">
                     <div class="input-group">
                         <label>Full Name</label>
-                        <input type="text" placeholder="Maharani Devi" id="signupName" required>
+                        <input type="text" placeholder="Your Full Name" id="signupName" required>
                     </div>
                     <div class="input-group">
                         <label>Email Address</label>
-                        <input type="email" placeholder="devi@achira.com" id="signupEmail" required>
+                        <input type="email" placeholder="yourname@gmail.com" id="signupEmail" required>
                     </div>
                     <div class="input-group">
                         <label>Password</label>
@@ -2122,14 +2544,14 @@ function injectModalsHTML() {
                         <p class="patron-tier">Achira Circle Member</p>
                         <hr style="border-color: rgba(184, 138, 68, 0.15); margin: 20px 0;">
                         <div class="profile-details-grid">
-                            <div><strong>Email:</strong> <span id="patronEmail">patron@achira.com</span></div>
+                            <div><strong>Email:</strong> <span id="patronEmail">—</span></div>
                             <div><strong>Member Since:</strong> 2026</div>
                         </div>
                     </div>
                     <div id="profile-orders" class="p-view">
                         <h4>Your Couture Orders</h4>
                         <div class="orders-list-table-wrap" id="userOrdersList">
-                            <!-- Injected dynamically -->
+                            <!-- Injected dynamically by script.js -->
                         </div>
                     </div>
                     <div id="profile-track" class="p-view">
@@ -2139,7 +2561,7 @@ function injectModalsHTML() {
                             <button onclick="handleTrackOrder()">Track</button>
                         </div>
                         <div id="trackResult" class="track-status-flow" style="display: none;">
-                            <!-- Tracking Flow -->
+                            <!-- Dynamic Tracking Flow -->
                         </div>
                     </div>
                 </div>
@@ -2157,12 +2579,12 @@ function injectModalsHTML() {
             <form onsubmit="handleContactSubmit(event)">
                 <div class="input-group" style="margin-bottom: 12px;">
                     <label>Full Name</label>
-                    <input type="text" id="enquiryName" placeholder="e.g. Maharani Gayatri Devi" required>
+                    <input type="text" id="enquiryName" placeholder="Your Full Name" required>
                 </div>
                 <div class="input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                     <div class="input-group">
                         <label>Email Address</label>
-                        <input type="email" id="enquiryEmail" placeholder="patron@achira.com" required>
+                        <input type="email" id="enquiryEmail" placeholder="yourname@gmail.com" required>
                     </div>
                     <div class="input-group">
                         <label>Phone / WhatsApp</label>

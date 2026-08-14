@@ -177,28 +177,98 @@ export default function AdminDashboard() {
 
   const fetchOrders = async () => {
     console.log('[ADMIN DEBUG] Fetching all orders...');
+    let orderList = [];
     try {
       const res = await fetch(`${API_BASE}/api/admin/orders`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      console.log('[ADMIN DEBUG] Raw API response:', data);
-      if (res.ok && Array.isArray(data)) {
-        setOrders(data);
+      if (res.ok && Array.isArray(data) && data.length > 0) {
+        orderList = data;
       }
     } catch (e) { console.error('[ADMIN DEBUG] Fetch error:', e); }
+
+    if (orderList.length === 0) {
+      try {
+        const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+        if (cloudRes.ok) {
+          const cloudData = await cloudRes.json();
+          if (cloudData && Array.isArray(cloudData.orders)) orderList = cloudData.orders;
+        }
+      } catch (err) {}
+    }
+
+    if (orderList.length > 0) {
+      setOrders(orderList);
+    }
   };
 
   const fetchCustomers = async () => {
+    let customerList = [];
     try {
       const res = await fetch(`${API_BASE}/api/admin/customers`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
       if (res.ok && Array.isArray(data)) {
-        setCustomers(data);
+        customerList = data;
       }
     } catch (e) { console.error(e); }
+
+    let cloudUsers = [];
+    let cloudOrders = [];
+    try {
+      const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+      if (cloudRes.ok) {
+        const cloudData = await cloudRes.json();
+        if (cloudData && Array.isArray(cloudData.users)) cloudUsers = cloudData.users;
+        if (cloudData && Array.isArray(cloudData.orders)) cloudOrders = cloudData.orders;
+      }
+    } catch (err) {}
+
+    const custMap = new Map();
+    customerList.forEach(c => {
+      const em = (c.email || '').toLowerCase().trim();
+      if (em) custMap.set(em, c);
+    });
+
+    cloudUsers.forEach(u => {
+      const em = (u.email || '').toLowerCase().trim();
+      if (em && !custMap.has(em)) {
+        custMap.set(em, {
+          id: u.id || ('CUST-' + Math.floor(1000 + Math.random() * 9000)),
+          name: u.name || 'Valued Patron',
+          email: u.email,
+          phone: u.phone || '+91 98765 43210',
+          address: u.address || 'Registered Online Customer',
+          ordersCount: u.ordersCount || 0,
+          totalSpent: u.totalSpent || 0,
+          status: 'Active'
+        });
+      }
+    });
+
+    const allOrders = [...orders, ...cloudOrders];
+    allOrders.forEach(o => {
+      const em = (o.userEmail || o.email || '').toLowerCase().trim();
+      if (em) {
+        const userOrds = allOrders.filter(x => (x.userEmail || x.email || '').toLowerCase().trim() === em);
+        const totalSpent = userOrds.reduce((s, x) => s + (x.grandTotal || x.total || 0), 0);
+        const existing = custMap.get(em);
+        custMap.set(em, {
+          id: existing ? existing.id : (o.id || Date.now()),
+          name: existing && existing.name && existing.name !== 'Valued Patron' ? existing.name : (o.userName || o.customerName || 'Valued Patron'),
+          email: em,
+          phone: existing && existing.phone ? existing.phone : (o.userPhone || o.phone || '+91 98765 43210'),
+          address: existing && existing.address && existing.address !== 'Registered Online Customer' ? existing.address : (o.userAddress || o.address || 'Delivered Address'),
+          ordersCount: userOrds.length,
+          totalSpent: totalSpent,
+          status: 'Active'
+        });
+      }
+    });
+
+    setCustomers(Array.from(custMap.values()));
   };
 
   const fetchLogs = async () => {
