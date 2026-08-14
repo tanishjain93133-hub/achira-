@@ -63,18 +63,13 @@ function initDatabase() {
 
     getDB('orders', []);
     getDB('wishlist', []);
-    getDB('cart', [{ productId: 9, qty: 1 }]); // Default item in cart matching index.html
+    getDB('cart', []);
     getDB('coupons', [
         { code: 'LUXE15', discount: 15, expiry: '2026-12-31' },
         { code: 'ACHIRA1960', discount: 20, expiry: '2026-12-31' }
     ]);
-    getDB('reviews', [
-        { id: 1, prodName: "Heritage Polki Diamond Choker", author: "Devi Sen", rating: 5, content: "Magnificent piece! Perfect craftsmanship.", status: "Approved" }
-    ]);
-    getDB('enquiries', [
-        { id: 'EQ-1001', name: 'Devi Sharma', email: 'devi.sharma@gmail.com', contact: '+91 98765 43210', subject: 'Bridal Lehenga Customization', message: 'I would like a custom fitting appointment for the Maharani Zardozi collection for my wedding in November.', date: new Date().toLocaleDateString('en-IN') },
-        { id: 'EQ-1002', name: 'Rajesh Malhotra', email: 'malhotra.r@outlook.com', contact: '+91 98111 22334', subject: 'Polki Choker Availability', message: 'Is the Heritage Polki Choker available for international shipping to London?', date: new Date().toLocaleDateString('en-IN') }
-    ]);
+    getDB('reviews', []);
+    getDB('enquiries', []);
     getDB('settings', { gst: 18, shipping: 150, email: 'atelier@achira.com', phone: '+91 98765 43210' });
 }
 
@@ -1520,12 +1515,19 @@ function handlePlaceOrder(e) {
     console.log('[ORDER DEBUG] Products:', JSON.stringify(cart));
     console.log('[ORDER DEBUG] Total: ₹' + grandTotal);
 
-    const userToken = localStorage.getItem('userToken') || ('simulated-token-' + Date.now());
+    const submitBtn = document.querySelector('#checkoutForm button[type="submit"]') || document.getElementById('checkoutSubmitBtn');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.setAttribute('data-orig-text', submitBtn.innerText);
+        submitBtn.innerText = 'Processing Order...';
+    }
+
+    const userToken = localStorage.getItem('userToken') || '';
     fetch(`${API_BASE}/api/user/checkout`, {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${userToken}`
+            ...(userToken ? { 'Authorization': `Bearer ${userToken}` } : {})
         },
         body: JSON.stringify({
             name: name,
@@ -1547,33 +1549,38 @@ function handlePlaceOrder(e) {
     })
     .then(async res => {
         const data = await res.json().catch(() => ({}));
-        console.log('[ORDER DEBUG] API Response received:', data);
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = submitBtn.getAttribute('data-orig-text') || 'Complete Purchase';
+        }
         if (res.ok && data.success && data.order) {
             completeOrderPlacement(data.order);
         } else {
-            console.warn('[ORDER WARNING] API return not ok, completing order locally.', data);
-            completeOrderPlacement(formattedOrder);
+            showToast(data.error || "Order creation failed on server. Please try again.");
         }
     })
     .catch(err => {
-        console.warn('[ORDER WARNING] Checkout API unreachable, completing order locally.', err);
-        completeOrderPlacement(formattedOrder);
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = submitBtn.getAttribute('data-orig-text') || 'Complete Purchase';
+        }
+        showToast("Unable to connect to order server. Please check your internet connection.");
     });
 }
 
-function completeOrderPlacement(formattedOrder) {
+function completeOrderPlacement(realServerOrder) {
     const orders = getDB('orders');
-    orders.unshift(formattedOrder);
+    orders.unshift(realServerOrder);
     setDB('orders', orders);
     setDB('admin_orders', orders);
 
-    const email = (formattedOrder.userEmail || formattedOrder.email || '').toLowerCase().trim();
-    const name = formattedOrder.userName || formattedOrder.customerName || 'Valued Patron';
-    const phone = formattedOrder.userPhone || formattedOrder.phone || '+91 98765 43210';
-    const address = formattedOrder.userAddress || formattedOrder.address || 'Delivered Address';
-    const grandTotal = formattedOrder.grandTotal || formattedOrder.total || 0;
+    const email = (realServerOrder.userEmail || realServerOrder.email || '').toLowerCase().trim();
+    const name = realServerOrder.userName || realServerOrder.customerName || 'Valued Patron';
+    const phone = realServerOrder.userPhone || realServerOrder.phone || '+91 98765 43210';
+    const address = realServerOrder.userAddress || realServerOrder.address || 'Delivered Address';
+    const grandTotal = realServerOrder.grandTotal || realServerOrder.total || 0;
 
-    // Update customer in local admin_customers
+    // Update customer in local cache
     if (email) {
         const adminCustomers = getDB('admin_customers');
         const cIdx = adminCustomers.findIndex(c => (c.email || '').toLowerCase().trim() === email);
@@ -1599,7 +1606,6 @@ function completeOrderPlacement(formattedOrder) {
         }
         setDB('admin_customers', adminCustomers);
 
-        // Also ensure user in users store
         const users = getDB('users');
         const uIdx = users.findIndex(u => (u.email || '').toLowerCase().trim() === email);
         if (uIdx !== -1) {
@@ -1612,81 +1618,10 @@ function completeOrderPlacement(formattedOrder) {
         setDB('users', users);
     }
 
-    // Add to admin audit logs
-    const adminLogs = getDB('admin_logs');
-    adminLogs.unshift({
-        id: Date.now(),
-        timestamp: new Date().toLocaleString('en-IN'),
-        action: `Order Placed ${formattedOrder.id}`,
-        user: email || name,
-        details: `Order of ₹${grandTotal.toLocaleString('en-IN')} placed for ${formattedOrder.itemsSummary || 'Couture Item'}`
-    });
-    setDB('admin_logs', adminLogs);
-    
     setDB('cart', []);
     updateHeaderBadges();
-    
     closeCheckoutModal();
-    showToast("Couture Order Placed successfully!");
-    
-    // Direct multi-device cloud sync backup for both Orders and Users
-    try {
-        fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`)
-            .then(res => res.json())
-            .then(cloudData => {
-                const existingOrders = (cloudData && Array.isArray(cloudData.orders)) ? cloudData.orders : [];
-                if (!existingOrders.some(o => String(o.id) === String(formattedOrder.id))) {
-                    existingOrders.unshift(formattedOrder);
-                }
-
-                const existingUsers = (cloudData && Array.isArray(cloudData.users)) ? cloudData.users : [];
-                if (email) {
-                    const uIdx = existingUsers.findIndex(u => (u.email || '').toLowerCase().trim() === email);
-                    if (uIdx !== -1) {
-                        existingUsers[uIdx].ordersCount = (existingUsers[uIdx].ordersCount || 0) + 1;
-                        existingUsers[uIdx].totalSpent = (existingUsers[uIdx].totalSpent || 0) + grandTotal;
-                        if (name && name !== 'Valued Patron') existingUsers[uIdx].name = name;
-                        if (phone) existingUsers[uIdx].phone = phone;
-                        if (address) existingUsers[uIdx].address = address;
-                    } else {
-                        existingUsers.unshift({
-                            id: Date.now(),
-                            name: name,
-                            email: email,
-                            phone: phone,
-                            address: address,
-                            ordersCount: 1,
-                            totalSpent: grandTotal,
-                            regDate: new Date().toISOString()
-                        });
-                    }
-                }
-
-                const logs = (cloudData && Array.isArray(cloudData.logs)) ? cloudData.logs : [];
-                logs.unshift({
-                    id: Date.now(),
-                    action: `Place Order ${formattedOrder.id} (₹${grandTotal})`,
-                    ip: 'Web',
-                    device: 'Online Storefront',
-                    createdAt: new Date().toISOString()
-                });
-
-                return fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        ...(cloudData || {}), 
-                        orders: existingOrders, 
-                        users: existingUsers,
-                        logs: logs.slice(0, 50) 
-                    })
-                });
-            }).catch(() => {});
-    } catch (e) {}
-
-    setTimeout(() => {
-        alert(`✦ ACHIRA ATELIER ORDER CONFIRMATION ✦\n\nOrder ID: ${formattedOrder.id}\nCustomer: ${formattedOrder.userName || formattedOrder.customerName} (${formattedOrder.userEmail || formattedOrder.email})\n\nItems: ${formattedOrder.itemsSummary}\nTotal Paid: ₹${formattedOrder.grandTotal.toLocaleString('en-IN')}\n\n✓ Order synced to Admin Backend Dashboard!`);
-    }, 600);
+    showToast(`✦ Order ${realServerOrder.id} Placed Successfully!`);
 }
 
 // --- Invoice view ---
