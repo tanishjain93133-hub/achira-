@@ -4,8 +4,8 @@ require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 require('dotenv').config();
 
 // Ensure DATABASE_URL fallback if environment variable is missing in serverless context
-if (!process.env.DATABASE_URL) {
-  process.env.DATABASE_URL = `file:${path.join(__dirname, '../prisma/dev.db')}`;
+if (!process.env.DATABASE_URL || process.env.DATABASE_URL.startsWith('file:')) {
+  process.env.DATABASE_URL = process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL || "postgresql://postgres:postgres@localhost:5432/achira";
 }
 
 const express = require('express');
@@ -1206,7 +1206,7 @@ app.post('/api/user/checkout', async (req, res) => {
 
   try {
     const user = await getCheckoutUser(req);
-    const settings = await prisma.settings.findFirst() || { gst: 18, shipping: 150 };
+    const settings = (await prisma.settings.findFirst().catch(() => null)) || { gst: 18, shipping: 150 };
 
     let subtotal = 0;
     const dbItems = [];
