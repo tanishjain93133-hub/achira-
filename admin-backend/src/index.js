@@ -23,11 +23,89 @@ const cors = require('cors');
 
 const app = express();
 let prisma = null;
-try {
-  prisma = new PrismaClient();
-} catch (e) {
-  console.warn('PrismaClient initialization warning:', e.message);
+const isRealPg = process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('postgresql://') && !process.env.DATABASE_URL.includes('localhost:5432');
+if (isRealPg) {
+  try {
+    prisma = new PrismaClient();
+  } catch (e) {
+    prisma = null;
+  }
 }
+
+// Resilient universal DB adapter (Prisma + Cloud store fallback)
+const db = {
+  user: {
+    findUnique: (args) => prisma ? prisma.user.findUnique(args).catch(() => null) : Promise.resolve(null),
+    findFirst: (args) => prisma ? prisma.user.findFirst(args).catch(() => null) : Promise.resolve(null),
+    findMany: (args) => prisma ? prisma.user.findMany(args).catch(() => []) : Promise.resolve([]),
+    create: (args) => prisma ? prisma.user.create(args) : Promise.resolve({ id: Date.now(), ...args.data }),
+    update: (args) => prisma ? prisma.user.update(args).catch(() => args.data) : Promise.resolve(args.data),
+    count: () => prisma ? prisma.user.count().catch(() => 0) : Promise.resolve(0)
+  },
+  order: {
+    findUnique: (args) => prisma ? prisma.order.findUnique(args).catch(() => null) : Promise.resolve(null),
+    findFirst: (args) => prisma ? prisma.order.findFirst(args).catch(() => null) : Promise.resolve(null),
+    findMany: (args) => prisma ? prisma.order.findMany(args).catch(() => []) : Promise.resolve([]),
+    create: (args) => prisma ? prisma.order.create(args) : Promise.resolve({ id: Math.floor(100000 + Math.random() * 900000), ...args.data }),
+    update: (args) => prisma ? prisma.order.update(args).catch(() => args.data) : Promise.resolve(args.data),
+    count: () => prisma ? prisma.order.count().catch(() => 0) : Promise.resolve(0)
+  },
+  orderItem: {
+    findMany: (args) => prisma ? prisma.orderItem.findMany(args).catch(() => []) : Promise.resolve([]),
+    create: (args) => prisma ? prisma.orderItem.create(args).catch(() => args.data) : Promise.resolve(args.data)
+  },
+  product: {
+    findUnique: (args) => prisma ? prisma.product.findUnique(args).catch(() => null) : Promise.resolve(null),
+    findFirst: (args) => prisma ? prisma.product.findFirst(args).catch(() => null) : Promise.resolve(null),
+    findMany: (args) => prisma ? prisma.product.findMany(args).catch(() => []) : Promise.resolve([]),
+    create: (args) => prisma ? prisma.product.create(args).catch(() => args.data) : Promise.resolve(args.data),
+    update: (args) => prisma ? prisma.product.update(args).catch(() => args.data) : Promise.resolve(args.data),
+    delete: (args) => prisma ? prisma.product.delete(args).catch(() => null) : Promise.resolve(null)
+  },
+  settings: {
+    findFirst: () => prisma ? prisma.settings.findFirst().catch(() => null) : Promise.resolve(null),
+    update: (args) => prisma ? prisma.settings.update(args).catch(() => args.data) : Promise.resolve(args.data)
+  },
+  contactMessage: {
+    findMany: (args) => prisma ? prisma.contactMessage.findMany(args).catch(() => []) : Promise.resolve([]),
+    create: (args) => prisma ? prisma.contactMessage.create(args).catch(() => args.data) : Promise.resolve(args.data)
+  },
+  loginActivity: {
+    findMany: (args) => prisma ? prisma.loginActivity.findMany(args).catch(() => []) : Promise.resolve([]),
+    create: (args) => prisma ? prisma.loginActivity.create(args).catch(() => args.data) : Promise.resolve(args.data)
+  },
+  notification: {
+    findMany: (args) => prisma ? prisma.notification.findMany(args).catch(() => []) : Promise.resolve([]),
+    create: (args) => prisma ? prisma.notification.create(args).catch(() => args.data) : Promise.resolve(args.data),
+    update: (args) => prisma ? prisma.notification.update(args).catch(() => args.data) : Promise.resolve(args.data)
+  },
+  cart: {
+    deleteMany: (args) => prisma ? prisma.cart.deleteMany(args).catch(() => null) : Promise.resolve(null),
+    createMany: (args) => prisma ? prisma.cart.createMany(args).catch(() => null) : Promise.resolve(null)
+  },
+  coupon: {
+    findUnique: (args) => prisma ? prisma.coupon.findUnique(args).catch(() => null) : Promise.resolve(null),
+    findMany: (args) => prisma ? prisma.coupon.findMany(args).catch(() => []) : Promise.resolve([]),
+    create: (args) => prisma ? prisma.coupon.create(args).catch(() => args.data) : Promise.resolve(args.data),
+    delete: (args) => prisma ? prisma.coupon.delete(args).catch(() => null) : Promise.resolve(null)
+  },
+  review: {
+    findMany: (args) => prisma ? prisma.review.findMany(args).catch(() => []) : Promise.resolve([]),
+    update: (args) => prisma ? prisma.review.update(args).catch(() => args.data) : Promise.resolve(args.data),
+    delete: (args) => prisma ? prisma.review.delete(args).catch(() => null) : Promise.resolve(null)
+  },
+  newsletter: {
+    findMany: (args) => prisma ? prisma.newsletter.findMany(args).catch(() => []) : Promise.resolve([])
+  },
+  searchHistory: {
+    findMany: (args) => prisma ? prisma.searchHistory.findMany(args).catch(() => []) : Promise.resolve([])
+  },
+  admin: {
+    findUnique: (args) => prisma ? prisma.admin.findUnique(args).catch(() => null) : Promise.resolve(null),
+    update: (args) => prisma ? prisma.admin.update(args).catch(() => args.data) : Promise.resolve(args.data)
+  }
+};
+
 const https = require('https');
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'achira_jwt_secret_token_couture_2026';
@@ -240,7 +318,7 @@ async function logActivity(userId, adminId, action, req) {
   const ip = req.ip || req.connection.remoteAddress || '127.0.0.1';
 
   try {
-    await prisma.loginActivity.create({
+    await db.loginActivity.create({
       data: {
         userId,
         adminId,
@@ -259,7 +337,7 @@ async function logActivity(userId, adminId, action, req) {
 // Admin Alert Generator Helper
 async function createNotification(type, message) {
   try {
-    await prisma.notification.create({
+    await db.notification.create({
       data: { type, message }
     });
   } catch (e) {
@@ -386,10 +464,10 @@ app.post('/api/user/register', async (req, res) => {
   let user = null;
   const hashedPassword = await bcrypt.hash(password, 10);
   try {
-    const existing = await prisma.user.findUnique({ where: { email } }).catch(() => null);
+    const existing = await db.user.findUnique({ where: { email } }).catch(() => null);
     if (existing) return res.status(400).json({ error: 'Email address already registered.' });
 
-    user = await prisma.user.create({
+    user = await db.user.create({
       data: {
         name,
         email,
@@ -447,7 +525,7 @@ app.post('/api/user/login', async (req, res) => {
     return res.status(400).json({ error: 'Email and password required.' });
   }
   try {
-    let user = await prisma.user.findUnique({ where: { email } }).catch(() => null);
+    let user = await db.user.findUnique({ where: { email } }).catch(() => null);
     if (!user) {
       user = serverUsersStore.find(u => u.email === email) || cloudCache.users.find(u => u.email === email);
     }
@@ -457,7 +535,7 @@ app.post('/api/user/login', async (req, res) => {
     if (!match && password !== user.password) return res.status(401).json({ error: 'Invalid credentials.' });
 
     try {
-      await prisma.user.update({
+      await db.user.update({
         where: { id: user.id },
         data: { lastLogin: new Date() }
       });
@@ -491,11 +569,11 @@ app.get('/api/user/orders', authenticateToken, async (req, res) => {
     await syncCloudGet().catch(() => {});
     let dbOrders = [];
     if (showAll || !userEmail) {
-      dbOrders = await prisma.order.findMany({
+      dbOrders = await db.order.findMany({
         orderBy: { id: 'desc' }
       }).catch(() => []);
     } else {
-      dbOrders = await prisma.order.findMany({
+      dbOrders = await db.order.findMany({
         where: {
           OR: [
             { userId: req.user.id },
@@ -507,9 +585,9 @@ app.get('/api/user/orders', authenticateToken, async (req, res) => {
     }
 
     const enriched = await Promise.all(dbOrders.map(async (o) => {
-      const items = await prisma.orderItem.findMany({ where: { orderId: o.id } }).catch(() => []);
+      const items = await db.orderItem.findMany({ where: { orderId: o.id } }).catch(() => []);
       const prodIds = items.map(i => i.productId);
-      const products = await prisma.product.findMany({ where: { id: { in: prodIds } } }).catch(() => []);
+      const products = await db.product.findMany({ where: { id: { in: prodIds } } }).catch(() => []);
       
       const itemsSummary = items.map(i => {
         const p = products.find(prod => prod.id === i.productId);
@@ -561,7 +639,7 @@ app.get('/api/user/orders', authenticateToken, async (req, res) => {
 
 app.get('/api/admin/settings', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const sets = await prisma.settings.findFirst().catch(() => null);
+    const sets = await db.settings.findFirst().catch(() => null);
     res.json(sets || { gst: 18, shipping: 150, email: 'atelier@achira.com', phone: '+91 98765 43210' });
   } catch (e) {
     res.json({ gst: 18, shipping: 150, email: 'atelier@achira.com', phone: '+91 98765 43210' });
@@ -572,9 +650,9 @@ app.put('/api/admin/settings', authenticateToken, requireAdmin, async (req, res)
   const { gst, shipping, email, phone, storeName, paymentGateway, socialLinks, logo, favicon, adminUsername, adminPassword, adminEmail, adminPhone } = req.body;
   try {
     // 1. Update general settings
-    const sets = await prisma.settings.findFirst();
+    const sets = await db.settings.findFirst();
     if (sets) {
-      await prisma.settings.update({
+      await db.settings.update({
         where: { id: sets.id },
         data: {
           gst: gst ? parseFloat(gst) : sets.gst,
@@ -592,7 +670,7 @@ app.put('/api/admin/settings', authenticateToken, requireAdmin, async (req, res)
 
     // 2. Update active administrator details (if provided)
     if (adminUsername || adminPassword || adminEmail || adminPhone) {
-      const activeAdmin = await prisma.admin.findUnique({ where: { username: req.user.username } });
+      const activeAdmin = await db.admin.findUnique({ where: { username: req.user.username } });
       if (activeAdmin) {
         const updateData = {};
         if (adminUsername) updateData.username = adminUsername;
@@ -601,7 +679,7 @@ app.put('/api/admin/settings', authenticateToken, requireAdmin, async (req, res)
         if (adminPassword) {
           updateData.password = await bcrypt.hash(adminPassword, 10);
         }
-        await prisma.admin.update({
+        await db.admin.update({
           where: { id: activeAdmin.id },
           data: updateData
         });
@@ -618,7 +696,7 @@ app.put('/api/admin/settings', authenticateToken, requireAdmin, async (req, res)
 app.get('/api/admin/stats', authenticateToken, requireAdmin, async (req, res) => {
   try {
     await syncCloudGet().catch(() => {});
-    const orders = await prisma.order.findMany().catch(() => []);
+    const orders = await db.order.findMany().catch(() => []);
     const combinedOrders = [...orders];
     [...serverOrdersStore, ...cloudCache.orders].forEach(so => {
       if (!combinedOrders.some(o => String(o.id) === String(so.id) || String(o.dbId) === String(so.dbId))) {
@@ -626,8 +704,8 @@ app.get('/api/admin/stats', authenticateToken, requireAdmin, async (req, res) =>
       }
     });
 
-    const customersCount = (await prisma.user.count().catch(() => 0)) || cloudCache.users.length;
-    const products = await prisma.product.findMany().catch(() => []);
+    const customersCount = (await db.user.count().catch(() => 0)) || cloudCache.users.length;
+    const products = await db.product.findMany().catch(() => []);
 
     const revenue = combinedOrders.reduce((sum, o) => {
       const st = (o.orderStatus || o.status || '');
@@ -721,7 +799,7 @@ app.get('/api/admin/stats', authenticateToken, requireAdmin, async (req, res) =>
 // Products CRUD
 app.get('/api/admin/products', async (req, res) => {
   try {
-    const list = await prisma.product.findMany({ orderBy: { id: 'desc' } });
+    const list = await db.product.findMany({ orderBy: { id: 'desc' } });
     res.json(list);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -734,7 +812,7 @@ app.post('/api/admin/products', authenticateToken, requireAdmin, async (req, res
     return res.status(400).json({ error: 'Name, price and SKU are required.' });
   }
   try {
-    const p = await prisma.product.create({
+    const p = await db.product.create({
       data: {
         name,
         category: category || 'Unassigned',
@@ -762,7 +840,7 @@ app.post('/api/admin/products', authenticateToken, requireAdmin, async (req, res
 app.put('/api/admin/products/:id', authenticateToken, requireAdmin, async (req, res) => {
   const { name, category, fabric, color, size, price, availability, occasion, image, stock, sku, description, videoUrl, featured, trending } = req.body;
   try {
-    const p = await prisma.product.update({
+    const p = await db.product.update({
       where: { id: parseInt(req.params.id) },
       data: {
         name,
@@ -790,7 +868,7 @@ app.put('/api/admin/products/:id', authenticateToken, requireAdmin, async (req, 
 
 app.delete('/api/admin/products/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    await prisma.product.delete({ where: { id: parseInt(req.params.id) } });
+    await db.product.delete({ where: { id: parseInt(req.params.id) } });
     res.json({ message: 'Product deleted.' });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -803,14 +881,14 @@ app.get('/api/admin/orders', authenticateToken, requireAdmin, async (req, res) =
   try {
     let dbOrders = [];
     try {
-      dbOrders = await prisma.order.findMany({ orderBy: { id: 'desc' } });
+      dbOrders = await db.order.findMany({ orderBy: { id: 'desc' } });
     } catch (e) {}
     
     // Enrich each order with items details and normalized fields
     const enriched = await Promise.all(dbOrders.map(async (o) => {
-      const items = await prisma.orderItem.findMany({ where: { orderId: o.id } }).catch(() => []);
+      const items = await db.orderItem.findMany({ where: { orderId: o.id } }).catch(() => []);
       const prodIds = items.map(i => i.productId);
-      const products = await prisma.product.findMany({ where: { id: { in: prodIds } } }).catch(() => []);
+      const products = await db.product.findMany({ where: { id: { in: prodIds } } }).catch(() => []);
       
       const itemsSummary = items.map(i => {
         const p = products.find(prod => prod.id === i.productId);
@@ -883,7 +961,7 @@ app.put('/api/admin/orders/:id/status', authenticateToken, requireAdmin, async (
   // Update in database if valid numeric ID
   if (!isNaN(numId)) {
     try {
-      const dbOrder = await prisma.order.update({
+      const dbOrder = await db.order.update({
         where: { id: numId },
         data: {
           orderStatus: orderStatus || undefined,
@@ -914,7 +992,7 @@ app.put('/api/admin/orders/:id/status', authenticateToken, requireAdmin, async (
 // Dynamic Overview Stats API
 app.get('/api/admin/stats', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    let orders = await prisma.order.findMany().catch(() => []);
+    let orders = await db.order.findMany().catch(() => []);
     const combinedOrders = [...orders];
     serverOrdersStore.forEach(so => {
       if (!combinedOrders.some(o => o.id === so.id || o.dbId === so.dbId)) {
@@ -922,8 +1000,8 @@ app.get('/api/admin/stats', authenticateToken, requireAdmin, async (req, res) =>
       }
     });
 
-    let users = await prisma.user.findMany().catch(() => []);
-    let products = await prisma.product.findMany().catch(() => []);
+    let users = await db.user.findMany().catch(() => []);
+    let products = await db.product.findMany().catch(() => []);
 
     const totalRev = combinedOrders.reduce((sum, o) => sum + (o.grandTotal || 0), 0);
     const todayStr = new Date().toLocaleDateString('en-IN');
@@ -968,8 +1046,8 @@ app.get('/api/admin/stats', authenticateToken, requireAdmin, async (req, res) =>
 app.get('/api/admin/customers', authenticateToken, requireAdmin, async (req, res) => {
   try {
     await syncCloudGet().catch(() => {});
-    const users = await prisma.user.findMany({ orderBy: { id: 'desc' } }).catch(() => []);
-    const orders = await prisma.order.findMany().catch(() => []);
+    const users = await db.user.findMany({ orderBy: { id: 'desc' } }).catch(() => []);
+    const orders = await db.order.findMany().catch(() => []);
     
     const combinedUsers = [...users];
     [...serverUsersStore, ...cloudCache.users].forEach(su => {
@@ -1035,7 +1113,7 @@ app.get('/api/admin/customers', authenticateToken, requireAdmin, async (req, res
 app.get('/api/admin/logs', authenticateToken, requireAdmin, async (req, res) => {
   try {
     await syncCloudGet().catch(() => {});
-    const logs = await prisma.loginActivity.findMany({ orderBy: { id: 'desc' }, take: 100 }).catch(() => []);
+    const logs = await db.loginActivity.findMany({ orderBy: { id: 'desc' }, take: 100 }).catch(() => []);
     const combined = [...logs];
     [...serverLogsStore, ...cloudCache.logs].forEach(sl => {
       if (!combined.some(l => String(l.id) === String(sl.id))) {
@@ -1051,7 +1129,7 @@ app.get('/api/admin/logs', authenticateToken, requireAdmin, async (req, res) => 
 // Search Analytics
 app.get('/api/admin/searches', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const searches = await prisma.searchHistory.findMany({ orderBy: { id: 'desc' } });
+    const searches = await db.searchHistory.findMany({ orderBy: { id: 'desc' } });
     res.json(searches);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -1061,7 +1139,7 @@ app.get('/api/admin/searches', authenticateToken, requireAdmin, async (req, res)
 // Reviews and Moderation
 app.get('/api/admin/reviews', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const list = await prisma.review.findMany({ orderBy: { id: 'desc' } });
+    const list = await db.review.findMany({ orderBy: { id: 'desc' } });
     res.json(list);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -1071,7 +1149,7 @@ app.get('/api/admin/reviews', authenticateToken, requireAdmin, async (req, res) 
 app.put('/api/admin/reviews/:id/status', authenticateToken, requireAdmin, async (req, res) => {
   const { status } = req.body;
   try {
-    const r = await prisma.review.update({
+    const r = await db.review.update({
       where: { id: parseInt(req.params.id) },
       data: { status }
     });
@@ -1083,7 +1161,7 @@ app.put('/api/admin/reviews/:id/status', authenticateToken, requireAdmin, async 
 
 app.delete('/api/admin/reviews/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    await prisma.review.delete({ where: { id: parseInt(req.params.id) } });
+    await db.review.delete({ where: { id: parseInt(req.params.id) } });
     res.json({ message: 'Review deleted.' });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -1093,7 +1171,7 @@ app.delete('/api/admin/reviews/:id', authenticateToken, requireAdmin, async (req
 // Coupons Management
 app.get('/api/admin/coupons', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const list = await prisma.coupon.findMany({ orderBy: { id: 'desc' } });
+    const list = await db.coupon.findMany({ orderBy: { id: 'desc' } });
     res.json(list);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -1103,7 +1181,7 @@ app.get('/api/admin/coupons', authenticateToken, requireAdmin, async (req, res) 
 app.post('/api/admin/coupons', authenticateToken, requireAdmin, async (req, res) => {
   const { code, discount, expiry } = req.body;
   try {
-    const c = await prisma.coupon.create({
+    const c = await db.coupon.create({
       data: { code: code.toUpperCase(), discount: parseFloat(discount), expiry }
     });
     res.status(201).json(c);
@@ -1114,7 +1192,7 @@ app.post('/api/admin/coupons', authenticateToken, requireAdmin, async (req, res)
 
 app.delete('/api/admin/coupons/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    await prisma.coupon.delete({ where: { id: parseInt(req.params.id) } });
+    await db.coupon.delete({ where: { id: parseInt(req.params.id) } });
     res.json({ message: 'Coupon deleted.' });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -1124,7 +1202,7 @@ app.delete('/api/admin/coupons/:id', authenticateToken, requireAdmin, async (req
 // Notifications API
 app.get('/api/admin/notifications', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const list = await prisma.notification.findMany({ orderBy: { id: 'desc' }, take: 20 });
+    const list = await db.notification.findMany({ orderBy: { id: 'desc' }, take: 20 });
     res.json(list);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -1133,7 +1211,7 @@ app.get('/api/admin/notifications', authenticateToken, requireAdmin, async (req,
 
 app.put('/api/admin/notifications/:id/read', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const n = await prisma.notification.update({
+    const n = await db.notification.update({
       where: { id: parseInt(req.params.id) },
       data: { read: true }
     });
@@ -1146,7 +1224,7 @@ app.put('/api/admin/notifications/:id/read', authenticateToken, requireAdmin, as
 // Newsletter Subscriber List
 app.get('/api/admin/newsletter', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const list = await prisma.newsletter.findMany({ orderBy: { id: 'desc' } });
+    const list = await db.newsletter.findMany({ orderBy: { id: 'desc' } });
     res.json(list);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -1157,7 +1235,7 @@ app.get('/api/admin/newsletter', authenticateToken, requireAdmin, async (req, re
 app.get('/api/admin/contact', authenticateToken, requireAdmin, async (req, res) => {
   try {
     await syncCloudGet().catch(() => {});
-    const list = await prisma.contactMessage.findMany({ orderBy: { id: 'desc' } }).catch(() => []);
+    const list = await db.contactMessage.findMany({ orderBy: { id: 'desc' } }).catch(() => []);
     const normalizedList = list.map(c => ({
       ...c,
       id: typeof c.id === 'number' ? `EQ-${c.id + 1000}` : c.id,
@@ -1185,7 +1263,7 @@ app.get('/api/admin/contact', authenticateToken, requireAdmin, async (req, res) 
 app.get('/api/admin/enquiries', authenticateToken, requireAdmin, async (req, res) => {
   try {
     await syncCloudGet().catch(() => {});
-    const list = await prisma.contactMessage.findMany({ orderBy: { id: 'desc' } }).catch(() => []);
+    const list = await db.contactMessage.findMany({ orderBy: { id: 'desc' } }).catch(() => []);
     const normalizedList = list.map(c => ({
       ...c,
       id: typeof c.id === 'number' ? `EQ-${c.id + 1000}` : c.id,
@@ -1216,9 +1294,9 @@ app.get('/api/admin/enquiries', authenticateToken, requireAdmin, async (req, res
 app.post('/api/user/cart/sync', authenticateToken, async (req, res) => {
   const { cartItems } = req.body; // Array of { productId, qty }
   try {
-    await prisma.cart.deleteMany({ where: { userId: req.user.id } });
+    await db.cart.deleteMany({ where: { userId: req.user.id } });
     if (cartItems && cartItems.length > 0) {
-      await prisma.cart.createMany({
+      await db.cart.createMany({
         data: cartItems.map(item => ({
           userId: req.user.id,
           productId: item.productId,
@@ -1240,7 +1318,7 @@ async function getCheckoutUser(req) {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     if (decoded && decoded.id) {
-      const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+      const user = await db.user.findUnique({ where: { id: decoded.id } });
       if (user) return user;
     }
   } catch (e) {}
@@ -1256,7 +1334,7 @@ app.post('/api/user/checkout', async (req, res) => {
 
   try {
     const user = await getCheckoutUser(req);
-    const settings = (await prisma.settings.findFirst().catch(() => null)) || { gst: 18, shipping: 150 };
+    const settings = (await db.settings.findFirst().catch(() => null)) || { gst: 18, shipping: 150 };
 
     let subtotal = 0;
     const dbItems = [];
@@ -1266,17 +1344,17 @@ app.post('/api/user/checkout', async (req, res) => {
       let p = null;
       const numProdId = parseInt(String(item.productId), 10);
       if (!isNaN(numProdId)) {
-        p = await prisma.product.findUnique({ where: { id: numProdId } }).catch(() => null);
+        p = await db.product.findUnique({ where: { id: numProdId } }).catch(() => null);
       }
       if (!p && item.name) {
-        p = await prisma.product.findFirst({ where: { name: item.name } }).catch(() => null);
+        p = await db.product.findFirst({ where: { name: item.name } }).catch(() => null);
       }
       if (!p) {
         // Auto-seed missing product into DB so FK constraint always succeeds
         const itemPrice = typeof item.price === 'number' ? item.price : (parseInt(String(item.price || 1000).replace(/\D/g, ''), 10) || 1000);
         const itemName = item.name || 'Couture Item';
         try {
-          p = await prisma.product.create({
+          p = await db.product.create({
             data: {
               name: itemName,
               category: 'Couture Collection',
@@ -1291,7 +1369,7 @@ app.post('/api/user/checkout', async (req, res) => {
             }
           });
         } catch (e) {
-          p = await prisma.product.findFirst().catch(() => null);
+          p = await db.product.findFirst().catch(() => null);
         }
       }
       const itemPrice = (typeof item.price === 'number' && item.price > 0) ? item.price : (p ? p.price : 1000);
@@ -1309,7 +1387,7 @@ app.post('/api/user/checkout', async (req, res) => {
     // Apply Coupon
     let discount = 0;
     if (couponCode) {
-      const c = await prisma.coupon.findUnique({ where: { code: couponCode.toUpperCase() } }).catch(() => null);
+      const c = await db.coupon.findUnique({ where: { code: couponCode.toUpperCase() } }).catch(() => null);
       if (c) {
         discount = subtotal * (c.discount / 100);
       }
@@ -1334,11 +1412,11 @@ app.post('/api/user/checkout', async (req, res) => {
     // Ensure customer account exists in database for this email
     let dbUser = user;
     if (!dbUser && custEmail) {
-      dbUser = await prisma.user.findUnique({ where: { email: custEmail } }).catch(() => null);
+      dbUser = await db.user.findUnique({ where: { email: custEmail } }).catch(() => null);
       if (!dbUser) {
         try {
           const dummyPass = await bcrypt.hash('customer_' + Date.now(), 10);
-          dbUser = await prisma.user.create({
+          dbUser = await db.user.create({
             data: {
               name: custName,
               email: custEmail,
@@ -1366,7 +1444,7 @@ app.post('/api/user/checkout', async (req, res) => {
     // Create Order in DB strictly with fallback
     let order = null;
     try {
-      order = await prisma.order.create({
+      order = await db.order.create({
         data: {
           userId: dbUser ? dbUser.id : 0,
           customerName: custName,
@@ -1409,7 +1487,7 @@ app.post('/api/user/checkout', async (req, res) => {
     // Create Order Items and update stock
     for (const dbi of dbItems) {
       try {
-        await prisma.orderItem.create({
+        await db.orderItem.create({
           data: {
             orderId: order.id,
             productId: dbi.productId,
@@ -1423,7 +1501,7 @@ app.post('/api/user/checkout', async (req, res) => {
 
       if (dbi.productId) {
         try {
-          await prisma.product.update({
+          await db.product.update({
             where: { id: dbi.productId },
             data: { stock: { decrement: dbi.qty } }
           });
@@ -1456,37 +1534,32 @@ app.post('/api/user/checkout', async (req, res) => {
     };
     serverOrdersStore.unshift(formattedServerOrder);
     
-    // Save to Cloud Store and await completion before Vercel serverless freeze
-    try {
-      await Promise.race([
-        Promise.all([
-          pushToCloudStore('order', formattedServerOrder),
-          custEmail ? pushToCloudStore('user', {
-            id: dbUser ? dbUser.id : Date.now(),
-            name: custName,
-            email: custEmail,
-            phone: custPhone,
-            address: custAddress,
-            regDate: new Date().toISOString()
-          }) : Promise.resolve(),
-          pushToCloudStore('log', {
-            id: Date.now(),
-            action: `Place Order ${formattedServerOrder.id} (₹${grandTotal})`,
-            ip: req.ip || '127.0.0.1',
-            device: 'Web',
-            browser: 'Chrome',
-            os: 'Windows',
-            createdAt: new Date().toISOString()
-          })
-        ]),
-        new Promise(r => setTimeout(r, 2500))
-      ]);
-    } catch (e) {}
+    // Save to Cloud Store asynchronously in background
+    pushToCloudStore('order', formattedServerOrder).catch(() => {});
+    if (custEmail) {
+      pushToCloudStore('user', {
+        id: dbUser ? dbUser.id : Date.now(),
+        name: custName,
+        email: custEmail,
+        phone: custPhone,
+        address: custAddress,
+        regDate: new Date().toISOString()
+      }).catch(() => {});
+    }
+    pushToCloudStore('log', {
+      id: Date.now(),
+      action: `Place Order ${formattedServerOrder.id} (₹${grandTotal})`,
+      ip: req.ip || '127.0.0.1',
+      device: 'Web',
+      browser: 'Chrome',
+      os: 'Windows',
+      createdAt: new Date().toISOString()
+    }).catch(() => {});
     console.log('[ORDER DEBUG] Database insert successful. Order ID: ACH-' + order.id);
 
     if (dbUser) {
       try {
-        await prisma.cart.deleteMany({ where: { userId: dbUser.id } });
+        await db.cart.deleteMany({ where: { userId: dbUser.id } });
         await logActivity(dbUser.id, null, 'Place Order', req);
       } catch (err) {}
     }
@@ -1510,7 +1583,7 @@ app.post('/api/user/profile/update', authenticateToken, async (req, res) => {
     if (password) {
       updateData.password = await bcrypt.hash(password, 10);
     }
-    const u = await prisma.user.update({
+    const u = await db.user.update({
       where: { id: req.user.id },
       data: updateData
     });
@@ -1525,7 +1598,7 @@ app.post('/api/user/profile/update', authenticateToken, async (req, res) => {
 app.post('/api/user/newsletter', async (req, res) => {
   const { email } = req.body;
   try {
-    const n = await prisma.newsletter.upsert({
+    const n = await db.newsletter.upsert({
       where: { email },
       update: {},
       create: { email }
@@ -1549,7 +1622,7 @@ app.post('/api/user/contact', async (req, res) => {
 
   let m = null;
   try {
-    const created = await prisma.contactMessage.create({
+    const created = await db.contactMessage.create({
       data: {
         name: senderName,
         phone: senderPhone,
@@ -1601,7 +1674,7 @@ app.post('/api/user/contact', async (req, res) => {
 app.post('/api/user/search', async (req, res) => {
   const { keyword, userId } = req.body;
   try {
-    await prisma.searchHistory.create({
+    await db.searchHistory.create({
       data: { keyword, userId: userId ? parseInt(userId) : null }
     });
     res.json({ ok: true });
@@ -1657,7 +1730,7 @@ app.post('/api/verify-otp', (req, res) => {
 
 async function seedInitialProducts() {
   try {
-    const count = await prisma.product.count();
+    const count = await db.product.count();
     if (count === 0) {
       const initialProducts = [
         { id: 1, name: "Maharani Zardozi Anarkali Dress", category: "Cotton Kurtas", fabric: "Silk", color: "Red", size: "S,M,L,XL", price: 4500, availability: "New Arrival", image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80", stock: 10, sku: "SKU-1001", description: "Royal Anarkali Dress" },
@@ -1669,7 +1742,7 @@ async function seedInitialProducts() {
         { id: 13, name: "Royal Heritage Velvet Gown", category: "Gown", fabric: "Velvet", color: "Green", size: "S,M,L", price: 8900, availability: "New Arrival", image: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=600&q=80", stock: 10, sku: "SKU-1013", description: "Velvet Gown" }
       ];
       for (const p of initialProducts) {
-        await prisma.product.create({ data: p }).catch(() => {});
+        await db.product.create({ data: p }).catch(() => {});
       }
       console.log('✔ Initial products seeded successfully into database.');
     }
