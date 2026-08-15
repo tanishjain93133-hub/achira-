@@ -949,8 +949,15 @@ function switchProfileTab(tabId) {
     document.querySelectorAll('.p-tab').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.p-view').forEach(view => view.classList.remove('active'));
     
-    event.currentTarget.classList.add('active');
-    document.getElementById(tabId).classList.add('active');
+    if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+    }
+    const viewEl = document.getElementById(tabId);
+    if (viewEl) viewEl.classList.add('active');
+    
+    if (tabId === 'profile-orders') {
+        renderUserOrdersTable();
+    }
 }
 
 async function renderUserOrdersTable() {
@@ -1622,6 +1629,17 @@ function completeOrderPlacement(realServerOrder) {
             users.push({ id: Date.now(), name, email, phone, address });
         }
         setDB('users', users);
+
+        if (!currentUser) {
+            currentUser = { name: name || 'Valued Patron', email: email, phone: phone, address: address };
+        } else {
+            currentUser.email = email;
+            if (name && name !== 'Valued Patron') currentUser.name = name;
+            if (phone) currentUser.phone = phone;
+            if (address) currentUser.address = address;
+        }
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        localStorage.setItem('userEmail', email);
     }
 
     // Direct Cloud Storage Sync (Ensures multi-tab / multi-device / serverless admin panel gets the order)
