@@ -415,9 +415,7 @@ app.delete('/api/admin/products/:id', authenticateToken, requireAdmin, async (re
   }
 });
 
-// --- ORDER PLACEMENT & MULTI-USER CHECKOUT ---
-
-app.post('/api/user/checkout', async (req, res) => {
+const checkoutHandler = async (req, res) => {
   const { name, email, phone, address, city, state, pincode, paymentMethod, couponCode, items } = req.body || {};
 
   if (!items || !Array.isArray(items) || items.length === 0) {
@@ -580,6 +578,28 @@ app.post('/api/user/checkout', async (req, res) => {
       });
     }
 
+    // Server-side Cloud Storage Sync
+    (async () => {
+      try {
+        const cloudGet = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+        let cloudData = { orders: [], users: [], enquiries: [], logs: [], notifications: [] };
+        if (cloudGet.ok) {
+          cloudData = await cloudGet.json();
+          if (!Array.isArray(cloudData.orders)) cloudData.orders = [];
+          if (!Array.isArray(cloudData.users)) cloudData.users = [];
+          if (!Array.isArray(cloudData.logs)) cloudData.logs = [];
+        }
+        if (!cloudData.orders.some(o => String(o.id) === String(orderId))) {
+          cloudData.orders.unshift(fullMemoryOrder);
+        }
+        await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cloudData)
+        });
+      } catch (e) {}
+    })();
+
     console.log(`[ORDER CREATED] ID: ${orderId} | Customer: ${custEmail} (${custName}) | Total: ₹${grandTotal}`);
 
     res.status(201).json({
@@ -594,7 +614,11 @@ app.post('/api/user/checkout', async (req, res) => {
       error: 'Something went wrong while processing your order. Please try again.'
     });
   }
-});
+};
+
+app.post('/api/user/checkout', checkoutHandler);
+app.post('/api/orders', checkoutHandler);
+
 
 // --- CUSTOMER PURCHASE HISTORY (Strict Isolation: WHERE email = req.user.email) ---
 
