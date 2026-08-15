@@ -591,6 +591,9 @@ function switchAuthTab(tab) {
 function onAuthSuccess(user, token, toastMsg) {
     currentUser = user;
     localStorage.setItem('currentUser', JSON.stringify(user));
+    if (user && user.email) {
+        localStorage.setItem('userEmail', user.email.toLowerCase().trim());
+    }
     if (token) localStorage.setItem('userToken', token);
     showToast(toastMsg || `Welcome, ${user.name}!`);
     closeAuthModal();
@@ -808,6 +811,7 @@ function performLocalSignup(name, email, pass, phone) {
 function handleUserLogout() {
     currentUser = null;
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('userEmail');
     localStorage.removeItem('userToken');
     const chkName = document.getElementById('checkoutName');
     const chkPhone = document.getElementById('checkoutPhone');
