@@ -4,18 +4,7 @@ datasource db {
 }
 
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "rhel-openssl-1.0.x", "rhel-openssl-3.0.x", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
-}
-
-model Admin {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
-  password  String
-  email     String
-  phone     String
-  role      String   @default("Admin") // Admin, Editor
-  createdAt DateTime @default(now())
+  provider = "prisma-client-js"
 }
 
 model User {
@@ -23,187 +12,142 @@ model User {
   name      String
   email     String   @unique
   password  String
-  phone     String
-  address   String
-  city      String
-  state     String
-  pincode   String
-  regDate   DateTime @default(now())
-  lastLogin DateTime @default(now())
+  phone     String?
+  address   String?
+  city      String?
+  state     String?
+  pincode   String?
+  role      String   @default("CUSTOMER")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  email     String?
+  role      String   @default("ADMIN")
+  createdAt DateTime @default(now())
 }
 
 model Product {
-  id           Int      @id @default(autoincrement())
+  id           Int         @id @default(autoincrement())
   name         String
   category     String
-  fabric       String
-  color        String
-  size         String   // Stored as comma-separated values (e.g. "S,M,L")
+  fabric       String?
+  color        String?
+  size         String?
   price        Float
-  availability String   @default("In Stock") // In Stock, New Arrival, Best Seller
-  occasion     String   @default("Festive")
+  availability String      @default("In Stock")
+  occasion     String?
   image        String
-  rating       Float    @default(5.0)
-  stock        Int      @default(10)
-  sku          String   @unique
-  description  String
-  videoUrl     String   @default("")
-  featured     Boolean  @default(false)
-  trending     Boolean  @default(false)
-  createdAt    DateTime @default(now())
-}
-
-model Category {
-  id   Int    @id @default(autoincrement())
-  name String @unique
-}
-
-model Subcategory {
-  id         Int    @id @default(autoincrement())
-  name       String
-  categoryId Int
+  sku          String?     @unique
+  description  String?
+  rating       Float       @default(5.0)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  orderItems   OrderItem[]
+  reviews      Review[]
 }
 
 model Order {
-  id             Int      @id @default(autoincrement())
-  userId         Int
-  customerName   String
-  phone          String
-  email          String
-  address        String
-  paymentMethod  String   @default("COD") // COD, UPI, Razorpay
-  paymentStatus  String   @default("Pending") // Pending, Paid
-  orderStatus    String   @default("Pending") // Pending, Confirmed, Packed, Shipped, Delivered, Cancelled
-  invoiceNumber  String   @unique
-  trackingNumber String   @default("")
-  shippingFee    Float    @default(0.0)
-  tax            Float    @default(0.0)
-  discount       Float    @default(0.0)
-  subtotal       Float
-  grandTotal     Float
-  createdAt      DateTime @default(now())
+  id            String      @id
+  userId        Int?
+  customerName  String
+  email         String
+  phone         String
+  address       String
+  city          String?
+  state         String?
+  pincode       String?
+  paymentMethod String      @default("COD")
+  paymentStatus String      @default("Pending")
+  orderStatus   String      @default("Processing")
+  invoiceNumber String?     @unique
+  subtotal      Float       @default(0)
+  discount      Float       @default(0)
+  tax           Float       @default(0)
+  shippingFee   Float       @default(0)
+  grandTotal    Float       @default(0)
+  itemsSummary  String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  user          User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items         OrderItem[]
 }
 
 model OrderItem {
-  id        Int   @id @default(autoincrement())
-  orderId   Int
-  productId Int
-  qty       Int
-  price     Float
-}
-
-model Payment {
   id            Int      @id @default(autoincrement())
-  orderId       Int
-  transactionId String   @unique
-  amount        Float
-  status        String
-  createdAt     DateTime @default(now())
-}
-
-model Wishlist {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  productId Int
-  createdAt DateTime @default(now())
-}
-
-model Cart {
-  id        Int @id @default(autoincrement())
-  userId    Int
-  productId Int
-  qty       Int @default(1)
-}
-
-model Review {
-  id        Int      @id @default(autoincrement())
-  productId Int
-  userId    Int
-  author    String
-  rating    Int
-  content   String
-  status    String   @default("Pending") // Pending, Approved, Rejected
-  createdAt DateTime @default(now())
-}
-
-model Comment {
-  id        Int      @id @default(autoincrement())
-  productId Int
-  userId    Int
-  author    String
-  content   String
-  reply     String   @default("")
-  status    String   @default("Pending") // Pending, Approved, Rejected
-  createdAt DateTime @default(now())
+  orderId       String
+  productId     Int?
+  name          String
+  qty           Int      @default(1)
+  price         Float    @default(0)
+  image         String?
+  selectedSize  String?
+  selectedColor String?
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product       Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 }
 
 model Coupon {
-  id       Int    @id @default(autoincrement())
-  code     String @unique
-  discount Float
-  expiry   String
-}
-
-model Newsletter {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  createdAt DateTime @default(now())
-}
-
-model ContactMessage {
-  id        Int      @id @default(autoincrement())
-  name      String
-  phone     String
-  email     String
-  subject   String
-  message   String
-  createdAt DateTime @default(now())
-}
-
-model Banner {
-  id    Int    @id @default(autoincrement())
-  title String
-  image String
-  type  String // Hero, Homepage, Offer
-  link  String @default("#")
+  id         Int      @id @default(autoincrement())
+  code       String   @unique
+  discount   Float
+  expiryDate String?
+  status     String   @default("Active")
+  createdAt  DateTime @default(now())
 }
 
 model Settings {
-  id             Int    @id @default(autoincrement())
-  gst            Float  @default(18.0)
-  shipping       Float  @default(150.0)
-  email          String @default("atelier@achira.com")
-  phone          String @default("+91 98765 43210")
-  storeName      String @default("ACHIRA Atelier")
-  paymentGateway String @default("Razorpay")
-  logo           String @default("")
-  favicon        String @default("")
-  socialLinks    String @default("") // Comma-separated or JSON
+  id             Int      @id @default(1)
+  storeName      String   @default("Achira Couture")
+  gst            Float    @default(18.0)
+  shipping       Float    @default(150.0)
+  email          String   @default("atelier@achira.com")
+  phone          String   @default("+91 98765 43210")
+  logo           String?
+  favicon        String?
+  paymentGateway String?  @default("UPI & COD")
+  socialLinks    String?
+  adminUsername  String   @default("admin2")
+  adminPassword  String   @default("admin2@Achira2026")
+  adminEmail     String?  @default("admin2@achira.com")
+  adminPhone     String?  @default("+91 98765 43210")
+  updatedAt      DateTime @updatedAt
 }
 
-model Notification {
+model Enquiry {
   id        Int      @id @default(autoincrement())
-  type      String   // Register, Login, Order, Review, Contact
+  name      String
+  email     String
+  phone     String?
+  subject   String?
   message   String
-  read      Boolean  @default(false)
+  date      String?
+  status    String   @default("Unread")
   createdAt DateTime @default(now())
 }
 
-model LoginActivity {
+model AuditLog {
   id        Int      @id @default(autoincrement())
-  userId    Int?
-  adminId   Int?
-  action    String   // Create Account, Login, Logout, Change Password, Update Profile
-  ip        String
-  browser   String
-  os        String
-  device    String
+  action    String
+  user      String?  @default("System")
+  ip        String?
+  device    String?
+  details   String?
   createdAt DateTime @default(now())
 }
 
-model SearchHistory {
-  id        Int      @id @default(autoincrement())
-  userId    Int?
-  keyword   String
-  createdAt DateTime @default(now())
+model Review {
+  id           Int      @id @default(autoincrement())
+  productId    Int
+  customerName String
+  rating       Int      @default(5)
+  comment      String
+  status       String   @default("Approved")
+  createdAt    DateTime @default(now())
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 }

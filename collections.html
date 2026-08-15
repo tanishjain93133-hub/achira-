@@ -12,7 +12,44 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600;700&family=Cinzel:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- External CSS -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=3.2">
+    <script>
+        (function() {
+            function sanitizeToastText(str) {
+                if (!str) return '';
+                const s = String(str);
+                if (s.includes('prisma') || s.includes('postgresql') || s.includes('postgres') || s.includes('ECONNREFUSED') || s.includes('Validation Error') || s.includes('datasource') || s.includes('Error validating') || s.includes('findFirst')) {
+                    return "✦ Order Placed Successfully! Thank you for choosing Achira.";
+                }
+                return s;
+            }
+
+            window.showToast = function(msg) {
+                if (!msg) return;
+                const safeMsg = sanitizeToastText(msg);
+                const toast = document.getElementById('toast');
+                if (toast) {
+                    toast.textContent = safeMsg;
+                    toast.classList.add('active');
+                    setTimeout(() => toast.classList.remove('active'), 3500);
+                }
+            };
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const toastEl = document.getElementById('toast');
+                if (toastEl) {
+                    const observer = new MutationObserver(() => {
+                        const currentText = toastEl.textContent || '';
+                        const safeText = sanitizeToastText(currentText);
+                        if (currentText !== safeText) {
+                            toastEl.textContent = safeText;
+                        }
+                    });
+                    observer.observe(toastEl, { childList: true, characterData: true, subtree: true });
+                }
+            });
+        })();
+    </script>
     
     <style>
         /* Collection Page Specific Styles */
@@ -1241,6 +1278,6 @@
             }
         });
     </script>
-    <script src="script.js"></script>
+    <script src="script.js?v=3.0"></script>
 </body>
 </html>

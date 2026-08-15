@@ -6,18 +6,16 @@
   "scripts": {
     "start": "node admin-backend/src/index.js",
     "dev": "node admin-backend/src/index.js",
-    "postinstall": "prisma generate --schema=./admin-backend/prisma/schema.prisma",
-    "vercel-build": "prisma db push --schema=./admin-backend/prisma/schema.prisma --accept-data-loss && prisma generate --schema=./admin-backend/prisma/schema.prisma"
+    "postinstall": "node -e \"console.log('Postinstall complete')\"",
+    "vercel-build": "node -e \"console.log('Build complete')\""
   },
   "dependencies": {
-    "@prisma/client": "^5.10.2",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.18.3",
-    "jsonwebtoken": "^9.0.2"
-  },
-  "devDependencies": {
-    "prisma": "^5.10.2"
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^7.5.0",
+    "mongoose": "^9.9.2"
   }
 }

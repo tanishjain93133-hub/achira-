@@ -432,7 +432,9 @@
         </div>
     </div>
 
-    <!-- MAIN         <div class="header">
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div class="header">
             <h2 id="pageTitle">Dashboard Overview</h2>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <button onclick="fetchLiveData()" class="btn-gold" style="padding: 8px 16px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; width: auto;">
@@ -529,7 +531,14 @@
         <div id="tab-orders" class="tab-content" style="display: none;">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Orders Management</h3>
+                    <div>
+                        <h3 class="card-title">Orders Management</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Live customer orders placed on store with full item breakdown & customer tracking.</p>
+                    </div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn-gold" style="width: auto; padding: 8px 16px; font-size: 0.8rem;" onclick="fetchLiveData()">🔄 Refresh Orders</button>
+                        <button style="background: rgba(220,53,69,0.12); border: 1px solid var(--danger); color: var(--danger); font-weight: 600; padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; cursor: pointer;" onclick="clearAllOrders()">🗑️ Clear All Fake / Test Orders</button>
+                    </div>
                 </div>
                 <div class="table-responsive">
                     <table>
@@ -578,8 +587,6 @@
                     </table>
                 </div>
             </div>
-        </div>           </div>
-            </div>
         </div>
 
         <!-- COUPONS TAB -->
@@ -597,6 +604,7 @@
                                 <th>Discount</th>
                                 <th>Expiry Date</th>
                                 <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="couponsBody">
@@ -735,6 +743,22 @@
         </div>
     </div>
 
+    <!-- ORDER DETAILS MODAL -->
+    <div class="modal-overlay" id="orderDetailsModal">
+        <div class="modal-body" style="max-width: 680px;">
+            <div class="modal-header">
+                <div>
+                    <h3 class="card-title" id="orderModalTitle">Order Details</h3>
+                    <span id="orderModalDate" style="font-size: 0.8rem; color: var(--text-muted);"></span>
+                </div>
+                <button class="close-btn" onclick="closeOrderModal()">×</button>
+            </div>
+            <div id="orderModalContent" style="font-size: 0.88rem; line-height: 1.6;">
+                <!-- Filled dynamically -->
+            </div>
+        </div>
+    </div>
+
     <script>
         let defaultProducts = [
             { id: 1, name: "Maharani Zardozi Anarkali Dress", category: "Cotton Kurtas", price: 4500, availability: "New Arrival", image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80" },
@@ -770,8 +794,11 @@
             } catch (e) { console.error(e); }
         }
 
+        // List of legacy hardcoded mock test IDs to filter out
+        const FAKE_MOCK_ORDER_IDS = ['ACH-56', 'ACH-55', 'ACH-54', 'ACH-53', 'ACH-52', 'ACH-51', '56', '55', '54', '53', '52', '51'];
+
         let products = getDB('admin_products', defaultProducts);
-        let orders = getDB('admin_orders', defaultOrders);
+        let orders = getDB('admin_orders', defaultOrders).filter(o => o && !FAKE_MOCK_ORDER_IDS.includes(String(o.id)) && !FAKE_MOCK_ORDER_IDS.includes(String(o.dbId)));
         let customers = getDB('admin_customers', defaultCustomers);
         let coupons = getDB('admin_coupons', defaultCoupons);
         let enquiries = getDB('enquiries', defaultEnquiries);
@@ -810,6 +837,23 @@
                 hideLoginOverlay();
             }
         });
+
+        // Instant Real-Time Cross-Tab Listener for Live Orders
+        try {
+            if (typeof BroadcastChannel !== 'undefined') {
+                const channel = new BroadcastChannel('achira_store_channel');
+                channel.onmessage = (event) => {
+                    if (event.data && event.data.type === 'NEW_ORDER') {
+                        fetchLiveData();
+                    }
+                };
+            }
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'achira_order_event' || e.key === 'orders' || e.key === 'admin_orders') {
+                    fetchLiveData();
+                }
+            });
+        } catch (e) {}
 
         async function handleLogin(e) {
             if (e) e.preventDefault();
@@ -891,18 +935,34 @@
                 }
             } catch (err) {}
 
-            const combinedOrders = [...(Array.isArray(fetchedOrders) ? fetchedOrders : [])];
-            if (Array.isArray(cloudOrders)) {
-                cloudOrders.forEach(co => {
-                    if (co && co.id && !combinedOrders.some(o => String(o.id) === String(co.id))) {
-                        combinedOrders.push(co);
-                    }
-                });
-            }
-            orders = combinedOrders;
+            const localAdminOrders = getDB('admin_orders', []);
+            const localStoreOrders = getDB('orders', []);
+
+            // Combine and filter out old fake mock test orders
+            const rawCombined = [...fetchedOrders, ...cloudOrders, ...localAdminOrders, ...localStoreOrders];
+            const cleanOrdersMap = new Map();
+            rawCombined.forEach(o => {
+                if (!o || !o.id) return;
+                const oId = String(o.id);
+                const oDbId = String(o.dbId || '');
+                if (FAKE_MOCK_ORDER_IDS.includes(oId) || FAKE_MOCK_ORDER_IDS.includes(oDbId)) {
+                    return; // skip old fake test orders
+                }
+                if (!cleanOrdersMap.has(oId)) {
+                    cleanOrdersMap.set(oId, o);
+                }
+            });
+
+            orders = Array.from(cleanOrdersMap.values());
+            // Sort by most recent
+            orders.sort((a, b) => {
+                const da = new Date(a.createdAt || a.date || 0).getTime();
+                const db = new Date(b.createdAt || b.date || 0).getTime();
+                return db - da;
+            });
             setDB('admin_orders', orders);
 
-            // 3. Fetch Customers (Real Backend API + Cloud Users)
+            // 3. Fetch Customers (Real Backend API + Cloud Users + Auto-derived from real orders)
             let fetchedCustomers = [];
             try {
                 const res = await fetch(`${API_BASE}/api/admin/customers`, { headers });
@@ -915,13 +975,20 @@
             const custMap = new Map();
             fetchedCustomers.forEach(c => {
                 const em = (c.email || '').toLowerCase().trim();
-                if (em) custMap.set(em, c);
+                if (em && em !== 'priya.roy@gmail.com') custMap.set(em, c);
             });
 
-            // Auto-derive all purchasers from Orders to ensure 100% visibility
+            cloudUsers.forEach(u => {
+                const em = (u.email || '').toLowerCase().trim();
+                if (em && em !== 'priya.roy@gmail.com' && !custMap.has(em)) {
+                    custMap.set(em, u);
+                }
+            });
+
+            // Auto-derive all purchasers from Orders to ensure 100% visibility of any real checkout
             orders.forEach(o => {
                 const em = (o.userEmail || o.email || '').toLowerCase().trim();
-                if (em) {
+                if (em && em !== 'priya.roy@gmail.com') {
                     const userOrds = orders.filter(x => (x.userEmail || x.email || '').toLowerCase().trim() === em);
                     const totalSpent = userOrds.reduce((s, x) => s + (x.grandTotal || x.total || 0), 0);
                     const existing = custMap.get(em);
@@ -992,13 +1059,13 @@
             renderAllData();
         }
 
-        // Live Auto-Refresh Data Sync every 5 seconds
+        // Live Auto-Refresh Data Sync every 4 seconds
         setInterval(function() {
             const savedToken = localStorage.getItem('adminToken');
             if (savedToken || localStorage.getItem('adminLoggedIn') === 'true') {
                 fetchLiveData();
             }
-        }, 5000);
+        }, 4000);
 
         function switchTab(tabId, el) {
             document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
@@ -1012,12 +1079,13 @@
         }
 
         async function updateOrderStatus(orderId, newStatus) {
-            let matched = orders.find(o => o.id === orderId || o.dbId === orderId);
+            let matched = orders.find(o => String(o.id) === String(orderId) || String(o.dbId) === String(orderId));
             if (matched) {
                 matched.status = newStatus;
                 matched.orderStatus = newStatus;
             }
             setDB('admin_orders', orders);
+            setDB('orders', orders);
 
             try {
                 const cleanId = String(orderId).replace(/^ACH-/, '');
@@ -1029,9 +1097,203 @@
                     },
                     body: JSON.stringify({ orderStatus: newStatus })
                 });
-            } catch (e) { console.error('Failed to sync order status to server:', e); }
+            } catch (e) {}
+
+            // Update in Cloud Store
+            try {
+                const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+                if (cloudRes.ok) {
+                    const cloudData = await cloudRes.json();
+                    if (cloudData && Array.isArray(cloudData.orders)) {
+                        const cOrder = cloudData.orders.find(o => String(o.id) === String(orderId) || String(o.dbId) === String(orderId));
+                        if (cOrder) {
+                            cOrder.status = newStatus;
+                            cOrder.orderStatus = newStatus;
+                            await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(cloudData)
+                            });
+                        }
+                    }
+                }
+            } catch (e) {}
 
             renderAllData();
+        }
+
+        async function deleteOrder(orderId) {
+            if (!confirm(`Are you sure you want to delete order ${orderId}? This cannot be undone.`)) return;
+            orders = orders.filter(o => String(o.id) !== String(orderId) && String(o.dbId) !== String(orderId));
+            setDB('admin_orders', orders);
+            setDB('orders', orders);
+
+            try {
+                const cleanId = String(orderId).replace(/^ACH-/, '');
+                await fetch(`${API_BASE}/api/admin/orders/${cleanId}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeader()
+                });
+            } catch (e) {}
+
+            try {
+                const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+                if (cloudRes.ok) {
+                    const cloudData = await cloudRes.json();
+                    if (cloudData && Array.isArray(cloudData.orders)) {
+                        cloudData.orders = cloudData.orders.filter(o => String(o.id) !== String(orderId) && String(o.dbId) !== String(orderId));
+                        await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(cloudData)
+                        });
+                    }
+                }
+            } catch (e) {}
+
+            renderAllData();
+        }
+
+        async function clearAllOrders() {
+            if (!confirm('Are you sure you want to clear all test/fake orders? This will wipe the order list so you can receive only new genuine customer orders.')) return;
+            orders = [];
+            setDB('admin_orders', []);
+            setDB('orders', []);
+
+            try {
+                await fetch(`${API_BASE}/api/admin/orders`, {
+                    method: 'DELETE',
+                    headers: getAuthHeader()
+                });
+            } catch (e) {}
+
+            try {
+                const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+                if (cloudRes.ok) {
+                    const cloudData = await cloudRes.json();
+                    cloudData.orders = [];
+                    await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(cloudData)
+                    });
+                }
+            } catch (e) {}
+
+            fetchLiveData();
+            alert('✦ All old test orders cleared! Your admin panel is now ready to receive real live customer orders.');
+        }
+
+        function openOrderModal(orderId) {
+            const o = orders.find(ord => String(ord.id) === String(orderId) || String(ord.dbId) === String(orderId));
+            if (!o) return;
+
+            document.getElementById('orderModalTitle').textContent = `Order Details: ${o.id}`;
+            document.getElementById('orderModalDate').textContent = `Placed on ${o.date || 'Today'}`;
+
+            const itemsDetail = Array.isArray(o.itemsDetail) && o.itemsDetail.length > 0 ? o.itemsDetail : [];
+            let itemsHtml = '';
+            if (itemsDetail.length > 0) {
+                itemsHtml = itemsDetail.map(item => {
+                    const p = products.find(prod => String(prod.id) === String(item.productId) || String(prod.id) === String(item.id));
+                    const img = item.image || (p ? p.image : 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80');
+                    const itemName = item.name || (p ? p.name : 'Couture Item');
+                    const price = item.price || (p ? p.price : 1000);
+                    const qty = item.qty || 1;
+                    const size = item.selectedSize || 'M';
+                    const color = item.selectedColor || 'Standard';
+                    return `
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-color);">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <img src="${img}" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border-color);">
+                                <div>
+                                    <strong style="color: var(--primary); font-size: 0.9rem;">${itemName}</strong>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">Size: ${size} | Color: ${color} | Qty: ${qty}</div>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <strong style="color: var(--gold);">₹${(price * qty).toLocaleString('en-IN')}</strong>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">₹${price.toLocaleString('en-IN')} each</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                itemsHtml = `<div style="padding: 10px 0; color: var(--text-muted);">${o.itemsSummary || 'Couture Items'}</div>`;
+            }
+
+            const modalContent = document.getElementById('orderModalContent');
+            modalContent.innerHTML = `
+                <div style="background: var(--cream); padding: 15px; border-radius: 10px; margin-bottom: 18px; border: 1px solid var(--border-color);">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div>
+                            <strong style="color: var(--primary); display: block; margin-bottom: 4px;">Customer Info</strong>
+                            <div><strong>Name:</strong> ${o.userName || o.customerName || 'Valued Patron'}</div>
+                            <div><strong>Email:</strong> <a href="mailto:${o.userEmail || o.email || ''}" style="color: var(--primary);">${o.userEmail || o.email || 'N/A'}</a></div>
+                            <div><strong>Phone:</strong> <a href="tel:${o.userPhone || o.phone || ''}" style="color: var(--primary);">${o.userPhone || o.phone || 'N/A'}</a></div>
+                        </div>
+                        <div>
+                            <strong style="color: var(--primary); display: block; margin-bottom: 4px;">Delivery Address</strong>
+                            <div style="color: var(--text-main); font-size: 0.85rem; line-height: 1.4;">${o.userAddress || o.address || 'Standard Delivery Address'}</div>
+                            <div style="margin-top: 6px;"><strong>Payment:</strong> <span class="badge badge-success">${o.paymentMode || o.paymentMethod || 'UPI / Prepaid'}</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 18px;">
+                    <strong style="color: var(--primary); font-size: 0.95rem; display: block; margin-bottom: 8px;">Purchased Items</strong>
+                    <div style="max-height: 220px; overflow-y: auto;">
+                        ${itemsHtml}
+                    </div>
+                </div>
+
+                <div style="background: #faf8f5; padding: 14px; border-radius: 10px; border: 1px solid var(--border-color);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                        <span style="color: var(--text-muted);">Subtotal</span>
+                        <span>₹${(o.subtotal || o.grandTotal || o.total || 0).toLocaleString('en-IN')}</span>
+                    </div>
+                    ${o.discount ? `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px; color: var(--success);">
+                        <span>Discount Applied</span>
+                        <span>-₹${Number(o.discount).toLocaleString('en-IN')}</span>
+                    </div>` : ''}
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                        <span style="color: var(--text-muted);">Taxes (GST)</span>
+                        <span>₹${(o.tax || 0).toLocaleString('en-IN')}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-muted);">Shipping</span>
+                        <span>${o.shippingFee === 0 || o.shipping === 0 ? 'FREE' : '₹' + (o.shippingFee || o.shipping || 150)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 700; border-top: 1.5px solid var(--border-color); padding-top: 8px; color: var(--primary);">
+                        <span>Grand Total</span>
+                        <span style="color: var(--gold);">₹${(o.grandTotal || o.total || 0).toLocaleString('en-IN')}</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label style="font-weight: 600; font-size: 0.82rem;">Update Status:</label>
+                        <select onchange="updateOrderStatus('${o.id}', this.value); document.getElementById('orderModalStatusBadge').textContent = this.value;" style="padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-weight: 600;">
+                            <option value="Processing" ${(o.status || o.orderStatus) === 'Processing' || (o.status || o.orderStatus) === 'Pending' ? 'selected' : ''}>Processing / Pending</option>
+                            <option value="Confirmed" ${(o.status || o.orderStatus) === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                            <option value="Shipped" ${(o.status || o.orderStatus) === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                            <option value="Delivered" ${(o.status || o.orderStatus) === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                            <option value="Cancelled" ${(o.status || o.orderStatus) === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-action btn-delete" onclick="deleteOrder('${o.id}'); closeOrderModal();">🗑️ Delete Order</button>
+                        <button class="btn-gold" style="width: auto; padding: 6px 14px; font-size: 0.8rem;" onclick="closeOrderModal()">Close</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('orderDetailsModal').style.display = 'flex';
+        }
+
+        function closeOrderModal() {
+            document.getElementById('orderDetailsModal').style.display = 'none';
         }
 
         async function deleteEnquiry(id) {
@@ -1043,7 +1305,10 @@
         function renderAllData() {
             let uniqueOrders = Array.from(new Map(orders.map(o => [o.id, o])).values());
 
-            let totalRevenue = uniqueOrders.reduce((sum, o) => sum + (o.grandTotal || o.total || 0), 0);
+            let totalRevenue = uniqueOrders.reduce((sum, o) => {
+                const st = o.status || o.orderStatus || '';
+                return st !== 'Cancelled' ? sum + (o.grandTotal || o.total || 0) : sum;
+            }, 0);
             const revEl = document.getElementById('statRevenue');
             if (revEl) revEl.textContent = `₹${totalRevenue.toLocaleString('en-IN')}`;
             
@@ -1078,13 +1343,13 @@
             const recentBody = document.getElementById('recentOrdersBody');
             if (recentBody) {
                 if (uniqueOrders.length === 0) {
-                    recentBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 25px;">No orders placed yet.</td></tr>`;
+                    recentBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 25px;">No real customer orders placed yet. Any order placed on the store will show here instantly!</td></tr>`;
                 } else {
-                    recentBody.innerHTML = uniqueOrders.slice(0, 5).map(o => `
-                        <tr>
+                    recentBody.innerHTML = uniqueOrders.slice(0, 8).map(o => `
+                        <tr style="cursor: pointer;" onclick="openOrderModal('${o.id}')">
                             <td><strong style="color: var(--primary);">${o.id}</strong></td>
                             <td><strong>${o.userName || o.customerName || o.customer || "Valued Patron"}</strong></td>
-                            <td style="max-width: 200px; font-size: 0.8rem;">${o.itemsSummary || o.items || "Couture Product"}</td>
+                            <td style="max-width: 220px; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${o.itemsSummary || o.items || "Couture Product"}</td>
                             <td><strong style="color: var(--gold);">₹${(o.grandTotal || o.total || 0).toLocaleString('en-IN')}</strong></td>
                             <td><span class="badge ${(o.status || o.orderStatus) === 'Delivered' ? 'badge-success' : ((o.status || o.orderStatus) === 'Cancelled' ? 'badge-danger' : 'badge-warning')}">${o.status || o.orderStatus || 'Processing'}</span></td>
                             <td><span style="font-size: 0.78rem; color: var(--text-muted);">${o.date || 'Today'}</span></td>
@@ -1097,7 +1362,7 @@
             const allOrdersBody = document.getElementById('allOrdersBody');
             if (allOrdersBody) {
                 if (uniqueOrders.length === 0) {
-                    allOrdersBody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">No orders placed yet.</td></tr>`;
+                    allOrdersBody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 35px; font-size: 0.95rem;">No customer orders found. As soon as a user places an order on the website, it will immediately appear here with full details!</td></tr>`;
                 } else {
                     allOrdersBody.innerHTML = uniqueOrders.map(o => {
                         const st = o.status || o.orderStatus || 'Processing';
@@ -1114,7 +1379,7 @@
                             <td style="max-width: 180px; font-size: 0.8rem; line-height: 1.4;">
                                 ${o.userAddress || o.address || 'Standard Delivery Address'}
                             </td>
-                            <td style="max-width: 220px; font-weight: 500;">
+                            <td style="max-width: 220px; font-weight: 500; font-size: 0.82rem;">
                                 ${o.itemsSummary || o.items || "Couture Product"}
                             </td>
                             <td>
@@ -1122,7 +1387,7 @@
                             </td>
                             <td>
                                 <span class="badge ${o.paymentMode === 'UPI' || o.paymentMode === 'UPI (QR)' ? 'badge-success' : 'badge-info'}">
-                                    ${o.paymentMode === 'UPI' || o.paymentMode === 'UPI (QR)' ? '📱 UPI (QR Paid)' : (o.paymentMode || o.paymentMethod || 'Prepaid')}
+                                    ${o.paymentMode === 'UPI' || o.paymentMode === 'UPI (QR)' ? '📱 UPI (Paid)' : (o.paymentMode || o.paymentMethod || 'Prepaid')}
                                 </span>
                             </td>
                             <td>
@@ -1131,13 +1396,17 @@
                                 </span>
                             </td>
                             <td>
-                                <select onchange="updateOrderStatus('${o.id}', this.value)" style="padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; border: 1px solid var(--border-color); cursor: pointer;">
-                                    <option value="Processing" ${st === 'Processing' || st === 'Pending' ? 'selected' : ''}>Processing / Pending</option>
-                                    <option value="Confirmed" ${st === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-                                    <option value="Shipped" ${st === 'Shipped' ? 'selected' : ''}>Shipped</option>
-                                    <option value="Delivered" ${st === 'Delivered' ? 'selected' : ''}>Delivered</option>
-                                    <option value="Cancelled" ${st === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-                                </select>
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <select onchange="updateOrderStatus('${o.id}', this.value)" style="padding: 4px 6px; border-radius: 6px; font-size: 0.75rem; border: 1px solid var(--border-color); cursor: pointer;">
+                                        <option value="Processing" ${st === 'Processing' || st === 'Pending' ? 'selected' : ''}>Processing</option>
+                                        <option value="Confirmed" ${st === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                                        <option value="Shipped" ${st === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                                        <option value="Delivered" ${st === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                        <option value="Cancelled" ${st === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                                    </select>
+                                    <button class="btn-action" style="background: var(--gold); color: #FFF; padding: 4px 6px; font-size: 0.72rem;" onclick="openOrderModal('${o.id}')">👁️ View Details</button>
+                                    <button class="btn-action btn-delete" style="padding: 4px 6px; font-size: 0.72rem;" onclick="deleteOrder('${o.id}')">🗑️ Delete</button>
+                                </div>
                             </td>
                         </tr>
                     `;
@@ -1149,7 +1418,7 @@
             const custBody = document.getElementById('customersBody');
             if (custBody) {
                 if (customers.length === 0) {
-                    custBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">No registered customers yet.</td></tr>`;
+                    custBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">No registered patrons or purchasers yet.</td></tr>`;
                 } else {
                     custBody.innerHTML = customers.map(c => {
                         const ordCount = c.ordersCount !== undefined ? c.ordersCount : (c.orders || c.totalOrders || 0);
@@ -1172,14 +1441,21 @@
             // Render Coupons
             const coupBody = document.getElementById('couponsBody');
             if (coupBody) {
-                coupBody.innerHTML = coupons.map(cp => `
-                    <tr>
-                        <td><strong style="color: var(--gold);">${cp.code}</strong></td>
-                        <td>${cp.discount}% OFF</td>
-                        <td>${cp.expiry || '2026-12-31'}</td>
-                        <td><span class="badge badge-success">${cp.status || 'Active'}</span></td>
-                    </tr>
-                `).join('');
+                if (coupons.length === 0) {
+                    coupBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 25px;">No active coupons created.</td></tr>`;
+                } else {
+                    coupBody.innerHTML = coupons.map(cp => `
+                        <tr>
+                            <td><strong style="color: var(--gold);">${cp.code}</strong></td>
+                            <td>${cp.discount}% OFF</td>
+                            <td>${cp.expiry || '2026-12-31'}</td>
+                            <td><span class="badge badge-success">${cp.status || 'Active'}</span></td>
+                            <td>
+                                <button class="btn-action btn-delete" onclick="deleteCoupon('${cp.code}')">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
             }
 
             // Render Enquiries
@@ -1301,14 +1577,30 @@
         async function addCoupon() {
             const code = prompt('Enter Coupon Code (e.g. SUMMER15):');
             if (code) {
-                const cleanCode = code.toUpperCase();
-                coupons.unshift({ code: cleanCode, discount: 15, expiry: "2026-12-31", status: "Active" });
+                const discount = prompt('Enter Discount Percentage (e.g. 15):', '15');
+                const cleanCode = code.toUpperCase().trim();
+                const discNum = parseInt(discount) || 15;
+                coupons.unshift({ code: cleanCode, discount: discNum, expiry: "2026-12-31", status: "Active" });
                 setDB('admin_coupons', coupons);
                 try {
                     await fetch(`${API_BASE}/api/admin/coupons`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-                        body: JSON.stringify({ code: cleanCode, discount: 15, expiry: "2026-12-31" })
+                        body: JSON.stringify({ code: cleanCode, discount: discNum, expiry: "2026-12-31" })
+                    });
+                } catch (err) {}
+                renderAllData();
+            }
+        }
+
+        async function deleteCoupon(code) {
+            if (confirm(`Are you sure you want to delete coupon "${code}"?`)) {
+                coupons = coupons.filter(c => c.code !== code && String(c.id) !== String(code));
+                setDB('admin_coupons', coupons);
+                try {
+                    await fetch(`${API_BASE}/api/admin/coupons/${code}`, {
+                        method: 'DELETE',
+                        headers: getAuthHeader()
                     });
                 } catch (err) {}
                 renderAllData();

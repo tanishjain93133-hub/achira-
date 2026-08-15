@@ -177,6 +177,7 @@ export default function AdminDashboard() {
 
   const fetchOrders = async () => {
     console.log('[ADMIN DEBUG] Fetching all orders...');
+    const FAKE_MOCK_ORDER_IDS = ['ACH-56', 'ACH-55', 'ACH-54', 'ACH-53', 'ACH-52', 'ACH-51', '56', '55', '54', '53', '52', '51'];
     let orderList = [];
     try {
       const res = await fetch(`${API_BASE}/api/admin/orders`, {
@@ -184,7 +185,7 @@ export default function AdminDashboard() {
       });
       const data = await res.json();
       if (res.ok && Array.isArray(data) && data.length > 0) {
-        orderList = data;
+        orderList = data.filter(o => o && !FAKE_MOCK_ORDER_IDS.includes(String(o.id)) && !FAKE_MOCK_ORDER_IDS.includes(String(o.dbId)));
       }
     } catch (e) { console.error('[ADMIN DEBUG] Fetch error:', e); }
 
@@ -193,14 +194,14 @@ export default function AdminDashboard() {
         const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
         if (cloudRes.ok) {
           const cloudData = await cloudRes.json();
-          if (cloudData && Array.isArray(cloudData.orders)) orderList = cloudData.orders;
+          if (cloudData && Array.isArray(cloudData.orders)) {
+            orderList = cloudData.orders.filter(o => o && !FAKE_MOCK_ORDER_IDS.includes(String(o.id)) && !FAKE_MOCK_ORDER_IDS.includes(String(o.dbId)));
+          }
         }
       } catch (err) {}
     }
 
-    if (orderList.length > 0) {
-      setOrders(orderList);
-    }
+    setOrders(orderList);
   };
 
   const fetchCustomers = async () => {
