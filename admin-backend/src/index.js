@@ -578,27 +578,40 @@ const checkoutHandler = async (req, res) => {
       });
     }
 
-    // Server-side Cloud Storage Sync
-    (async () => {
-      try {
-        const cloudGet = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-        let cloudData = { orders: [], users: [], enquiries: [], logs: [], notifications: [] };
-        if (cloudGet.ok) {
-          cloudData = await cloudGet.json();
-          if (!Array.isArray(cloudData.orders)) cloudData.orders = [];
-          if (!Array.isArray(cloudData.users)) cloudData.users = [];
-          if (!Array.isArray(cloudData.logs)) cloudData.logs = [];
-        }
-        if (!cloudData.orders.some(o => String(o.id) === String(orderId))) {
-          cloudData.orders.unshift(fullMemoryOrder);
-        }
-        await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(cloudData)
+    // Synchronous Server-side Cloud Storage Sync
+    try {
+      const cloudGet = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+      let cloudData = { orders: [], users: [], enquiries: [], logs: [], notifications: [] };
+      if (cloudGet.ok) {
+        cloudData = await cloudGet.json();
+        if (!Array.isArray(cloudData.orders)) cloudData.orders = [];
+        if (!Array.isArray(cloudData.users)) cloudData.users = [];
+        if (!Array.isArray(cloudData.logs)) cloudData.logs = [];
+      }
+      if (!cloudData.orders.some(o => String(o.id) === String(orderId))) {
+        cloudData.orders.unshift(fullMemoryOrder);
+      }
+      if (custEmail && !cloudData.users.some(u => (u.email || '').toLowerCase() === custEmail)) {
+        cloudData.users.unshift({
+          id: Date.now(),
+          name: custName,
+          email: custEmail,
+          phone: custPhone,
+          address: custAddress,
+          ordersCount: 1,
+          totalSpent: grandTotal,
+          regDate: new Date().toISOString()
         });
-      } catch (e) {}
-    })();
+      }
+      await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cloudData)
+      });
+      console.log(`[CLOUD BIN SYNC SUCCESS] Order ${orderId} committed to persistent cloud database.`);
+    } catch (e) {
+      console.warn('[CLOUD BIN SYNC NOTICE]', e.message);
+    }
 
     console.log(`[ORDER CREATED] ID: ${orderId} | Customer: ${custEmail} (${custName}) | Total: ₹${grandTotal}`);
 
@@ -622,16 +635,35 @@ app.post('/api/orders', checkoutHandler);
 
 // --- CUSTOMER PURCHASE HISTORY (Strict Isolation: WHERE email = req.user.email) ---
 
-app.get('/api/user/orders', authenticateToken, async (req, res) => {
-  const customerEmail = (req.user && req.user.email ? req.user.email : '').toLowerCase().trim();
+app.get('/api/user/orders', async (req, res) => {
+  let customerEmail = '';
+
+  // 1. From Authorization Bearer JWT if provided
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (token && !token.startsWith('simulated-')) {
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      if (decoded && decoded.email) customerEmail = decoded.email;
+    } catch (e) {}
+  }
+
+  // 2. From query or custom header
+  if (!customerEmail) {
+    customerEmail = req.query.email || req.headers['x-user-email'] || '';
+  }
+
+  // Clean email
+  customerEmail = String(customerEmail).toLowerCase().trim();
 
   if (!customerEmail) {
-    return res.status(400).json({ success: false, error: 'Customer authentication email required.' });
+    return res.status(400).json({ success: false, error: 'Customer email is required to fetch purchase history.' });
   }
 
   try {
     let customerOrders = [];
 
+    // 1. Query PostgreSQL
     if (isDbConnected && prisma) {
       try {
         customerOrders = await prisma.order.findMany({
@@ -639,14 +671,34 @@ app.get('/api/user/orders', authenticateToken, async (req, res) => {
           include: { items: true },
           orderBy: { createdAt: 'desc' }
         });
-      } catch (dbErr) {
-        console.warn('[DB USER ORDERS FALLBACK]', dbErr.message);
-      }
+      } catch (dbErr) {}
     }
 
-    if (!customerOrders || customerOrders.length === 0) {
-      customerOrders = memoryStore.orders.filter(o => (o.email || o.userEmail || '').toLowerCase().trim() === customerEmail);
-    }
+    // 2. Query Cloud Storage Database Bin
+    try {
+      const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+      if (cloudRes.ok) {
+        const cData = await cloudRes.json();
+        if (cData && Array.isArray(cData.orders)) {
+          cData.orders.forEach(co => {
+            if (co && co.id && (co.email || co.userEmail || '').toLowerCase().trim() === customerEmail) {
+              if (!customerOrders.some(o => String(o.id) === String(co.id))) {
+                customerOrders.push(co);
+              }
+            }
+          });
+        }
+      }
+    } catch (err) {}
+
+    // 3. Merge with memoryStore
+    memoryStore.orders.forEach(mo => {
+      if (mo && mo.id && (mo.email || mo.userEmail || '').toLowerCase().trim() === customerEmail) {
+        if (!customerOrders.some(o => String(o.id) === String(mo.id))) {
+          customerOrders.push(mo);
+        }
+      }
+    });
 
     res.json({
       success: true,

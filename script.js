@@ -987,10 +987,13 @@ async function renderUserOrdersTable() {
     let customerOrders = [];
     const userToken = localStorage.getItem('userToken') || '';
     
-    // 1. Fetch from server API with JWT token
+    // 1. Fetch from server API with JWT token & email parameter
     try {
-        const res = await fetch(`${API_BASE}/api/user/orders`, {
-            headers: { 'Authorization': `Bearer ${userToken}` }
+        const res = await fetch(`${API_BASE}/api/user/orders?email=${encodeURIComponent(currEmail)}`, {
+            headers: { 
+                'Authorization': `Bearer ${userToken}`,
+                'x-user-email': currEmail
+            }
         });
         const data = await res.json();
         if (res.ok && data.success && Array.isArray(data.orders)) {
