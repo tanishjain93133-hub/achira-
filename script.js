@@ -3,30 +3,150 @@
 
 // Initial Products Data
 const initialProducts = [
-    { id: 1, name: "Maharani Zardozi Anarkali Dress", category: "Cotton Kurtas", fabric: "Cotton", color: "Red", size: ["M", "L", "XL", "XXL"], price: 4500, availability: "New Arrival", occasion: "Wedding", image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80", rating: 5 },
-    { id: 2, name: "Kashmiri Arayan Embroidered Dress", category: "Lucknowi Collection", fabric: "Chanderi", color: "Black", size: ["S", "M", "L", "XXL", "XXXXL"], price: 3200, availability: "Best Seller", occasion: "Festive", image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80", rating: 4 },
-    { id: 3, name: "Gulbahar Handblock Cotton Dress", category: "Cotton Kurtas", fabric: "Cotton", color: "Pink", size: ["XS", "S", "M", "L", "XL", "XXL", "XXXXL", "XXXXXL"], price: 1800, availability: "Best Seller", occasion: "Casual", image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=600&q=80", rating: 5 },
-    { id: 4, name: "Atelier Lucknowi Chikankari Tunic", category: "Lucknowi Collection", fabric: "Muslin", color: "White", size: ["S", "M", "L", "XL"], price: 2900, availability: "New Arrival", occasion: "Office Wear", image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80", rating: 4 },
-    { id: 5, name: "Noor Indigo Straight Dress", category: "Chanderi Collection", fabric: "Linen", color: "Blue", size: ["M", "L", "XL", "XXL", "XXXXXL"], price: 2200, availability: "New Arrival", occasion: "Casual", image: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=600&q=80", rating: 4 },
-    { id: 6, name: "Avanti A-Line Banarasi Tunic", category: "Designer Sarees", fabric: "Silk", color: "Green", size: ["S", "M", "L"], price: 4900, availability: "Best Seller", occasion: "Festive", image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80", rating: 5 },
-    { id: 7, name: "Zoya Indo-Western Palazzo Set", category: "Chanderi Collection", fabric: "Rayon", color: "Yellow", size: ["M", "L", "XL", "XXL"], price: 3800, availability: "Trending", occasion: "Party Wear", image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80", rating: 4 },
-    { id: 8, name: "Avani Banarasi Silk Saree", category: "Designer Sarees", fabric: "Silk", color: "Red", price: 8500, availability: "New Arrival", size: ["Free Size"], occasion: "Wedding", image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80", rating: 5 },
-    { id: 9, name: "Atelier Spiral Pave Diamond Studs", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 45000, availability: "New Arrival", occasion: "Festive", image: "jewellery1.jpg", rating: 5, description: "Handcrafted 18K white gold spiral studs studded with high-brilliance micro-pave natural diamonds in a fluid swirling motif." },
-    { id: 10, name: "Celestial Crescent Diamond Earrings", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 58000, availability: "New Arrival", occasion: "Bridal", image: "jewellery2.jpg", rating: 5, description: "Architectural crescent moon drop earrings featuring tiered rows of G-H VVS diamonds for luminous brilliance." },
-    { id: 11, name: "Vasant Floral Organza Saree", category: "Organza Sarees", fabric: "Organza", color: "Pink", size: ["Free Size"], price: 6800, availability: "Trending", occasion: "Festive", image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=600&q=85", rating: 5 },
-    { id: 12, name: "Royal Banarasi Silk Lehenga", category: "Bridal Lehengas", fabric: "Silk", color: "Red", size: ["M", "L", "XL", "XXL"], price: 14500, availability: "Best Seller", occasion: "Wedding", image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80", rating: 5 },
-    { id: 13, name: "Royal Heritage Velvet Gown", category: "Gown", fabric: "Velvet", color: "Maroon", size: ["S", "M", "L", "XL", "XXL", "XXXXL", "XXXXXL"], price: 8900, availability: "New Arrival", occasion: "Party Wear", image: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=600&q=80", rating: 5 },
-    { id: 14, name: "Solitaire Diamond Riviera Necklace", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 185000, availability: "Best Seller", occasion: "Wedding", image: "jewellery3.jpg", rating: 5, description: "A seamless continuous tennis strand of matched claw-set brilliant solitaire diamonds crafted in hallmarked 18K white gold." },
-    { id: 15, name: "Aura Four-Stone Linear Drop Earrings", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 74000, availability: "Best Seller", occasion: "Bridal", image: "jewellery4.jpg", rating: 5, description: "Elegant linear drops featuring four graduating claw-set round solitaire diamonds per earring for fluid movement." },
-    { id: 16, name: "Double Layer Riviera Diamond Necklace", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 245000, availability: "Limited Edition", occasion: "Anniversary", image: "jewellery5.jpg", rating: 5, description: "Magnificent double-row layered riviera necklace featuring graduating brilliant-cut diamonds handcrafted for royal couture." },
-    { id: 17, name: "Empress Choker Solitaire Necklace", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 195000, availability: "New Arrival", occasion: "Wedding", image: "jewellery6.jpg", rating: 5, description: "High-jewellery solitaire collar choker designed to rest elegantly against the collarbone with maximum light refraction." },
-    { id: 18, name: "Art Deco Lattice Fan Drop Earrings", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 64000, availability: "Trending", occasion: "Festive", image: "jewellery7.jpg", rating: 5, description: "Art-Deco inspired cage drop earrings with fine lattice filigree and dangling diamond accents." },
-    { id: 19, name: "Royal Marquise Diamond Eternity Ring", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 52000, availability: "Best Seller", occasion: "Anniversary", image: "jewellery8.jpg", rating: 5, description: "Luxury multi-row band set with marquise cut and brilliant round solitaire diamonds in fine rose-gold setting." },
-    { id: 20, name: "Royal Zambian Emerald Choker Necklace", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 290000, availability: "Limited Edition", occasion: "Bridal", image: "jewellery9.jpg", rating: 5, description: "Heritage chandelier necklace adorned with vivid teardrop Zambian emeralds suspended from diamond-encrusted arches." },
-    { id: 21, name: "Concentric Double Halo Circle Studs", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 48000, availability: "In Stock", occasion: "Daily Wear", image: "jewellery10.jpg", rating: 5, description: "Timeless concentric double halo ear studs with a sparkling central solitaire cluster." },
-    { id: 22, name: "Tri-Band Triple Row Solitaire Diamond Ring", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 56000, availability: "Best Seller", occasion: "Anniversary", image: "jewellery11.jpg", rating: 5, description: "Multi-row band ring featuring three parallel tracks of channel and claw-set round brilliant solitaire diamonds." },
-    { id: 23, name: "Aura Concentric Triple Halo Ear Studs", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 49000, availability: "New Arrival", occasion: "Festive", image: "jewellery12.jpg", rating: 5, description: "Harmonious triple concentric circular halo ear studs encrusted with natural micro-pave diamonds around a central cluster." },
-    { id: 24, name: "Interlocking Double Halo Solitaire Studs", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 54000, availability: "Limited Edition", occasion: "Bridal", image: "jewellery13.jpg", rating: 5, description: "Avante-garde ear studs featuring an offset interlocking double halo around a prominent floating claw-set solitaire." }
+    { 
+        id: 101, 
+        sku: "ACH-ANK-001",
+        name: "Noor-e-Kashmir Midnight Black Embroidered Anarkali Set", 
+        category: "Anarkali", 
+        parentCategory: "Ethnic Wear",
+        fabric: "Pure Cotton Mulmul", 
+        color: "Midnight Black", 
+        size: ["XS", "S", "M", "L", "XL", "XXL"], 
+        price: 3999, 
+        originalPrice: 4850,
+        discountPrice: 3999,
+        stock: 24,
+        status: "Active",
+        featured: true,
+        availability: "New Arrival", 
+        occasion: "Festive & Party", 
+        image: "anarkali1.jpg", 
+        images: ["anarkali1.jpg"],
+        rating: 5,
+        description: "Elegantly crafted from breathable pure cotton mulmul in midnight black, featuring a handcrafted mirror-work circular medallion motif on the chest, a delicate V-neckline with silver embroidery, and a full flaring silhouette paired with straight pants.",
+        careInstructions: "Dry clean first wash. Gentle cold hand wash separately thereafter.",
+        deliveryInfo: "Dispatched within 24-48 hours. Express delivery across India in 3-5 business days."
+    },
+    { 
+        id: 102, 
+        sku: "ACH-ANK-002",
+        name: "Zaffran Kesariya Mustard Yoke Embroidered Anarkali Suit", 
+        category: "Anarkali", 
+        parentCategory: "Ethnic Wear",
+        fabric: "Chanderi Silk Blend", 
+        color: "Mustard Yellow", 
+        size: ["XS", "S", "M", "L", "XL", "XXL"], 
+        price: 4499, 
+        originalPrice: 5400,
+        discountPrice: 4499,
+        stock: 18,
+        status: "Active",
+        featured: true,
+        availability: "Best Seller", 
+        occasion: "Festive & Haldi", 
+        image: "anarkali2.jpg", 
+        images: ["anarkali2.jpg"],
+        rating: 5,
+        description: "Radiant festive mustard yellow Anarkali dress highlighted with an intricate needlework yoke, delicate floral hand embroidery, matching gathered flared bottoms, and a lightweight scalloped matching dupatta with contrast pink tassels.",
+        careInstructions: "Dry clean recommended for maintaining the lustre of silk blend fabric.",
+        deliveryInfo: "Dispatched within 24-48 hours. Express delivery in 3-5 business days."
+    },
+    { 
+        id: 103, 
+        sku: "ACH-ANK-003",
+        name: "Gul-e-Chanderi Lime Green Anarkali with Kalamkari Dupatta", 
+        category: "Anarkali", 
+        parentCategory: "Ethnic Wear",
+        fabric: "Pure Chanderi Silk", 
+        color: "Lime Green", 
+        size: ["XS", "S", "M", "L", "XL", "XXL"], 
+        price: 5199, 
+        originalPrice: 6200,
+        discountPrice: 5199,
+        stock: 15,
+        status: "Active",
+        featured: true,
+        availability: "Trending", 
+        occasion: "Wedding & Festive", 
+        image: "anarkali3.jpg", 
+        images: ["anarkali3.jpg"],
+        rating: 5,
+        description: "Rich lime green flared Chanderi Anarkali gown paired with a magnificent traditional Kalamkari printed artisanal dupatta, woven zari accents on the yoke, and tailored tonal trousers.",
+        careInstructions: "Strictly dry clean only to preserve natural dye prints and fine silk texture.",
+        deliveryInfo: "Handcrafted on order. Dispatched in 2-3 business days."
+    },
+    { 
+        id: 104, 
+        sku: "ACH-ANK-004",
+        name: "Gulabi Meher Blush Pink Gota Handblock Anarkali Suit", 
+        category: "Anarkali", 
+        parentCategory: "Ethnic Wear",
+        fabric: "Organic Cotton", 
+        color: "Blush Pink", 
+        size: ["XS", "S", "M", "L", "XL", "XXL"], 
+        price: 3799, 
+        originalPrice: 4600,
+        discountPrice: 3799,
+        stock: 28,
+        status: "Active",
+        featured: true,
+        availability: "New Arrival", 
+        occasion: "Casual & Day Festive", 
+        image: "anarkali4.jpg", 
+        images: ["anarkali4.jpg"],
+        rating: 5,
+        description: "Soft ethereal blush pink cotton Anarkali suit adorned with geometric yoke stitching, subtle booti motifs all over the kalis, delicate lace trims on the neckline and hem, complemented by a featherlight matching dupatta.",
+        careInstructions: "Hand wash cold with mild detergent. Dry in shade.",
+        deliveryInfo: "Dispatched within 24 hours. Delivery in 3-5 days."
+    },
+    { 
+        id: 105, 
+        sku: "ACH-ANK-005",
+        name: "Lavanya Lilac Floral Tiered Anarkali Suit Set", 
+        category: "Anarkali", 
+        parentCategory: "Ethnic Wear",
+        fabric: "Muslin Cotton", 
+        color: "Lilac Purple", 
+        size: ["XS", "S", "M", "L", "XL", "XXL"], 
+        price: 4250, 
+        originalPrice: 5100,
+        discountPrice: 4250,
+        stock: 20,
+        status: "Active",
+        featured: true,
+        availability: "Best Seller", 
+        occasion: "Party & Festive", 
+        image: "anarkali5.jpg", 
+        images: ["anarkali5.jpg"],
+        rating: 5,
+        description: "Dreamy pastel lilac tiered Anarkali suit featuring whimsical botanical floral vines, a delicate scalloped V-neckline with fabric button accents, matching tonal trousers, and an exquisite printed border dupatta.",
+        careInstructions: "Gentle machine wash inside out or dry clean for best longevity.",
+        deliveryInfo: "Dispatched within 24-48 hours. Express delivery in 3-5 business days."
+    },
+    { id: 1, sku: "ACH-COT-001", name: "Maharani Zardozi Anarkali Dress", category: "Cotton Kurtas", fabric: "Cotton", color: "Red", size: ["M", "L", "XL", "XXL"], price: 4500, availability: "New Arrival", occasion: "Wedding", image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80", rating: 5 },
+    { id: 2, sku: "ACH-LUK-002", name: "Kashmiri Arayan Embroidered Dress", category: "Lucknowi Collection", fabric: "Chanderi", color: "Black", size: ["S", "M", "L", "XXL", "XXXXL"], price: 3200, availability: "Best Seller", occasion: "Festive", image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80", rating: 4 },
+    { id: 3, sku: "ACH-COT-003", name: "Gulbahar Handblock Cotton Dress", category: "Cotton Kurtas", fabric: "Cotton", color: "Pink", size: ["XS", "S", "M", "L", "XL", "XXL", "XXXXL", "XXXXXL"], price: 1800, availability: "Best Seller", occasion: "Casual", image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=600&q=80", rating: 5 },
+    { id: 4, sku: "ACH-LUK-004", name: "Atelier Lucknowi Chikankari Tunic", category: "Lucknowi Collection", fabric: "Muslin", color: "White", size: ["S", "M", "L", "XL"], price: 2900, availability: "New Arrival", occasion: "Office Wear", image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80", rating: 4 },
+    { id: 5, sku: "ACH-CHA-005", name: "Noor Indigo Straight Dress", category: "Chanderi Collection", fabric: "Linen", color: "Blue", size: ["M", "L", "XL", "XXL", "XXXXXL"], price: 2200, availability: "New Arrival", occasion: "Casual", image: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=600&q=80", rating: 4 },
+    { id: 6, sku: "ACH-SAR-006", name: "Avanti A-Line Banarasi Tunic", category: "Designer Sarees", fabric: "Silk", color: "Green", size: ["S", "M", "L"], price: 4900, availability: "Best Seller", occasion: "Festive", image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80", rating: 5 },
+    { id: 7, sku: "ACH-CHA-007", name: "Zoya Indo-Western Palazzo Set", category: "Chanderi Collection", fabric: "Rayon", color: "Yellow", size: ["M", "L", "XL", "XXL"], price: 3800, availability: "Trending", occasion: "Party Wear", image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80", rating: 4 },
+    { id: 8, sku: "ACH-SAR-008", name: "Avani Banarasi Silk Saree", category: "Designer Sarees", fabric: "Silk", color: "Red", price: 8500, availability: "New Arrival", size: ["Free Size"], occasion: "Wedding", image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80", rating: 5 },
+    { id: 9, sku: "ACH-JWL-009", name: "Atelier Spiral Pave Diamond Studs", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 45000, availability: "New Arrival", occasion: "Festive", image: "jewellery1.jpg", rating: 5, description: "Handcrafted 18K white gold spiral studs studded with high-brilliance micro-pave natural diamonds in a fluid swirling motif." },
+    { id: 10, sku: "ACH-JWL-010", name: "Celestial Crescent Diamond Earrings", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 58000, availability: "New Arrival", occasion: "Bridal", image: "jewellery2.jpg", rating: 5, description: "Architectural crescent moon drop earrings featuring tiered rows of G-H VVS diamonds for luminous brilliance." },
+    { id: 11, sku: "ACH-SAR-011", name: "Vasant Floral Organza Saree", category: "Organza Sarees", fabric: "Organza", color: "Pink", size: ["Free Size"], price: 6800, availability: "Trending", occasion: "Festive", image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=600&q=85", rating: 5 },
+    { id: 12, sku: "ACH-LEH-012", name: "Royal Banarasi Silk Lehenga", category: "Bridal Lehengas", fabric: "Silk", color: "Red", size: ["M", "L", "XL", "XXL"], price: 14500, availability: "Best Seller", occasion: "Wedding", image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80", rating: 5 },
+    { id: 13, sku: "ACH-GWN-013", name: "Royal Heritage Velvet Gown", category: "Gown", fabric: "Velvet", color: "Maroon", size: ["S", "M", "L", "XL", "XXL", "XXXXL", "XXXXXL"], price: 8900, availability: "New Arrival", occasion: "Party Wear", image: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=600&q=80", rating: 5 },
+    { id: 14, sku: "ACH-JWL-014", name: "Solitaire Diamond Riviera Necklace", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 185000, availability: "Best Seller", occasion: "Wedding", image: "jewellery3.jpg", rating: 5, description: "A seamless continuous tennis strand of matched claw-set brilliant solitaire diamonds crafted in hallmarked 18K white gold." },
+    { id: 15, sku: "ACH-JWL-015", name: "Aura Four-Stone Linear Drop Earrings", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 74000, availability: "Best Seller", occasion: "Bridal", image: "jewellery4.jpg", rating: 5, description: "Elegant linear drops featuring four graduating claw-set round solitaire diamonds per earring for fluid movement." },
+    { id: 16, sku: "ACH-JWL-016", name: "Double Layer Riviera Diamond Necklace", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 245000, availability: "Limited Edition", occasion: "Anniversary", image: "jewellery5.jpg", rating: 5, description: "Magnificent double-row layered riviera necklace featuring graduating brilliant-cut diamonds handcrafted for royal couture." },
+    { id: 17, sku: "ACH-JWL-017", name: "Empress Choker Solitaire Necklace", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 195000, availability: "New Arrival", occasion: "Wedding", image: "jewellery6.jpg", rating: 5, description: "High-jewellery solitaire collar choker designed to rest elegantly against the collarbone with maximum light refraction." },
+    { id: 18, sku: "ACH-JWL-018", name: "Art Deco Lattice Fan Drop Earrings", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 64000, availability: "Trending", occasion: "Festive", image: "jewellery7.jpg", rating: 5, description: "Art-Deco inspired cage drop earrings with fine lattice filigree and dangling diamond accents." },
+    { id: 19, sku: "ACH-JWL-019", name: "Royal Marquise Diamond Eternity Ring", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 52000, availability: "Best Seller", occasion: "Anniversary", image: "jewellery8.jpg", rating: 5, description: "Luxury multi-row band set with marquise cut and brilliant round solitaire diamonds in fine rose-gold setting." },
+    { id: 20, sku: "ACH-JWL-020", name: "Royal Zambian Emerald Choker Necklace", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 290000, availability: "Limited Edition", occasion: "Bridal", image: "jewellery9.jpg", rating: 5, description: "Heritage chandelier necklace adorned with vivid teardrop Zambian emeralds suspended from diamond-encrusted arches." },
+    { id: 21, sku: "ACH-JWL-021", name: "Concentric Double Halo Circle Studs", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 48000, availability: "In Stock", occasion: "Daily Wear", image: "jewellery10.jpg", rating: 5, description: "Timeless concentric double halo ear studs with a sparkling central solitaire cluster." },
+    { id: 22, sku: "ACH-JWL-022", name: "Tri-Band Triple Row Solitaire Diamond Ring", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 56000, availability: "Best Seller", occasion: "Anniversary", image: "jewellery11.jpg", rating: 5, description: "Multi-row band ring featuring three parallel tracks of channel and claw-set round brilliant solitaire diamonds." },
+    { id: 23, sku: "ACH-JWL-023", name: "Aura Concentric Triple Halo Ear Studs", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 49000, availability: "New Arrival", occasion: "Festive", image: "jewellery12.jpg", rating: 5, description: "Harmonious triple concentric circular halo ear studs encrusted with natural micro-pave diamonds around a central cluster." },
+    { id: 24, sku: "ACH-JWL-024", name: "Interlocking Double Halo Solitaire Studs", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: ["Adjustable"], price: 54000, availability: "Limited Edition", occasion: "Bridal", image: "jewellery13.jpg", rating: 5, description: "Avante-garde ear studs featuring an offset interlocking double halo around a prominent floating claw-set solitaire." }
 ];
 
 // Helper database functions
@@ -54,8 +174,11 @@ function initDatabase() {
         products = initialProducts;
     } else {
         initialProducts.forEach(ip => {
-            if (!products.some(p => p.id === ip.id || p.name === ip.name)) {
-                products.push(ip);
+            const idx = products.findIndex(p => p.id === ip.id || p.sku === ip.sku);
+            if (idx === -1) {
+                products.unshift(ip);
+            } else {
+                products[idx] = { ...ip, ...products[idx] };
             }
         });
     }
@@ -493,24 +616,28 @@ function changeCartQty(productId, change, size = null, color = null) {
     updateHeaderBadges();
 }
 
-// --- Quick View Modal ---
+let currentQuickViewQty = 1;
+
+// --- Quick View / Product Detail Modal ---
 function openQuickView(productId) {
     const p = getDB('products').find(prod => prod.id === productId);
     if (!p) return;
+
+    currentQuickViewQty = 1;
 
     let availableSizes = [];
     if (Array.isArray(p.size)) availableSizes = p.size;
     else if (typeof p.size === 'string' && p.size.trim()) availableSizes = p.size.split(',').map(s => s.trim());
     else if (p.category === 'Jewellery' || (p.name && p.name.toLowerCase().includes('earring'))) availableSizes = ['Adjustable', 'Standard'];
-    else availableSizes = ['S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL'];
+    else availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
     let availableColors = [];
-    if (Array.isArray(p.color)) availableColors = [p.color[0]];
+    if (Array.isArray(p.color)) availableColors = p.color;
     else if (typeof p.color === 'string' && p.color.trim()) availableColors = p.color.split(',').map(c => c.trim());
-    else availableColors = ['Royal Red', 'Emerald Green', 'Maroon', 'Midnight Blue', 'Gold', 'Ivory White', 'Classic Black'];
+    else availableColors = ['Classic Shade', 'Festive Gold', 'Royal Jewel'];
 
     currentQuickViewSize = availableSizes[0] || 'M';
-    currentQuickViewColor = availableColors[0] || 'Royal Red';
+    currentQuickViewColor = availableColors[0] || 'Standard';
 
     const sizesHTML = availableSizes.map((sz, idx) => `
         <button type="button" class="qs-pill-btn ${idx === 0 ? 'active' : ''}" onclick="selectQuickViewSize(this, '${sz}')">${sz}</button>
@@ -520,42 +647,97 @@ function openQuickView(productId) {
         <button type="button" class="qc-pill-btn ${idx === 0 ? 'active' : ''}" onclick="selectQuickViewColor(this, '${clr}')">${clr}</button>
     `).join('');
 
+    const origPrice = p.originalPrice || (p.discountPrice ? Math.round(p.price * 1.22) : p.price);
+    const hasDiscount = origPrice > p.price;
+    const discountPercent = hasDiscount ? Math.round(((origPrice - p.price) / origPrice) * 100) : 0;
+
+    const stockCount = p.stock !== undefined ? p.stock : 24;
+    const isOutOfStock = p.status === 'Out of Stock' || stockCount <= 0;
+
+    const galleryImages = (p.images && Array.isArray(p.images) && p.images.length > 0) ? p.images : [p.image];
+    const thumbnailsHTML = galleryImages.length > 1 ? `
+        <div style="display: flex; gap: 8px; margin-top: 10px; overflow-x: auto;">
+            ${galleryImages.map((img, i) => `
+                <img src="${img}" alt="${p.name} ${i+1}" onclick="document.getElementById('qvMainImg').src='${img}'" style="width: 50px; height: 65px; object-fit: cover; border-radius: 6px; border: 1.5px solid rgba(184,138,68,0.3); cursor: pointer;">
+            `).join('')}
+        </div>
+    ` : '';
+
     const quickViewContent = document.getElementById('quickViewContent');
     quickViewContent.innerHTML = `
-        <div style="height: 480px; overflow: hidden; border-radius: 12px; border: 1px solid rgba(184, 138, 68, 0.15);">
-            <img src="${p.image}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover;">
+        <div style="display: flex; flex-direction: column;">
+            <div style="height: 480px; overflow: hidden; border-radius: 12px; border: 1px solid rgba(184, 138, 68, 0.2); background: #FAF7F2; position: relative;">
+                <img id="qvMainImg" src="${p.image}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;">
+                <span style="position: absolute; top: 12px; left: 12px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; border: 1px solid #B88A44; letter-spacing: 0.05em;">${(p.availability || 'Couture').toUpperCase()}</span>
+                ${p.sku ? `<span style="position: absolute; bottom: 12px; left: 12px; background: rgba(0,0,0,0.65); color: #FFF; font-size: 0.68rem; font-family: monospace; padding: 2px 8px; border-radius: 4px;">SKU: ${p.sku}</span>` : ''}
+            </div>
+            ${thumbnailsHTML}
         </div>
-        <div style="padding: 10px; max-height: 480px; overflow-y: auto;">
-            <span style="font-family: var(--font-body); font-size: 0.8rem; font-weight: 700; color: #B88A44;">${p.category.toUpperCase()}</span>
-            <h3 class="modal-title-serif" style="margin-top: 6px; font-size: 1.5rem;">${p.name}</h3>
-            <div style="color: #B88A44; font-size: 1rem; margin: 8px 0;">★★★★★ (5 reviews)</div>
-            <p style="font-family: var(--font-body); font-size: 0.85rem; line-height: 1.6; color: var(--color-charcoal-body); margin-bottom: 15px;">
-                Fabric/Material: ${p.fabric}<br>
-                Occasion: ${p.occasion}<br>
-                Handcrafted luxury couture by master Indian artisans.
-            </p>
+        <div style="padding: 10px 14px; max-height: 520px; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-family: var(--font-body); font-size: 0.78rem; font-weight: 700; color: #B88A44; letter-spacing: 0.08em;">${(p.parentCategory || 'ETHNIC WEAR').toUpperCase()} • ${p.category.toUpperCase()}</span>
+                <span style="font-size: 0.75rem; color: ${isOutOfStock ? '#dc3545' : '#28a745'}; font-weight: 700;">${isOutOfStock ? '● Out of Stock' : `● In Stock (${stockCount} available)`}</span>
+            </div>
+            <h3 class="modal-title-serif" style="margin-top: 4px; font-size: 1.45rem; line-height: 1.3; color: #3C0008;">${p.name}</h3>
+            
+            <div style="display: flex; align-items: center; gap: 8px; margin: 8px 0 14px;">
+                <span style="color: #B88A44; font-size: 0.95rem;">★★★★★</span>
+                <span style="font-size: 0.78rem; color: #777;">(5.0 / 28 Couture Reviews)</span>
+            </div>
+
+            <!-- Price Box -->
+            <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; padding: 8px 12px; background: #FAF7F2; border-radius: 8px; border: 1px solid rgba(184,138,68,0.15);">
+                <span style="font-family: var(--font-heading); font-size: 1.7rem; font-weight: 700; color: #3C0008;">₹${p.price.toLocaleString('en-IN')}</span>
+                ${hasDiscount ? `
+                    <span style="font-size: 1.05rem; color: #888; text-decoration: line-through;">₹${origPrice.toLocaleString('en-IN')}</span>
+                    <span style="font-size: 0.75rem; background: rgba(0,102,51,0.12); color: #006633; padding: 3px 8px; border-radius: 4px; font-weight: 700;">${discountPercent}% OFF</span>
+                ` : ''}
+            </div>
 
             <!-- Size Selection -->
-            <div style="margin-bottom: 16px;">
-                <label style="display: block; font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: var(--color-black-text); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Select Size Options:</label>
+            <div style="margin-bottom: 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <label style="font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; color: var(--color-black-text); text-transform: uppercase; letter-spacing: 0.05em;">Select Size (India / UK):</label>
+                    <span style="font-size: 0.72rem; color: #B88A44; text-decoration: underline; cursor: pointer;">Size Guide</span>
+                </div>
                 <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                     ${sizesHTML}
                 </div>
             </div>
 
             <!-- Color Selection -->
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: var(--color-black-text); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Select Color Options:</label>
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700; color: var(--color-black-text); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Selected Shade:</label>
                 <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                     ${colorsHTML}
                 </div>
             </div>
 
-            <div style="font-family: var(--font-heading); font-size: 1.6rem; font-weight: 600; color: var(--color-black-text); margin-bottom: 20px;">
-                ₹${p.price.toLocaleString('en-IN')}
+            <!-- Quantity Selector -->
+            <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 18px;">
+                <span style="font-size: 0.82rem; font-weight: 700; color: #3C0008; text-transform: uppercase;">Quantity:</span>
+                <div style="display: flex; align-items: center; border: 1px solid #B88A44; border-radius: 20px; overflow: hidden; background: #FFF;">
+                    <button type="button" onclick="if(currentQuickViewQty>1){currentQuickViewQty--; document.getElementById('qvQtySpan').innerText=currentQuickViewQty;}" style="padding: 4px 12px; background: none; border: none; font-size: 1rem; font-weight: 700; cursor: pointer; color: #3C0008;">−</button>
+                    <span id="qvQtySpan" style="padding: 0 10px; font-weight: 700; font-size: 0.9rem; color: #3C0008;">1</span>
+                    <button type="button" onclick="currentQuickViewQty++; document.getElementById('qvQtySpan').innerText=currentQuickViewQty;" style="padding: 4px 12px; background: none; border: none; font-size: 1rem; font-weight: 700; cursor: pointer; color: #3C0008;">+</button>
+                </div>
             </div>
-            <button class="buy-now-btn" style="width: 100%; padding: 14px; border-radius: 30px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; font-weight: 700; border: 1px solid #B88A44; cursor: pointer; text-transform: uppercase; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(60, 0, 8, 0.3);" onclick="addItemToCart(${p.id}, currentQuickViewSize, currentQuickViewColor); closeQuickViewModal(); openCheckoutModal();">⚡ BUY NOW</button>
-            <button class="add-to-bag" style="width: 100%; padding: 12px; border-radius: 30px; background: transparent; border: 1px solid #B88A44; color: #121212; font-weight: 600; cursor: pointer;" onclick="addItemToCart(${p.id}, currentQuickViewSize, currentQuickViewColor); closeQuickViewModal();">ADD TO SHOPPING BAG</button>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+                <button class="buy-now-btn" style="width: 100%; padding: 14px; border-radius: 30px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; font-weight: 700; border: 1px solid #B88A44; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 15px rgba(60, 0, 8, 0.3); font-size: 0.92rem; letter-spacing: 0.05em;" onclick="for(let q=0;q<currentQuickViewQty;q++){addItemToCart(${p.id}, currentQuickViewSize, currentQuickViewColor);} closeQuickViewModal(); openCheckoutModal();" ${isOutOfStock ? 'disabled' : ''}>⚡ ${isOutOfStock ? 'OUT OF STOCK' : 'BUY NOW'}</button>
+                <button class="add-to-bag" style="width: 100%; padding: 12px; border-radius: 30px; background: transparent; border: 1.5px solid #B88A44; color: #3C0008; font-weight: 700; cursor: pointer; font-size: 0.88rem; letter-spacing: 0.05em;" onclick="for(let q=0;q<currentQuickViewQty;q++){addItemToCart(${p.id}, currentQuickViewSize, currentQuickViewColor);} closeQuickViewModal();" ${isOutOfStock ? 'disabled' : ''}>ADD TO SHOPPING BAG</button>
+            </div>
+
+            <!-- Description & Accordions -->
+            <div style="font-family: var(--font-body); font-size: 0.85rem; line-height: 1.6; color: var(--color-charcoal-body); border-top: 1px solid rgba(184,138,68,0.2); padding-top: 14px;">
+                <p style="margin-bottom: 12px;">${p.description || 'Exquisite handcrafted ethnic silhouette tailored to perfection by Achira master artisans.'}</p>
+                <div style="background: #FAF7F2; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                    <div style="margin-bottom: 6px;"><strong>✦ Fabric:</strong> ${p.fabric || 'Pure Cotton Mulmul'}</div>
+                    <div style="margin-bottom: 6px;"><strong>✦ Care Instructions:</strong> ${p.careInstructions || 'Dry clean first wash. Gentle cold hand wash thereafter.'}</div>
+                    <div><strong>✦ Delivery:</strong> ${p.deliveryInfo || 'Dispatched within 24-48 hours. Express delivery across India in 3-5 business days.'}</div>
+                </div>
+            </div>
         </div>
     `;
     
@@ -3085,7 +3267,9 @@ function filterByCategory(categoryLabel) {
     }
 
     let matchedCheckbox = null;
-    if (categoryLabel === 'Cotton Kurtas' || categoryLabel === 'Cotton Dresses') {
+    if (categoryLabel === 'Anarkali' || categoryLabel === 'Anarkali Dresses') {
+        matchedCheckbox = Array.from(checkboxes).find(cb => cb.value === 'Anarkali' || cb.value === 'Anarkali Kurti' || cb.value === 'Anarkali Dresses');
+    } else if (categoryLabel === 'Cotton Kurtas' || categoryLabel === 'Cotton Dresses') {
         matchedCheckbox = Array.from(checkboxes).find(cb => cb.value === 'Cotton Kurtas' || cb.value === 'Cotton Dresses');
     } else if (categoryLabel === 'Designer Sarees') {
         matchedCheckbox = Array.from(checkboxes).find(cb => cb.value === 'Designer Sarees' || cb.value === 'Sarees');

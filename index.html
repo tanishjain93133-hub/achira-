@@ -242,6 +242,15 @@
         <!-- 1. SHOP BY CATEGORY (IMMEDIATELY BELOW NAVBAR) -->
         <section class="shop-by-category-circular sub-hero-collections fade-in-onload" id="collections" style="padding: 28px 0 20px 0; background: #F9F6F1; border-bottom: 1px solid rgba(200, 155, 74, 0.15);">
             <div class="circular-category-container">
+                <!-- Category 0: Anarkali -->
+                <div class="circular-cat-card" onclick="filterByCategory('Anarkali')">
+                    <div class="circular-img-wrap">
+                        <img src="anarkali1.jpg" alt="Royal Anarkali Couture">
+                        <div class="circular-gold-border"></div>
+                    </div>
+                    <span class="circular-cat-title">Anarkali</span>
+                </div>
+
                 <!-- Category 1: Cotton Dresses -->
                 <div class="circular-cat-card" onclick="filterByCategory('Cotton Kurtas')">
                     <div class="circular-img-wrap">
@@ -529,19 +538,15 @@
                         <h5 class="filter-title" onclick="toggleFeaturedFilter(this)">Category</h5>
                         <div class="filter-options" id="featCategory">
                             <label class="checkbox-label">
+                                <input type="checkbox" value="Anarkali" onchange="applyFeaturedFilters()"> Royal Anarkali
+                                <span class="checkmark"></span>
+                            </label>
+                            <label class="checkbox-label">
                                 <input type="checkbox" value="Gown" onchange="applyFeaturedFilters()"> Gown
                                 <span class="checkmark"></span>
                             </label>
                             <label class="checkbox-label">
                                 <input type="checkbox" value="Cotton Kurtas" onchange="applyFeaturedFilters()"> Cotton Dresses
-                                <span class="checkmark"></span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" value="Anarkali Kurtas" onchange="applyFeaturedFilters()"> Anarkali Dresses
-                                <span class="checkmark"></span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" value="Straight Kurtas" onchange="applyFeaturedFilters()"> Straight Dresses
                                 <span class="checkmark"></span>
                             </label>
                             <label class="checkbox-label">
