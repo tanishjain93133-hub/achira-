@@ -942,9 +942,12 @@
                 }
             } catch (err) {}
 
-            // 3. Deduplicate across backend & central cloud store (NEVER use local customer's personal browser cache)
+            // 3. Merge and deduplicate across all persistent stores (Backend API + Cloud Bin + Local Store)
+            const localOrders = getDB('orders', []);
+            const adminOrders = getDB('admin_orders', []);
+
             const orderMap = new Map();
-            [...backendOrders, ...cloudOrders].forEach(o => {
+            [...backendOrders, ...cloudOrders, ...localOrders, ...adminOrders].forEach(o => {
                 if (o && o.id) {
                     const idStr = String(o.id);
                     if (!orderMap.has(idStr)) {
