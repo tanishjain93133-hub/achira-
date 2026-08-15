@@ -922,11 +922,23 @@ function handleContactSubmit(e) {
 
 // --- Profile & My Orders Modal ---
 function openProfileModal() {
-    if (!currentUser) return;
-    document.getElementById('patronName').textContent = currentUser.name;
-    document.getElementById('patronEmail').textContent = currentUser.email;
+    if (!currentUser) {
+        const stored = localStorage.getItem('currentUser');
+        if (stored) {
+            try { currentUser = JSON.parse(stored); } catch(e) {}
+        }
+    }
+    if (!currentUser) {
+        openAuthModal();
+        return;
+    }
+    const patronName = document.getElementById('patronName');
+    const patronEmail = document.getElementById('patronEmail');
+    if (patronName) patronName.textContent = currentUser.name || 'Valued Patron';
+    if (patronEmail) patronEmail.textContent = currentUser.email || '';
     renderUserOrdersTable();
-    document.getElementById('profileModal').classList.add('active');
+    const pModal = document.getElementById('profileModal');
+    if (pModal) pModal.classList.add('active');
 }
 
 function closeProfileModal() {
@@ -947,10 +959,17 @@ async function renderUserOrdersTable() {
     
     listWrap.innerHTML = `<p style="font-family: var(--font-body); font-size: 0.85rem; color: var(--color-charcoal-body);">Loading your personal purchase history...</p>`;
 
-    const currEmail = (currentUser && currentUser.email) ? currentUser.email.toLowerCase().trim() : '';
+    const currEmail = (currentUser && currentUser.email) 
+        ? currentUser.email.toLowerCase().trim() 
+        : (localStorage.getItem('userEmail') ? localStorage.getItem('userEmail').toLowerCase().trim() : '');
 
     if (!currEmail) {
-        listWrap.innerHTML = `<p style="font-family: var(--font-body); font-size: 0.85rem; color: var(--color-charcoal-body); padding: 20px 0;">Please log in to view your orders.</p>`;
+        listWrap.innerHTML = `
+            <div style="text-align: center; padding: 30px 20px;">
+                <p style="font-family: var(--font-body); font-size: 0.95rem; color: var(--color-charcoal-body); margin-bottom: 12px;">Please log in with your email or Google account to view your purchase history.</p>
+                <button onclick="closeProfileModal(); openAuthModal();" style="padding: 10px 24px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 20px; font-weight: 700; cursor: pointer;">Sign In to Account</button>
+            </div>
+        `;
         return;
     }
 
@@ -968,7 +987,24 @@ async function renderUserOrdersTable() {
         }
     } catch (e) {}
 
-    // 2. Local fallback strictly filtered for current customer's email
+    // 2. Fetch from Cloud Database Bin for multi-device sync
+    try {
+        const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+        if (cloudRes.ok) {
+            const cData = await cloudRes.json();
+            if (cData && Array.isArray(cData.orders)) {
+                cData.orders.forEach(co => {
+                    if (co && co.id && (co.userEmail || co.email || '').toLowerCase().trim() === currEmail) {
+                        if (!customerOrders.some(o => String(o.id) === String(co.id))) {
+                            customerOrders.push(co);
+                        }
+                    }
+                });
+            }
+        }
+    } catch (e) {}
+
+    // 3. Local fallback strictly filtered for current customer's email
     const localOrders = getDB('orders', []);
     localOrders.forEach(lo => {
         if (lo && lo.id && (lo.userEmail || lo.email || '').toLowerCase().trim() === currEmail) {
@@ -982,7 +1018,7 @@ async function renderUserOrdersTable() {
         listWrap.innerHTML = `
             <div style="text-align: center; padding: 40px 20px;">
                 <p style="font-family: var(--font-body); font-size: 0.95rem; color: var(--color-charcoal-body); margin-bottom: 12px;">You have not placed any orders yet with <strong>${currEmail}</strong>.</p>
-                <button onclick="closeProfileModal()" style="padding: 10px 20px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 20px; font-weight: 700; cursor: pointer;">Explore Couture Collection</button>
+                <button onclick="closeProfileModal()" style="padding: 10px 24px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 20px; font-weight: 700; cursor: pointer;">Explore Couture Collection</button>
             </div>
         `;
         return;
@@ -991,7 +1027,7 @@ async function renderUserOrdersTable() {
     let html = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
             <strong style="font-family: var(--font-brand); color: #3C0008; font-size: 1rem;">My Order History (${customerOrders.length})</strong>
-            <span style="font-size: 0.78rem; color: #888;">Account: ${currEmail}</span>
+            <span style="font-size: 0.78rem; color: #888;">Patron: ${currEmail}</span>
         </div>
         <div style="overflow-x: auto;">
         <table class="admin-table" style="width: 100%; border-collapse: collapse;">
