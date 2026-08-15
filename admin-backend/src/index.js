@@ -638,10 +638,12 @@ app.get('/api/user/orders', authenticateToken, async (req, res) => {
 
 // --- ADMIN ORDERS (UNFILTERED: SELECT ALL ORDERS ACROSS ALL CUSTOMERS) ---
 
-app.get('/api/admin/orders', authenticateToken, requireAdmin, async (req, res) => {
+// Dedicated Admin2 Orders API (Fetches ALL orders from EVERY customer across DB and Cloud storage)
+const fetchAllAdminOrdersHandler = async (req, res) => {
   try {
     let allOrders = [];
 
+    // 1. Query PostgreSQL
     if (isDbConnected && prisma) {
       try {
         allOrders = await prisma.order.findMany({
@@ -653,12 +655,35 @@ app.get('/api/admin/orders', authenticateToken, requireAdmin, async (req, res) =
       }
     }
 
-    if (!allOrders || allOrders.length === 0) {
-      allOrders = memoryStore.orders;
-    }
+    // 2. Query Cloud Storage Database Bin
+    let cloudOrders = [];
+    try {
+      const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+      if (cloudRes.ok) {
+        const cData = await cloudRes.json();
+        if (cData && Array.isArray(cData.orders)) cloudOrders = cData.orders;
+      }
+    } catch (e) {}
+
+    // 3. Merge with memory store
+    const orderMap = new Map();
+    [...allOrders, ...cloudOrders, ...memoryStore.orders].forEach(o => {
+      if (o && o.id) {
+        const idStr = String(o.id);
+        if (!orderMap.has(idStr)) {
+          orderMap.set(idStr, o);
+        }
+      }
+    });
+
+    const unifiedOrders = Array.from(orderMap.values()).sort((a, b) => {
+      const dateA = new Date(a.createdAt || a.date || 0).getTime();
+      const dateB = new Date(b.createdAt || b.date || 0).getTime();
+      return dateB - dateA;
+    });
 
     // Normalize format for Admin Dashboard
-    const formatted = allOrders.map(o => ({
+    const formatted = unifiedOrders.map(o => ({
       id: o.id,
       customerName: o.customerName || o.userName || (o.user ? o.user.name : 'Valued Patron'),
       userName: o.customerName || o.userName || (o.user ? o.user.name : 'Valued Patron'),
@@ -682,13 +707,17 @@ app.get('/api/admin/orders', authenticateToken, requireAdmin, async (req, res) =
       createdAt: o.createdAt || new Date().toISOString()
     }));
 
-    console.log(`[ADMIN ORDERS QUERY] Retrieved ${formatted.length} total orders for Admin2.`);
+    console.log(`[ADMIN2 ORDERS QUERY] Retrieved ${formatted.length} total orders across ALL customers.`);
     res.json(formatted);
   } catch (error) {
     console.error('[ADMIN ORDERS FETCH ERROR]', error);
     res.json(memoryStore.orders);
   }
-});
+};
+
+app.get('/api/admin/orders', authenticateToken, requireAdmin, fetchAllAdminOrdersHandler);
+app.get('/api/admin2/orders', authenticateToken, requireAdmin, fetchAllAdminOrdersHandler);
+
 
 // Update Order Status
 app.patch('/api/admin/orders/:id/status', authenticateToken, requireAdmin, async (req, res) => {

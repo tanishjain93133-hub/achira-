@@ -918,10 +918,10 @@
             const token = localStorage.getItem('admin2Token');
             if (!token) return;
 
-            // 1. Fetch Orders from Backend API
+            // 1. Fetch Orders from Dedicated Admin2 API (/api/admin2/orders & /api/admin/orders)
             let backendOrders = [];
             try {
-                const res = await fetch(`${API_BASE}/api/admin/orders`, {
+                const res = await fetch(`${API_BASE}/api/admin2/orders`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await res.json();
@@ -932,7 +932,7 @@
                 console.warn('[ADMIN2 ORDERS FETCH]', e);
             }
 
-            // 2. Fetch from Cloud Bin
+            // 2. Fetch from Central Cloud Database Bin (Includes orders from ALL customers globally)
             let cloudOrders = [];
             try {
                 const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
@@ -942,12 +942,9 @@
                 }
             } catch (err) {}
 
-            // 3. Merge with local storage
-            const localOrders = getDB('orders', []);
-            const adminOrders = getDB('admin_orders', []);
-
+            // 3. Deduplicate across backend & central cloud store (NEVER use local customer's personal browser cache)
             const orderMap = new Map();
-            [...backendOrders, ...cloudOrders, ...localOrders, ...adminOrders].forEach(o => {
+            [...backendOrders, ...cloudOrders].forEach(o => {
                 if (o && o.id) {
                     const idStr = String(o.id);
                     if (!orderMap.has(idStr)) {
