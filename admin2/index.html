@@ -534,7 +534,8 @@
                         <input type="text" id="productSearchInput" class="filter-input" placeholder="🔍 Search Anarkali, SKU, Name..." oninput="filterProductsTable()">
                         <select id="productCategoryFilter" class="filter-input" onchange="filterProductsTable()">
                             <option value="">All Categories</option>
-                            <option value="Anarkali" selected>Anarkali (Ethnic Wear)</option>
+                            <option value="Kurta Sets">Kurta Sets (Ethnic Wear)</option>
+                            <option value="Anarkali">Anarkali (Ethnic Wear)</option>
                             <option value="Cotton Kurtas">Cotton Dresses</option>
                             <option value="Lucknowi Collection">Lucknowi Dresses</option>
                             <option value="Chanderi Collection">Indo-Western Dresses</option>
@@ -765,7 +766,8 @@
                     <div class="form-group">
                         <label>Category *</label>
                         <select id="prodCategory" class="form-control" required>
-                            <option value="Anarkali" selected>Anarkali</option>
+                            <option value="Kurta Sets">Kurta Sets</option>
+                            <option value="Anarkali">Anarkali</option>
                             <option value="Cotton Kurtas">Cotton Dresses</option>
                             <option value="Lucknowi Collection">Lucknowi Dresses</option>
                             <option value="Chanderi Collection">Indo-Western Dresses</option>
@@ -1415,7 +1417,9 @@
                     (p.category && p.category.toLowerCase().includes(searchVal)) ||
                     (p.fabric && p.fabric.toLowerCase().includes(searchVal));
                 
-                const matchesCat = !catVal || p.category === catVal || (catVal === 'Anarkali' && (p.category === 'Anarkali' || (p.name && p.name.toLowerCase().includes('anarkali'))));
+                const matchesCat = !catVal || p.category === catVal || 
+                    (catVal === 'Anarkali' && (p.category === 'Anarkali' || (p.name && p.name.toLowerCase().includes('anarkali')))) ||
+                    (catVal === 'Kurta Sets' && (p.category === 'Kurta Sets' || (p.category && p.category.toLowerCase().includes('kurta'))));
 
                 return matchesSearch && matchesCat;
             });

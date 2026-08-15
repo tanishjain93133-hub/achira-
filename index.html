@@ -251,6 +251,15 @@
                     <span class="circular-cat-title">Anarkali</span>
                 </div>
 
+                <!-- Category 0.5: Kurta Sets -->
+                <div class="circular-cat-card" onclick="filterByCategory('Kurta Sets')">
+                    <div class="circular-img-wrap">
+                        <img src="kurtaset1.jpg" alt="Ethnic Kurta Sets">
+                        <div class="circular-gold-border"></div>
+                    </div>
+                    <span class="circular-cat-title">Kurta Sets</span>
+                </div>
+
                 <!-- Category 1: Cotton Dresses -->
                 <div class="circular-cat-card" onclick="filterByCategory('Cotton Kurtas')">
                     <div class="circular-img-wrap">
@@ -537,6 +546,10 @@
                     <div class="filter-group">
                         <h5 class="filter-title" onclick="toggleFeaturedFilter(this)">Category</h5>
                         <div class="filter-options" id="featCategory">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="Kurta Sets" onchange="applyFeaturedFilters()"> Kurta Sets
+                                <span class="checkmark"></span>
+                            </label>
                             <label class="checkbox-label">
                                 <input type="checkbox" value="Anarkali" onchange="applyFeaturedFilters()"> Royal Anarkali
                                 <span class="checkmark"></span>
