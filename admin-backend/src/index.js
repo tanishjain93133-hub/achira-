@@ -57,19 +57,11 @@ const memoryStore = {
     { id: 208, sku: "ACH-KRT-008", name: "Meghna Slate Blue Embroidered Square Yoke Kurta Trouser Set", category: "Kurta Sets", parentCategory: "Ethnic Wear", fabric: "Pure Slub Linen Cotton", color: "Slate Blue", size: "XS, S, M, L, XL, XXL", price: 3890, originalPrice: 4700, discountPrice: 3890, stock: 19, status: "Active", featured: true, availability: "Best Seller", occasion: "Office & Festive Wear", image: "kurtaset8.jpg", images: ["kurtaset8.jpg"], rating: 5, description: "Understated elegance in dusty slate blue linen-cotton kurta boasting an intricate embroidered square neckline yoke with mirror accents, delicate booti embroidery, and tailored matching trousers." },
     { id: 209, sku: "ACH-KRT-009", name: "Swarna Kesari Mustard Yoke Embroidered Kurta Set with Kalamkari Dupatta", category: "Kurta Sets", parentCategory: "Ethnic Wear", fabric: "Pure Chanderi Silk", color: "Mustard Gold", size: "XS, S, M, L, XL, XXL", price: 4350, originalPrice: 5200, discountPrice: 4350, stock: 16, status: "Active", featured: true, availability: "New Arrival", occasion: "Festive & Wedding Guest", image: "kurtaset9.jpg", images: ["kurtaset9.jpg"], rating: 5, description: "Regal mustard gold kurta set enriched with geometric mirror embroidered neck yoke, matching tailored trousers, and a grand geometric Kalamkari printed dupatta." },
     { id: 210, sku: "ACH-KRT-010", name: "Vrinda Lime Green V-Neck A-Line Kurta Salwar Set", category: "Kurta Sets", parentCategory: "Ethnic Wear", fabric: "Pure Chanderi Cotton", color: "Lime Green", size: "XS, S, M, L, XL, XXL", price: 3990, originalPrice: 4800, discountPrice: 3990, stock: 25, status: "Active", featured: true, availability: "Best Seller", occasion: "Mehendi & Festive", image: "kurtaset10.jpg", images: ["kurtaset10.jpg", "kurtaset2.jpg"], rating: 5, description: "Radiant lime green A-line kurta featuring an embroidered contrasting bottle green V-neck yoke, floral motif embroidery on the panels, and unique tie-up drawstring cuff trousers." },
-    { id: 1, name: "Maharani Zardozi Anarkali Dress", category: "Cotton Kurtas", fabric: "Cotton", color: "Red", size: "M, L, XL, XXL", price: 4500, availability: "New Arrival", occasion: "Wedding", image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80", rating: 5, sku: "ACH-SKU-001" },
-    { id: 2, name: "Kashmiri Arayan Embroidered Dress", category: "Lucknowi Collection", fabric: "Chanderi", color: "Black", size: "S, M, L, XXL, XXXXL", price: 3200, availability: "Best Seller", occasion: "Festive", image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80", rating: 4, sku: "ACH-SKU-002" },
-    { id: 3, name: "Gulbahar Handblock Cotton Dress", category: "Cotton Kurtas", fabric: "Cotton", color: "Pink", size: "XS, S, M, L, XL, XXL, XXXXL, XXXXXL", price: 1800, availability: "Best Seller", occasion: "Casual", image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=600&q=80", rating: 5, sku: "ACH-SKU-003" },
-    { id: 4, name: "Atelier Lucknowi Chikankari Tunic", category: "Lucknowi Collection", fabric: "Muslin", color: "White", size: "S, M, L, XL", price: 2900, availability: "New Arrival", occasion: "Office Wear", image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80", rating: 4, sku: "ACH-SKU-004" },
-    { id: 5, name: "Noor Indigo Straight Dress", category: "Chanderi Collection", fabric: "Linen", color: "Blue", size: "M, L, XL, XXL, XXXXXL", price: 2200, availability: "New Arrival", occasion: "Casual", image: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=600&q=80", rating: 4, sku: "ACH-SKU-005" },
-    { id: 6, name: "Avanti A-Line Banarasi Tunic", category: "Designer Sarees", fabric: "Silk", color: "Green", size: "S, M, L", price: 4900, availability: "Best Seller", occasion: "Festive", image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80", rating: 5, sku: "ACH-SKU-006" },
-    { id: 7, name: "Zoya Indo-Western Palazzo Set", category: "Chanderi Collection", fabric: "Rayon", color: "Yellow", size: "M, L, XL, XXL", price: 3800, availability: "Trending", occasion: "Party Wear", image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80", rating: 4, sku: "ACH-SKU-007" },
-    { id: 8, name: "Avani Banarasi Silk Saree", category: "Designer Sarees", fabric: "Silk", color: "Red", size: "Free Size", price: 8500, availability: "New Arrival", occasion: "Wedding", image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80", rating: 5, sku: "ACH-SKU-008" },
-    { id: 9, name: "Atelier Spiral Pave Diamond Studs", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: "Adjustable", price: 45000, availability: "New Arrival", occasion: "Festive", image: "jewellery1.jpg", rating: 5, sku: "ACH-SKU-009" },
-    { id: 10, name: "Celestial Crescent Diamond Earrings", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: "Adjustable", price: 58000, availability: "New Arrival", occasion: "Bridal", image: "jewellery2.jpg", rating: 5, sku: "ACH-SKU-010" },
-    { id: 11, name: "Vasant Floral Organza Saree", category: "Organza Sarees", fabric: "Organza", color: "Pink", size: "Free Size", price: 6800, availability: "Trending", occasion: "Festive", image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=600&q=85", rating: 5, sku: "ACH-SKU-011" },
-    { id: 12, name: "Royal Banarasi Silk Lehenga", category: "Bridal Lehengas", fabric: "Silk", color: "Red", size: "M, L, XL, XXL", price: 14500, availability: "Best Seller", occasion: "Wedding", image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80", rating: 5, sku: "ACH-SKU-012" },
-    { id: 13, name: "Royal Heritage Velvet Gown", category: "Gown", fabric: "Velvet", color: "Maroon", size: "S, M, L, XL, XXL, XXXXL, XXXXXL", price: 8900, availability: "New Arrival", occasion: "Party Wear", image: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=600&q=80", rating: 5, sku: "ACH-SKU-013" }
+    { id: 301, sku: "ACH-JWL-301", name: "Atelier Spiral Pave Diamond Studs", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: "Standard", price: 45000, availability: "New Arrival", occasion: "Festive", image: "jewellery1.jpg", rating: 5 },
+    { id: 302, sku: "ACH-JWL-302", name: "Celestial Crescent Diamond Earrings", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: "Standard", price: 58000, availability: "New Arrival", occasion: "Bridal", image: "jewellery2.jpg", rating: 5 },
+    { id: 303, sku: "ACH-JWL-303", name: "Solitaire Diamond Riviera Necklace", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: "Adjustable", price: 185000, availability: "Best Seller", occasion: "Wedding", image: "jewellery3.jpg", rating: 5 },
+    { id: 401, sku: "ACH-RNG-401", name: "Aura Wave Diamond Cluster Ring", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: "Adjustable", price: 48500, availability: "New Arrival", occasion: "Anniversary", image: "ring1.jpg", rating: 5 },
+    { id: 402, sku: "ACH-RNG-402", name: "Empress Oval Halo Floral Diamond Ring", category: "Jewellery", fabric: "Gemstones", color: "Gold", size: "Adjustable", price: 42000, availability: "Best Seller", occasion: "Daily Wear", image: "ring2.jpg", rating: 5 }
   ],
   orders: [],
   coupons: [
@@ -90,6 +82,55 @@ const memoryStore = {
   logs: []
 };
 
+// Persistent JSON File Storage Engine (Ensures 100% data persistence on disk without PostgreSQL/MongoDB)
+const fs = require('fs');
+const dbFilePath = path.join(__dirname, '..', 'data', 'achira_db.json');
+
+function loadFileDatabase() {
+  try {
+    if (fs.existsSync(dbFilePath)) {
+      const raw = fs.readFileSync(dbFilePath, 'utf8');
+      const data = JSON.parse(raw);
+      if (data && typeof data === 'object') {
+        if (Array.isArray(data.orders)) memoryStore.orders = data.orders;
+        if (Array.isArray(data.users)) memoryStore.users = data.users;
+        if (Array.isArray(data.products) && data.products.length > 0) memoryStore.products = data.products;
+        if (Array.isArray(data.coupons)) memoryStore.coupons = data.coupons;
+        if (Array.isArray(data.enquiries)) memoryStore.enquiries = data.enquiries;
+        if (Array.isArray(data.logs)) memoryStore.logs = data.logs;
+        if (data.settings) memoryStore.settings = { ...memoryStore.settings, ...data.settings };
+        console.log(`💾 :: Persistent File Database Loaded: ${memoryStore.orders.length} orders, ${memoryStore.users.length} users, ${memoryStore.products.length} products.`);
+      }
+    } else {
+      saveFileDatabase();
+    }
+  } catch (err) {
+    console.warn('⚠️ :: [FILE DB LOAD NOTICE]', err.message);
+  }
+}
+
+function saveFileDatabase() {
+  try {
+    const dataDir = path.dirname(dbFilePath);
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    const dataToSave = {
+      orders: memoryStore.orders,
+      users: memoryStore.users,
+      products: memoryStore.products,
+      coupons: memoryStore.coupons,
+      enquiries: memoryStore.enquiries,
+      logs: memoryStore.logs,
+      settings: memoryStore.settings,
+      lastUpdated: new Date().toISOString()
+    };
+    fs.writeFileSync(dbFilePath, JSON.stringify(dataToSave, null, 2), 'utf8');
+  } catch (err) {
+    console.warn('⚠️ :: [FILE DB SAVE NOTICE]', err.message);
+  }
+}
+
 // Seed admin2 account in memory store
 (async () => {
   const hash = await bcrypt.hash('admin2@Achira2026', 10);
@@ -100,6 +141,7 @@ const memoryStore = {
     role: 'ADMIN',
     email: 'admin2@achira.com'
   });
+  loadFileDatabase();
 })();
 
 // Test PostgreSQL Connection
@@ -112,11 +154,24 @@ async function checkDatabaseConnection() {
     return true;
   } catch (err) {
     isDbConnected = false;
-    console.warn('⚠️ :: PostgreSQL server not active on DATABASE_URL. Running in-memory database resilient engine.', err.message);
+    console.warn('⚠️ :: PostgreSQL server not active on DATABASE_URL. Running persistent JSON file database engine.');
     return false;
   }
 }
 checkDatabaseConnection();
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    app: 'Achira Couture Backend API',
+    version: '3.0.0',
+    dbConnected: isDbConnected,
+    totalOrders: memoryStore.orders.length,
+    totalProducts: memoryStore.products.length,
+    timestamp: new Date().toISOString()
+  });
+});
 
 // --- Authentication Middleware ---
 
@@ -398,7 +453,7 @@ app.post('/api/admin/products', authenticateToken, requireAdmin, async (req, res
     price: parseFloat(price),
     availability: availability || 'In Stock',
     occasion: occasion || 'Festive',
-    image: image || 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80',
+    image: image || 'anarkali1.jpg',
     description: description || name,
     sku: `ACH-SKU-${Date.now()}`
   };
@@ -595,6 +650,9 @@ const checkoutHandler = async (req, res) => {
         createdAt: new Date()
       });
     }
+
+    // Persist to Disk File Database immediately
+    saveFileDatabase();
 
     // Synchronous Server-side Cloud Storage Sync
     try {
@@ -813,36 +871,41 @@ app.get('/api/admin/orders', authenticateToken, requireAdmin, fetchAllAdminOrder
 app.get('/api/admin2/orders', authenticateToken, requireAdmin, fetchAllAdminOrdersHandler);
 
 
-// Update Order Status
-app.patch('/api/admin/orders/:id/status', authenticateToken, requireAdmin, async (req, res) => {
+// Update Order Status (supports both PATCH and PUT for seamless client compatibility)
+const updateOrderStatusHandler = async (req, res) => {
   const orderId = req.params.id;
-  const { status, paymentStatus } = req.body;
+  const { status, orderStatus, paymentStatus } = req.body || {};
+  const newStatus = status || orderStatus;
 
   try {
     if (isDbConnected && prisma) {
       await prisma.order.update({
         where: { id: orderId },
         data: {
-          ...(status ? { orderStatus: status } : {}),
+          ...(newStatus ? { orderStatus: newStatus } : {}),
           ...(paymentStatus ? { paymentStatus: paymentStatus } : {})
         }
       }).catch(() => {});
     }
 
-    const matched = memoryStore.orders.find(o => String(o.id) === String(orderId));
+    const matched = memoryStore.orders.find(o => String(o.id) === String(orderId) || String(o.id).replace(/^ACH-/, '') === String(orderId));
     if (matched) {
-      if (status) {
-        matched.orderStatus = status;
-        matched.status = status;
+      if (newStatus) {
+        matched.orderStatus = newStatus;
+        matched.status = newStatus;
       }
       if (paymentStatus) matched.paymentStatus = paymentStatus;
     }
 
+    saveFileDatabase();
     res.json({ success: true, message: `Order ${orderId} updated successfully.` });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to update order status.' });
   }
-});
+};
+
+app.patch('/api/admin/orders/:id/status', authenticateToken, requireAdmin, updateOrderStatusHandler);
+app.put('/api/admin/orders/:id/status', authenticateToken, requireAdmin, updateOrderStatusHandler);
 
 // Delete Single Order
 app.delete('/api/admin/orders/:id', authenticateToken, requireAdmin, async (req, res) => {
@@ -854,7 +917,8 @@ app.delete('/api/admin/orders/:id', authenticateToken, requireAdmin, async (req,
       await prisma.order.delete({ where: { id: orderId } }).catch(() => {});
     }
 
-    memoryStore.orders = memoryStore.orders.filter(o => String(o.id) !== String(orderId));
+    memoryStore.orders = memoryStore.orders.filter(o => String(o.id) !== String(orderId) && String(o.id).replace(/^ACH-/, '') !== String(orderId));
+    saveFileDatabase();
     console.log(`[ORDER DELETED] ID: ${orderId}`);
     res.json({ success: true, message: `Order ${orderId} deleted permanently.` });
   } catch (error) {
@@ -870,6 +934,7 @@ app.delete('/api/admin/orders', authenticateToken, requireAdmin, async (req, res
       await prisma.order.deleteMany({}).catch(() => {});
     }
     memoryStore.orders = [];
+    saveFileDatabase();
     console.log('[ALL ORDERS CLEARED]');
     res.json({ success: true, message: 'All orders cleared successfully.' });
   } catch (error) {
@@ -1092,15 +1157,32 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start Server
-if (require.main === module) {
-  app.listen(PORT, () => {
+// Start Server with auto-fallback if port is busy
+function startServer(portToTry) {
+  const server = app.listen(portToTry, () => {
     console.log(`\n======================================================`);
     console.log(`✨ ACHIRA LUXURY COUTURE BACKEND SERVER RUNNING`);
-    console.log(`📡 URL: http://localhost:${PORT}`);
-    console.log(`👑 ADMIN2 PANEL: http://localhost:${PORT}/admin2`);
+    console.log(`📡 URL: http://localhost:${portToTry}`);
+    console.log(`👑 ADMIN2 PANEL: http://localhost:${portToTry}/admin2`);
+    console.log(`👑 ADMIN PANEL: http://localhost:${portToTry}/admin`);
+    console.log(`🛍️ STOREFRONT: http://localhost:${portToTry}/index.html`);
     console.log(`======================================================\n`);
   });
+
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      const nextPort = Number(portToTry) + 1;
+      console.warn(`⚠️ :: Port ${portToTry} is already in use (e.g. by another service). Automatically trying next available port ${nextPort}...`);
+      startServer(nextPort);
+    } else {
+      console.error('❌ :: [SERVER LISTEN ERROR]', err);
+    }
+  });
+}
+
+if (require.main === module) {
+  const initialPort = Number(process.env.PORT) || 5001;
+  startServer(initialPort);
 }
 
 module.exports = app;

@@ -131,17 +131,16 @@
                                         <li><a href="collections.html?category=Gown"><span class="link-bullet">✦</span> Party Wear Gowns</a></li>
                                         <li><a href="collections.html"><span class="link-bullet">✦</span> All Women Wear</a></li>
                                     </ul>
-                                </div>
-                                <div class="mega-column">
+                                   <div class="mega-column">
                                     <div class="featured-card">
                                         <div class="featured-img-wrap">
-                                            <img src="https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=400&q=80" alt="Maharani Zardozi">
+                                            <img src="anarkali2.jpg" alt="Zaffran Kesariya Anarkali">
                                             <span class="featured-badge">TRENDING</span>
                                         </div>
                                         <div class="featured-content">
-                                            <h5>Maharani Zardozi</h5>
+                                            <h5>Zaffran Kesariya</h5>
                                             <p>Hand-embroidered Royal Couture</p>
-                                            <a href="collections.html?category=Gown" class="featured-link">Explore Collection →</a>
+                                            <a href="collections.html?category=Anarkali%20Kurti" class="featured-link">Explore Collection →</a>
                                         </div>
                                     </div>
                                 </div>
@@ -201,48 +200,76 @@
                         </div>
                     </li>
 
-                    <li class="nav-item"><a href="#contact" class="nav-link">Contact</a></li>
+                    <li class="nav-item"><a href="collections.html?category=Anarkali%20Kurti" class="nav-link">Anarkali</a></li>
+                    <li class="nav-item"><a href="collections.html?category=Straight%20Kurti" class="nav-link">Kurta Sets</a></li>
+                    <li class="nav-item"><a href="jewellery.html?category=Rings" class="nav-link">Diamond Rings</a></li>
+                    <li class="nav-item"><a href="jewellery.html?category=Earrings" class="nav-link">Earrings</a></li>
+                    <li class="nav-item"><a href="#about" class="nav-link">Heritage</a></li>
+                    <li class="nav-item"><a href="#contact" class="nav-link">Bespoke Concierge</a></li>
                 </ul>
             </nav>
 
-            <!-- Header Actions / Icons -->
-            <div class="header-actions">
-                <button class="action-btn" id="searchBtn" title="Search Collections">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <!-- Right utilities -->
+            <div class="nav-utilities">
+                <button class="nav-util-btn" id="searchBtn" aria-label="Search">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                 </button>
-                <button class="action-btn" id="accountBtn" title="My Account">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
+                <button class="nav-util-btn" id="wishlistBtn" aria-label="Wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                     </svg>
+                    <span class="badge" id="wishlistCount">0</span>
                 </button>
-                <button class="action-btn badge-btn" id="wishlistBtn" title="Wishlist">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.78-8.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                    </svg>
-                    <span class="action-badge" id="wishlistCount">2</span>
-                </button>
-                <button class="action-btn badge-btn" id="cartBtn" title="Shopping Cart">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <button class="nav-util-btn" id="cartBtn" aria-label="Shopping Bag">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                         <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
                         <line x1="3" y1="6" x2="21" y2="6"></line>
                         <path d="M16 10a4 4 0 0 1-8 0"></path>
                     </svg>
-                    <span class="action-badge" id="cartCount">1</span>
+                    <span class="badge" id="cartCount">0</span>
+                </button>
+                <button class="nav-util-btn" id="userBtn" aria-label="Account">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </button>
+                <button class="nav-util-btn theme-toggle" id="themeToggleBtn" aria-label="Toggle Theme">
+                    <span id="themeIcon">🌓</span>
                 </button>
             </div>
         </div>
     </header>
+
+    <!-- SEARCH OVERLAY / EXPANDABLE BAR -->
+    <div class="search-overlay" id="searchOverlay">
+        <div class="search-modal-container">
+            <div class="search-input-wrap">
+                <input type="text" id="searchInput" placeholder="Search handcrafted kurtas, anarkalis, diamond rings, necklaces..." autocomplete="off">
+                <button class="search-submit" id="searchSubmitBtn">Search</button>
+                <button class="close-search" id="closeSearchBtn">&times;</button>
+            </div>
+            <div class="search-suggestions" id="searchSuggestions">
+                <span>Popular:</span>
+                <a href="#" onclick="quickSearch('Anarkali')">Anarkali</a>
+                <a href="#" onclick="quickSearch('Kurta')">Kurta Sets</a>
+                <a href="#" onclick="quickSearch('Rings')">Diamond Rings</a>
+                <a href="#" onclick="quickSearch('Choker')">Necklaces</a>
+                <a href="#" onclick="quickSearch('Earrings')">Earrings</a>
+            </div>
+            <div class="live-search-results" id="liveSearchResults"></div>
+        </div>
+    </div>
 
     <!-- MAIN HOMEPAGE CONTENT -->
     <main>
         <!-- 1. SHOP BY CATEGORY (IMMEDIATELY BELOW NAVBAR) -->
         <section class="shop-by-category-circular sub-hero-collections fade-in-onload" id="collections" style="padding: 28px 0 20px 0; background: #F9F6F1; border-bottom: 1px solid rgba(200, 155, 74, 0.15);">
             <div class="circular-category-container">
-                <!-- Category 0: Anarkali -->
+                <!-- Category 1: Anarkali -->
                 <div class="circular-cat-card" onclick="filterByCategory('Anarkali')">
                     <div class="circular-img-wrap">
                         <img src="anarkali1.jpg" alt="Royal Anarkali Couture">
@@ -251,7 +278,7 @@
                     <span class="circular-cat-title">Anarkali</span>
                 </div>
 
-                <!-- Category 0.5: Kurta Sets -->
+                <!-- Category 2: Kurta Sets -->
                 <div class="circular-cat-card" onclick="filterByCategory('Kurta Sets')">
                     <div class="circular-img-wrap">
                         <img src="kurtaset1.jpg" alt="Ethnic Kurta Sets">
@@ -260,94 +287,58 @@
                     <span class="circular-cat-title">Kurta Sets</span>
                 </div>
 
-                <!-- Category 1: Cotton Dresses -->
-                <div class="circular-cat-card" onclick="filterByCategory('Cotton Kurtas')">
+                <!-- Category 3: Diamond Rings -->
+                <div class="circular-cat-card" onclick="location.href='jewellery.html?category=Rings'">
                     <div class="circular-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=300&q=80" alt="Cotton Dresses">
+                        <img src="ring1.jpg" alt="Diamond Rings">
                         <div class="circular-gold-border"></div>
                     </div>
-                    <span class="circular-cat-title">Cotton Dresses</span>
+                    <span class="circular-cat-title">Diamond Rings</span>
                 </div>
 
-                <!-- Category 2: Designer Sarees -->
-                <div class="circular-cat-card" onclick="filterByCategory('Designer Sarees')">
+                <!-- Category 4: Diamond Necklaces -->
+                <div class="circular-cat-card" onclick="location.href='jewellery.html?category=Necklaces'">
                     <div class="circular-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=300&q=80" alt="Designer Sarees">
+                        <img src="jewellery3.jpg" alt="Diamond Necklaces">
                         <div class="circular-gold-border"></div>
                     </div>
-                    <span class="circular-cat-title">Designer Sarees</span>
+                    <span class="circular-cat-title">Necklaces</span>
                 </div>
 
-                <!-- Category 3: Bridal Lehengas -->
-                <div class="circular-cat-card" onclick="filterByCategory('Bridal Lehengas')">
-                    <div class="circular-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=300&q=80" alt="Bridal Lehengas">
-                        <div class="circular-gold-border"></div>
-                    </div>
-                    <span class="circular-cat-title">Bridal Lehengas</span>
-                </div>
-
-                <!-- Category 4: Diamond Earrings -->
-                <div class="circular-cat-card" onclick="filterByCategory('Diamond Earrings')">
+                <!-- Category 5: Diamond Earrings -->
+                <div class="circular-cat-card" onclick="location.href='jewellery.html?category=Earrings'">
                     <div class="circular-img-wrap">
                         <img src="earring1.jpg" alt="Diamond Earrings">
                         <div class="circular-gold-border"></div>
                     </div>
-                    <span class="circular-cat-title">Diamond Earrings</span>
+                    <span class="circular-cat-title">Earrings</span>
                 </div>
 
-                <!-- Category 5: Gold Rings -->
-                <div class="circular-cat-card" onclick="filterByCategory('Gold Rings')">
+                <!-- Category 6: Royal Couture -->
+                <div class="circular-cat-card" onclick="filterByCategory('Anarkali')">
                     <div class="circular-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=300&q=80" alt="Gold Rings">
+                        <img src="anarkali2.jpg" alt="Royal Couture">
                         <div class="circular-gold-border"></div>
                     </div>
-                    <span class="circular-cat-title">Gold Rings</span>
+                    <span class="circular-cat-title">Royal Couture</span>
                 </div>
 
-                <!-- Category 6: Diamond Necklaces -->
-                <div class="circular-cat-card" onclick="filterByCategory('Diamond Necklaces')">
+                <!-- Category 7: Summer Florals -->
+                <div class="circular-cat-card" onclick="filterByCategory('Kurta Sets')">
                     <div class="circular-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=300&q=80" alt="Diamond Necklaces">
+                        <img src="kurtaset6.jpg" alt="Summer Florals">
                         <div class="circular-gold-border"></div>
                     </div>
-                    <span class="circular-cat-title">Diamond Necklaces</span>
+                    <span class="circular-cat-title">Summer Florals</span>
                 </div>
 
-                <!-- Category 7: Bangles -->
-                <div class="circular-cat-card" onclick="filterByCategory('Bangles')">
+                <!-- Category 8: High Jewellery -->
+                <div class="circular-cat-card" onclick="location.href='jewellery.html'">
                     <div class="circular-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&w=300&q=80" alt="Bangles">
+                        <img src="jewellery9.jpg" alt="High Jewellery">
                         <div class="circular-gold-border"></div>
                     </div>
-                    <span class="circular-cat-title">Bangles</span>
-                </div>
-
-                <!-- Category 8: Bracelets -->
-                <div class="circular-cat-card" onclick="filterByCategory('Bracelets')">
-                    <div class="circular-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=300&q=80" alt="Bracelets">
-                        <div class="circular-gold-border"></div>
-                    </div>
-                    <span class="circular-cat-title">Bracelets</span>
-                </div>
-
-                <!-- Category 9: Pendants -->
-                <div class="circular-cat-card" onclick="filterByCategory('Pendants')">
-                    <div class="circular-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=300&q=80" alt="Pendants">
-                        <div class="circular-gold-border"></div>
-                    </div>
-                    <span class="circular-cat-title">Pendants</span>
-                </div>
-
-                <!-- Category 10: New Arrivals -->
-                <div class="circular-cat-card" onclick="filterByCategory('New Arrivals')">
-                    <div class="circular-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=300&q=80" alt="New Arrivals">
-                        <div class="circular-gold-border"></div>
-                    </div>
-                    <span class="circular-cat-title">New Arrivals</span>
+                    <span class="circular-cat-title">High Jewellery</span>
                 </div>
             </div>
         </section>
@@ -358,29 +349,67 @@
                 <!-- LEFT SIDE (50%): Text Content -->
                 <div class="hero-split-left animate-fade-up">
                     <div class="hero-brand-meta">
-                        <span class="hero-owner-tag">BK SHAH</span>
-                        <span class="hero-sep-dot">•</span>
-                        <span class="hero-since-tag">SINCE 1960</span>
+                        <span class="meta-dot">✦</span>
+                        <span class="meta-tag">ROYAL ATELIER &bull; EST. 1960</span>
                     </div>
 
-                    <h1 class="hero-brand-title">ACHIRA</h1>
+                    <h1 class="hero-main-title">
+                        ROYALTY IN <br>
+                        <span class="gold-gradient-text">EVERY THREAD.</span>
+                    </h1>
 
-                    <h2 class="hero-brand-tagline">Luxury Indian Ethnic Wear &amp; Fine Jewellery</h2>
-
-                    <p class="hero-brand-desc">
-                        Discover timeless Dresses, Sarees, Lehengas and handcrafted Jewellery designed for every celebration.
+                    <p class="hero-subtitle">
+                        Immerse yourself in authentic Indian heritage. Handcrafted Anarkali gowns, Lucknowi Chikankari sets, and certified solitaire diamond jewellery curated for modern connoisseurs.
                     </p>
 
-                    <div class="hero-actions">
-                        <a href="#products" class="btn-luxe btn-luxe-gold">Shop Collection</a>
-                        <a href="jewellery.html" class="btn-luxe btn-luxe-outline">Explore Jewellery</a>
+                    <div class="hero-cta-group">
+                        <a href="collections.html" class="hero-btn-primary">
+                            <span>Explore Couture</span>
+                            <span class="btn-arrow">&rarr;</span>
+                        </a>
+                        <a href="jewellery.html" class="hero-btn-secondary">
+                            <span>Fine Jewellery</span>
+                            <span class="btn-sparkle">✦</span>
+                        </a>
+                    </div>
+
+                    <div class="hero-features-strip">
+                        <div class="h-feat-item">
+                            <span class="h-feat-icon">⚜</span>
+                            <span class="h-feat-text">100% Handcrafted</span>
+                        </div>
+                        <div class="h-feat-divider"></div>
+                        <div class="h-feat-item">
+                            <span class="h-feat-icon">🛡</span>
+                            <span class="h-feat-text">Certified Hallmarked</span>
+                        </div>
+                        <div class="h-feat-divider"></div>
+                        <div class="h-feat-item">
+                            <span class="h-feat-icon">✈</span>
+                            <span class="h-feat-text">Express Dispatch</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- RIGHT SIDE (50%): Showroom Showcase Image -->
-                <div class="hero-split-right">
-                    <div class="showroom-card-frame">
-                        <img src="storefront.jpg" alt="ACHIRA Luxury Showroom Storefront" class="showroom-img">
+                <!-- RIGHT SIDE (50%): Visual Showcase -->
+                <div class="hero-split-right animate-fade-in">
+                    <div class="hero-image-frame">
+                        <img src="anarkali1.jpg" alt="Achira Couture - Midnight Black Anarkali" class="hero-split-img">
+                        
+                        <!-- Floating Glassmorphism Tag -->
+                        <div class="hero-floating-glass-card">
+                            <div class="glass-card-icon">👑</div>
+                            <div class="glass-card-content">
+                                <span class="glass-card-tag">SPOTLIGHT MASTERPIECE</span>
+                                <h4 class="glass-card-title">Noor-e-Kashmir Anarkali</h4>
+                                <span class="glass-card-price">₹3,999</span>
+                            </div>
+                        </div>
+
+                        <!-- Secondary Floating Tag -->
+                        <div class="hero-artisan-badge">
+                            <span>✦ 60+ Years Heritage</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -436,51 +465,51 @@
 
             <div class="masterpieces-container">
                 <div class="masterpieces-grid">
-                    <!-- Card 1: Designer Sarees -->
+                    <!-- Card 1: Anarkali Couture -->
                     <div class="masterpiece-card">
                         <div class="masterpiece-img-wrap">
-                            <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80" alt="Designer Sarees" loading="lazy">
+                            <img src="anarkali1.jpg" alt="Anarkali Couture" loading="lazy">
                             <div class="masterpiece-overlay"></div>
                         </div>
                         <div class="masterpiece-content">
-                            <span class="masterpiece-tag">HERITAGE COUTURE</span>
-                            <h4 class="masterpiece-title">Designer Sarees</h4>
-                            <p class="masterpiece-desc">Handcrafted Banarasi, Kanjeevaram & Silk Masterpieces.</p>
-                            <a href="collections.html#saree" class="masterpiece-btn">
+                            <span class="masterpiece-tag">ROYAL ATELIER</span>
+                            <h4 class="masterpiece-title">Anarkali Couture</h4>
+                            <p class="masterpiece-desc">Handcrafted Pure Mulmul & Chanderi Anarkali Sets.</p>
+                            <a href="collections.html?category=Anarkali%20Kurti" class="masterpiece-btn">
                                 <span>Explore Collection</span>
                                 <span class="btn-arrow">&rarr;</span>
                             </a>
                         </div>
                     </div>
 
-                    <!-- Card 2: Cotton Kurtas -->
+                    <!-- Card 2: Kurta Sets -->
                     <div class="masterpiece-card">
                         <div class="masterpiece-img-wrap">
-                            <img src="https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=800&q=80" alt="Cotton Kurtas" loading="lazy">
+                            <img src="kurtaset1.jpg" alt="Ethnic Kurta Sets" loading="lazy">
                             <div class="masterpiece-overlay"></div>
                         </div>
                         <div class="masterpiece-content">
                             <span class="masterpiece-tag">EVERYDAY ELEGANCE</span>
-                            <h4 class="masterpiece-title">Cotton Kurtas</h4>
-                            <p class="masterpiece-desc">Breathable Lucknowi Chikankari & Handcrafted Kurtas.</p>
-                            <a href="collections.html#kurti" class="masterpiece-btn">
+                            <h4 class="masterpiece-title">Kurta Sets</h4>
+                            <p class="masterpiece-desc">Tailored Kurta Pant Sets & Kalamkari Dupattas.</p>
+                            <a href="collections.html?category=Straight%20Kurti" class="masterpiece-btn">
                                 <span>Explore Collection</span>
                                 <span class="btn-arrow">&rarr;</span>
                             </a>
                         </div>
                     </div>
 
-                    <!-- Card 3: Bridal Lehengas -->
+                    <!-- Card 3: Diamond Rings -->
                     <div class="masterpiece-card">
                         <div class="masterpiece-img-wrap">
-                            <img src="https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=800&q=80" alt="Bridal Lehengas" loading="lazy">
+                            <img src="ring1.jpg" alt="Fine Diamond Rings" loading="lazy">
                             <div class="masterpiece-overlay"></div>
                         </div>
                         <div class="masterpiece-content">
-                            <span class="masterpiece-tag">ROYAL BRIDAL</span>
-                            <h4 class="masterpiece-title">Bridal Lehengas</h4>
-                            <p class="masterpiece-desc">Regal Zardozi & Velvet Bridal Couture Ensembles.</p>
-                            <a href="collections.html#lehenga" class="masterpiece-btn">
+                            <span class="masterpiece-tag">FINE DIAMONDS</span>
+                            <h4 class="masterpiece-title">Diamond Rings</h4>
+                            <p class="masterpiece-desc">18K Solid Gold & Certified Solitaire Cluster Rings.</p>
+                            <a href="jewellery.html?category=Rings" class="masterpiece-btn">
                                 <span>Explore Collection</span>
                                 <span class="btn-arrow">&rarr;</span>
                             </a>
@@ -490,13 +519,13 @@
                     <!-- Card 4: Fine Jewellery -->
                     <div class="masterpiece-card">
                         <div class="masterpiece-img-wrap">
-                            <img src="earring1.jpg" alt="Fine Jewellery" loading="lazy">
+                            <img src="jewellery3.jpg" alt="Fine Jewellery" loading="lazy">
                             <div class="masterpiece-overlay"></div>
                         </div>
                         <div class="masterpiece-content">
                             <span class="masterpiece-tag">TIMELESS JEWELS</span>
                             <h4 class="masterpiece-title">Fine Jewellery</h4>
-                            <p class="masterpiece-desc">Royal Kundan, Polki & Heritage Diamond Sets.</p>
+                            <p class="masterpiece-desc">Solitaire Tennis Rivieras & Chandelier Earrings.</p>
                             <a href="jewellery.html" class="masterpiece-btn">
                                 <span>Explore Collection</span>
                                 <span class="btn-arrow">&rarr;</span>
@@ -755,27 +784,27 @@
             </div>
             <div class="instagram-grid">
                 <div class="instagram-item">
-                    <img src="https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=300&q=80" alt="Atelier Shoot 1">
+                    <img src="anarkali6.jpg" alt="Atelier Shoot 1">
                     <div class="insta-hover-overlay"><span>✦ View Post</span></div>
                 </div>
                 <div class="instagram-item">
-                    <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=300&q=80" alt="Atelier Shoot 2">
+                    <img src="kurtaset4.jpg" alt="Atelier Shoot 2">
                     <div class="insta-hover-overlay"><span>✦ View Post</span></div>
                 </div>
                 <div class="instagram-item">
-                    <img src="https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=300&q=80" alt="Atelier Shoot 3">
+                    <img src="anarkali8.jpg" alt="Atelier Shoot 3">
                     <div class="insta-hover-overlay"><span>✦ View Post</span></div>
                 </div>
                 <div class="instagram-item">
-                    <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=300&q=80" alt="Atelier Shoot 4">
+                    <img src="ring5.jpg" alt="Atelier Shoot 4">
                     <div class="insta-hover-overlay"><span>✦ View Post</span></div>
                 </div>
                 <div class="instagram-item">
-                    <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=300&q=80" alt="Atelier Shoot 5">
+                    <img src="jewellery8.jpg" alt="Atelier Shoot 5">
                     <div class="insta-hover-overlay"><span>✦ View Post</span></div>
                 </div>
                 <div class="instagram-item">
-                    <img src="https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=300&q=80" alt="Atelier Shoot 6">
+                    <img src="kurtaset9.jpg" alt="Atelier Shoot 6">
                     <div class="insta-hover-overlay"><span>✦ View Post</span></div>
                 </div>
             </div>
@@ -855,7 +884,7 @@
         </div>
         <div class="drawer-body" id="cartItemsList">
             <div class="cart-item">
-                <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=200&q=80" alt="Noor Polki Set">
+                <img src="jewellery9.jpg" alt="Noor Polki Set">
                 <div class="item-details">
                     <h5>Noor Polki & Emerald Choker Set</h5>
                     <span class="item-price">₹1,25,000</span>

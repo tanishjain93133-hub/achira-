@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 const API_BASE = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:')
-  ? (window.location.port === '5000' ? '' : 'http://localhost:5000')
+  ? (window.location.port === '5001' ? '' : (window.location.port === '5000' ? '' : 'http://localhost:5001'))
   : '';
 
 export default function AdminDashboard() {
@@ -183,25 +183,53 @@ export default function AdminDashboard() {
       const res = await fetch(`${API_BASE}/api/admin/orders`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await res.json();
-      if (res.ok && Array.isArray(data) && data.length > 0) {
-        orderList = data.filter(o => o && !FAKE_MOCK_ORDER_IDS.includes(String(o.id)) && !FAKE_MOCK_ORDER_IDS.includes(String(o.dbId)));
+      if (res.ok) {
+        const ct = res.headers.get('content-type') || '';
+        if (ct.includes('application/json')) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            orderList = data.filter(o => o && !FAKE_MOCK_ORDER_IDS.includes(String(o.id)) && !FAKE_MOCK_ORDER_IDS.includes(String(o.dbId)));
+          }
+        }
       }
     } catch (e) { console.error('[ADMIN DEBUG] Fetch error:', e); }
 
-    if (orderList.length === 0) {
-      try {
-        const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-        if (cloudRes.ok) {
-          const cloudData = await cloudRes.json();
-          if (cloudData && Array.isArray(cloudData.orders)) {
-            orderList = cloudData.orders.filter(o => o && !FAKE_MOCK_ORDER_IDS.includes(String(o.id)) && !FAKE_MOCK_ORDER_IDS.includes(String(o.dbId)));
-          }
+    let cloudOrders = [];
+    try {
+      const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+      if (cloudRes.ok) {
+        const cloudData = await cloudRes.json();
+        if (cloudData && Array.isArray(cloudData.orders)) {
+          cloudOrders = cloudData.orders.filter(o => o && !FAKE_MOCK_ORDER_IDS.includes(String(o.id)) && !FAKE_MOCK_ORDER_IDS.includes(String(o.dbId)));
         }
-      } catch (err) {}
-    }
+      }
+    } catch (err) {}
 
-    setOrders(orderList);
+    let localOrders = [];
+    try {
+      const rawLocal = localStorage.getItem('orders') || localStorage.getItem('admin_orders') || '[]';
+      localOrders = JSON.parse(rawLocal);
+      if (!Array.isArray(localOrders)) localOrders = [];
+    } catch (e) {}
+
+    // Merge and deduplicate
+    const orderMap = new Map();
+    [...orderList, ...cloudOrders, ...localOrders].forEach(o => {
+      if (o && o.id) {
+        const idStr = String(o.id);
+        if (!FAKE_MOCK_ORDER_IDS.includes(idStr) && !orderMap.has(idStr)) {
+          orderMap.set(idStr, o);
+        }
+      }
+    });
+
+    const unifiedList = Array.from(orderMap.values()).sort((a, b) => {
+      const dateA = new Date(a.createdAt || a.date || 0).getTime();
+      const dateB = new Date(b.createdAt || b.date || 0).getTime();
+      return dateB - dateA;
+    });
+
+    setOrders(unifiedList);
   };
 
   const fetchCustomers = async () => {

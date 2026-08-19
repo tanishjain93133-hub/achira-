@@ -761,13 +761,13 @@
 
     <script>
         let defaultProducts = [
-            { id: 1, name: "Maharani Zardozi Anarkali Dress", category: "Cotton Kurtas", price: 4500, availability: "New Arrival", image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80" },
-            { id: 2, name: "Kashmiri Arayan Embroidered Dress", category: "Lucknowi Collection", price: 3200, availability: "Best Seller", image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80" },
-            { id: 3, name: "Gulbahar Handblock Cotton Dress", category: "Cotton Kurtas", price: 1800, availability: "Best Seller", image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=600&q=80" },
-            { id: 4, name: "Atelier Lucknowi Chikankari Tunic", category: "Lucknowi Collection", price: 2900, availability: "In Stock", image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80" },
-            { id: 8, name: "Avani Banarasi Silk Saree", category: "Designer Sarees", price: 8500, availability: "New Arrival", image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80" },
-            { id: 12, name: "Royal Banarasi Silk Lehenga", category: "Bridal Lehengas", price: 14500, availability: "Best Seller", image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80" },
-            { id: 13, name: "Royal Heritage Velvet Gown", category: "Gown", price: 8900, availability: "New Arrival", image: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=600&q=80" }
+            { id: 101, name: "Noor-e-Kashmir Midnight Black Embroidered Anarkali Set", category: "Anarkali", price: 3999, availability: "New Arrival", image: "anarkali1.jpg" },
+            { id: 102, name: "Zaffran Kesariya Mustard Yoke Embroidered Anarkali Suit", category: "Anarkali", price: 4499, availability: "Best Seller", image: "anarkali2.jpg" },
+            { id: 201, name: "Mayura Mustard & Teal Blue Embroidered Kurta Pant Set", category: "Kurta Sets", price: 3450, availability: "New Arrival", image: "kurtaset1.jpg" },
+            { id: 202, name: "Parijaat Lime Green V-Neck Motif Embroidered Kurta Set", category: "Kurta Sets", price: 3850, availability: "Best Seller", image: "kurtaset2.jpg" },
+            { id: 301, name: "Atelier Spiral Pave Diamond Studs", category: "Jewellery", price: 45000, availability: "New Arrival", image: "jewellery1.jpg" },
+            { id: 303, name: "Solitaire Diamond Riviera Necklace", category: "Jewellery", price: 185000, availability: "Best Seller", image: "jewellery3.jpg" },
+            { id: 401, name: "Aura Wave Diamond Cluster Ring", category: "Jewellery", price: 48500, availability: "New Arrival", image: "ring1.jpg" }
         ];
 
         let defaultOrders = [];
@@ -797,7 +797,8 @@
         // List of legacy hardcoded mock test IDs to filter out
         const FAKE_MOCK_ORDER_IDS = ['ACH-56', 'ACH-55', 'ACH-54', 'ACH-53', 'ACH-52', 'ACH-51', '56', '55', '54', '53', '52', '51'];
 
-        let products = getDB('admin_products', defaultProducts);
+        let products = getDB('admin_products', defaultProducts).filter(p => p && p.image && !p.image.includes('unsplash.com') && ![1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13].includes(p.id));
+        if (products.length === 0) products = defaultProducts;
         let orders = getDB('admin_orders', defaultOrders).filter(o => o && !FAKE_MOCK_ORDER_IDS.includes(String(o.id)) && !FAKE_MOCK_ORDER_IDS.includes(String(o.dbId)));
         let customers = getDB('admin_customers', defaultCustomers);
         let coupons = getDB('admin_coupons', defaultCoupons);
@@ -805,7 +806,7 @@
         let logs = getDB('admin_logs', defaultLogs);
 
         const API_BASE = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'))
-          ? (window.location.port === '5000' ? '' : 'http://localhost:5000')
+          ? (window.location.port === '5001' ? '' : (window.location.port === '5000' ? '' : 'http://localhost:5001'))
           : '';
 
         function getAuthHeader() {
@@ -1196,7 +1197,7 @@
             if (itemsDetail.length > 0) {
                 itemsHtml = itemsDetail.map(item => {
                     const p = products.find(prod => String(prod.id) === String(item.productId) || String(prod.id) === String(item.id));
-                    const img = item.image || (p ? p.image : 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80');
+                    const img = item.image || (p ? p.image : 'anarkali1.jpg');
                     const itemName = item.name || (p ? p.name : 'Couture Item');
                     const price = item.price || (p ? p.price : 1000);
                     const qty = item.qty || 1;
@@ -1326,7 +1327,7 @@
             if (prodBody) {
                 prodBody.innerHTML = products.map(p => `
                     <tr>
-                        <td><img src="${p.image || 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b'}" width="40" height="40" style="border-radius: 6px; object-fit: cover;"></td>
+                        <td><img src="${p.image || 'anarkali1.jpg'}" width="40" height="40" style="border-radius: 6px; object-fit: cover;"></td>
                         <td><strong>${p.name}</strong></td>
                         <td>${p.category || 'Couture'}</td>
                         <td>₹${Number(p.price || 0).toLocaleString('en-IN')}</td>
