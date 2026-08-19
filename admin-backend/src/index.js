@@ -19,10 +19,21 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 const staticRoot = path.join(__dirname, '..', '..');
 app.use(express.static(staticRoot));
 
-// Dedicated /admin2 route
-app.get('/admin2', (req, res) => {
-  res.sendFile(path.join(staticRoot, 'admin2.html'));
+// Dedicated admin routes (redirecting to unified primary admin.html)
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(staticRoot, 'admin.html'));
 });
+app.get('/admin2', (req, res) => {
+  res.sendFile(path.join(staticRoot, 'admin.html'));
+});
+
+// Supabase Direct REST/Database Client
+let supabase = null;
+try {
+  supabase = require('./supabase.js');
+} catch (e) {
+  console.warn('[SUPABASE MODULE NOTICE]', e.message);
+}
 
 // Primary Prisma Client
 let prisma = null;
@@ -489,7 +500,17 @@ app.delete('/api/admin/products/:id', authenticateToken, requireAdmin, async (re
 });
 
 const checkoutHandler = async (req, res) => {
-  const { name, email, phone, address, city, state, pincode, paymentMethod, couponCode, items } = req.body || {};
+  const body = req.body || {};
+  const items = body.items || body.cart || [];
+  const name = body.name || body.customerName || body.userName || '';
+  const email = body.email || body.userEmail || '';
+  const phone = body.phone || body.userPhone || body.contactPhone || '';
+  const address = body.address || body.userAddress || '';
+  const city = body.city || '';
+  const state = body.state || '';
+  const pincode = body.pincode || '';
+  const paymentMethod = body.paymentMethod || body.paymentMode || 'COD';
+  const couponCode = body.couponCode || body.coupon || '';
 
   if (!items || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ success: false, error: 'Shopping bag is empty.' });
@@ -650,6 +671,13 @@ const checkoutHandler = async (req, res) => {
         createdAt: new Date()
       });
     }
+    
+    // Persist to Supabase Database immediately
+    if (supabase) {
+      supabase.insertSupabaseOrder(fullMemoryOrder).catch(sErr => {
+        console.warn('[SUPABASE ORDER INSERT NOTICE]', sErr);
+      });
+    }
 
     // Persist to Disk File Database immediately
     saveFileDatabase();
@@ -693,14 +721,14 @@ const checkoutHandler = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Order placed successfully',
+      message: 'Order placed successfully! Atelier receipt dispatched.',
       order: fullMemoryOrder
     });
   } catch (error) {
-    console.error('[CHECKOUT ERROR]', error);
+    console.error('[CHECKOUT API ERROR]', error);
     res.status(500).json({
       success: false,
-      error: 'Something went wrong while processing your order. Please try again.'
+      error: 'Checkout system encountered an error. Order cached locally.'
     });
   }
 };
@@ -712,49 +740,61 @@ app.post('/api/orders', checkoutHandler);
 // --- CUSTOMER PURCHASE HISTORY (Strict Isolation: WHERE email = req.user.email) ---
 
 app.get('/api/user/orders', async (req, res) => {
-  let customerEmail = '';
-
-  // 1. From Authorization Bearer JWT if provided
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-  if (token && !token.startsWith('simulated-')) {
-    try {
-      const decoded = jwt.verify(token, JWT_SECRET);
-      if (decoded && decoded.email) customerEmail = decoded.email;
-    } catch (e) {}
-  }
-
-  // 2. From query or custom header
-  if (!customerEmail) {
-    customerEmail = req.query.email || req.headers['x-user-email'] || '';
-  }
-
-  // Clean email
-  customerEmail = String(customerEmail).toLowerCase().trim();
-
-  if (!customerEmail) {
-    return res.status(400).json({ success: false, error: 'Customer email is required to fetch purchase history.' });
-  }
-
   try {
+    const customerEmail = (req.query.email || req.headers['x-user-email'] || '').toLowerCase().trim();
+    if (!customerEmail) {
+      return res.status(400).json({ success: false, error: 'Customer email is required.' });
+    }
+
     let customerOrders = [];
 
-    // 1. Query PostgreSQL
+    // 1. Check PostgreSQL
     if (isDbConnected && prisma) {
       try {
-        customerOrders = await prisma.order.findMany({
-          where: { email: customerEmail },
+        const dbOrders = await prisma.order.findMany({
+          where: {
+            user: { email: { equals: customerEmail, mode: 'insensitive' } }
+          },
           include: { items: true },
           orderBy: { createdAt: 'desc' }
         });
-      } catch (dbErr) {}
+        customerOrders = dbOrders;
+      } catch (err) {}
     }
 
-    // 2. Query Cloud Storage Database Bin
+    // 1b. Check Supabase
+    if (supabase) {
+      try {
+        const sOrders = await supabase.getSupabaseOrders();
+        if (Array.isArray(sOrders)) {
+          sOrders.forEach(so => {
+            if (so && (so.email || '').toLowerCase().trim() === customerEmail) {
+              if (!customerOrders.some(o => String(o.id) === String(so.id))) {
+                customerOrders.push({
+                  id: so.id,
+                  customerName: so.customer_name || 'Valued Patron',
+                  email: so.email,
+                  phone: so.phone,
+                  address: so.address,
+                  grandTotal: Number(so.grand_total || 0),
+                  paymentMethod: so.payment_method || 'COD',
+                  orderStatus: so.order_status || 'Processing',
+                  itemsSummary: so.items_summary || '',
+                  itemsDetail: so.items_detail || [],
+                  createdAt: so.created_at
+                });
+              }
+            }
+          });
+        }
+      } catch (sErr) {}
+    }
+
+    // 2. Check Cloud Bin
     try {
-      const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-      if (cloudRes.ok) {
-        const cData = await cloudRes.json();
+      const cRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+      if (cRes.ok) {
+        const cData = await cRes.json();
         if (cData && Array.isArray(cData.orders)) {
           cData.orders.forEach(co => {
             if (co && co.id && (co.email || co.userEmail || '').toLowerCase().trim() === customerEmail) {
@@ -790,7 +830,7 @@ app.get('/api/user/orders', async (req, res) => {
 
 // --- ADMIN ORDERS (UNFILTERED: SELECT ALL ORDERS ACROSS ALL CUSTOMERS) ---
 
-// Dedicated Admin2 Orders API (Fetches ALL orders from EVERY customer across DB and Cloud storage)
+// Dedicated Admin Orders API (Fetches ALL orders from EVERY customer across DB, Supabase, and Cloud storage)
 const fetchAllAdminOrdersHandler = async (req, res) => {
   try {
     let allOrders = [];
@@ -807,6 +847,38 @@ const fetchAllAdminOrdersHandler = async (req, res) => {
       }
     }
 
+    // 1b. Query Supabase
+    let supabaseOrders = [];
+    if (supabase) {
+      try {
+        const sOrders = await supabase.getSupabaseOrders();
+        if (Array.isArray(sOrders)) {
+          supabaseOrders = sOrders.map(so => ({
+            id: so.id,
+            customerName: so.customer_name || 'Valued Patron',
+            userName: so.customer_name || 'Valued Patron',
+            email: so.email || 'N/A',
+            userEmail: so.email || 'N/A',
+            phone: so.phone || 'N/A',
+            userPhone: so.phone || 'N/A',
+            address: so.address || 'Standard Delivery Address',
+            userAddress: so.address || 'Standard Delivery Address',
+            grandTotal: Number(so.grand_total || 0),
+            total: Number(so.grand_total || 0),
+            paymentMethod: so.payment_method || 'COD',
+            paymentMode: so.payment_method || 'COD',
+            paymentStatus: so.payment_status || 'Pending',
+            orderStatus: so.order_status || 'Processing',
+            status: so.order_status || 'Processing',
+            itemsSummary: so.items_summary || '',
+            itemsDetail: so.items_detail || [],
+            items: so.items_detail || [],
+            createdAt: so.created_at || new Date().toISOString()
+          }));
+        }
+      } catch (sErr) {}
+    }
+
     // 2. Query Cloud Storage Database Bin
     let cloudOrders = [];
     try {
@@ -819,7 +891,7 @@ const fetchAllAdminOrdersHandler = async (req, res) => {
 
     // 3. Merge with memory store
     const orderMap = new Map();
-    [...allOrders, ...cloudOrders, ...memoryStore.orders].forEach(o => {
+    [...allOrders, ...supabaseOrders, ...cloudOrders, ...memoryStore.orders].forEach(o => {
       if (o && o.id) {
         const idStr = String(o.id);
         if (!orderMap.has(idStr)) {

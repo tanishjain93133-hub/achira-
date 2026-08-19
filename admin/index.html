@@ -911,7 +911,15 @@
                 }
             } catch (e) {}
 
-            // 2. Fetch Orders (Backend API + Cloud Store + Local Storage)
+            // 2. Fetch Orders (Backend API + Supabase Cloud DB + Cloud Storage + Local Storage)
+            const SUPABASE_REST_URL = 'https://yixfebpbiqlhigunjbvt.supabase.co/rest/v1';
+            const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpeGZlYnBiaXFsaGlndW5qYnZ0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzE2MDkyOSwiZXhwIjoyMTAyNzM2OTI5fQ.ycIKFrEGvueg25UEntZE-4nQDIYz_QQB_5_zlTWf0sU';
+            const supabaseHeaders = {
+                'apikey': SUPABASE_API_KEY,
+                'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+                'Content-Type': 'application/json'
+            };
+
             let fetchedOrders = [];
             try {
                 const res = await fetch(`${API_BASE}/api/admin/orders`, { headers });
@@ -920,6 +928,39 @@
                     if (Array.isArray(data)) fetchedOrders = data;
                 }
             } catch (err) {}
+
+            let supabaseOrders = [];
+            try {
+                const sRes = await fetch(`${SUPABASE_REST_URL}/orders?select=*&order=created_at.desc`, { headers: supabaseHeaders });
+                if (sRes.ok) {
+                    const sData = await sRes.json();
+                    if (Array.isArray(sData)) {
+                        supabaseOrders = sData.map(so => ({
+                            id: so.id,
+                            customerName: so.customer_name || 'Valued Patron',
+                            userName: so.customer_name || 'Valued Patron',
+                            email: so.email || 'N/A',
+                            userEmail: so.email || 'N/A',
+                            phone: so.phone || 'N/A',
+                            userPhone: so.phone || 'N/A',
+                            address: so.address || 'Standard Delivery Address',
+                            userAddress: so.address || 'Standard Delivery Address',
+                            grandTotal: Number(so.grand_total || 0),
+                            total: Number(so.grand_total || 0),
+                            paymentMethod: so.payment_method || 'COD',
+                            paymentMode: so.payment_method || 'COD',
+                            paymentStatus: so.payment_status || 'Pending',
+                            orderStatus: so.order_status || 'Processing',
+                            status: so.order_status || 'Processing',
+                            itemsSummary: so.items_summary || '',
+                            itemsDetail: so.items_detail || [],
+                            items: so.items_detail || [],
+                            date: so.created_at ? new Date(so.created_at).toLocaleDateString('en-IN') : 'Today',
+                            createdAt: so.created_at
+                        }));
+                    }
+                }
+            } catch (e) {}
 
             let cloudOrders = [];
             let cloudUsers = [];
@@ -940,7 +981,7 @@
             const localStoreOrders = getDB('orders', []);
 
             // Combine and filter out old fake mock test orders
-            const rawCombined = [...fetchedOrders, ...cloudOrders, ...localAdminOrders, ...localStoreOrders];
+            const rawCombined = [...fetchedOrders, ...supabaseOrders, ...cloudOrders, ...localAdminOrders, ...localStoreOrders];
             const cleanOrdersMap = new Map();
             rawCombined.forEach(o => {
                 if (!o || !o.id) return;
