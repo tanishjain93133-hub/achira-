@@ -1,11 +1,16 @@
 {
   "version": 2,
   "cleanUrls": true,
+  "trailingSlash": false,
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index.js" },
-    { "source": "/admin2", "destination": "/admin.html" },
-    { "source": "/admin2/", "destination": "/admin.html" },
+    { "source": "/collections", "destination": "/collections.html" },
+    { "source": "/collections/", "destination": "/collections.html" },
+    { "source": "/jewellery", "destination": "/jewellery.html" },
+    { "source": "/jewellery/", "destination": "/jewellery.html" },
     { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/admin/", "destination": "/admin.html" }
+    { "source": "/admin/", "destination": "/admin.html" },
+    { "source": "/admin2", "destination": "/admin2.html" },
+    { "source": "/admin2/", "destination": "/admin2.html" }
   ]
 }
