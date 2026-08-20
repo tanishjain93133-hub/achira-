@@ -509,7 +509,7 @@ const checkoutHandler = async (req, res) => {
   const city = body.city || '';
   const state = body.state || '';
   const pincode = body.pincode || '';
-  const paymentMethod = body.paymentMethod || body.paymentMode || 'COD';
+  const paymentMethod = body.paymentMethod || body.paymentMode || 'UPI (QR)';
   const couponCode = body.couponCode || body.coupon || '';
 
   if (!items || !Array.isArray(items) || items.length === 0) {
@@ -576,8 +576,8 @@ const checkoutHandler = async (req, res) => {
       city: city || '',
       state: state || '',
       pincode: pincode || '',
-      paymentMethod: paymentMethod || 'COD',
-      paymentStatus: (paymentMethod === 'COD') ? 'Pending' : 'Paid',
+      paymentMethod: paymentMethod || 'UPI (QR)',
+      paymentStatus: 'Paid',
       orderStatus: 'Processing',
       invoiceNumber,
       subtotal: (typeof body.subtotal === 'number') ? body.subtotal : subtotal,
@@ -789,7 +789,7 @@ app.get('/api/user/orders', async (req, res) => {
                   phone: so.phone,
                   address: so.address,
                   grandTotal: Number(so.grand_total || 0),
-                  paymentMethod: so.payment_method || 'COD',
+                  paymentMethod: so.payment_method || 'UPI (QR)',
                   orderStatus: so.order_status || 'Processing',
                   itemsSummary: so.items_summary || '',
                   itemsDetail: so.items_detail || [],
@@ -877,9 +877,9 @@ const fetchAllAdminOrdersHandler = async (req, res) => {
             userAddress: so.address || 'Standard Delivery Address',
             grandTotal: Number(so.grand_total || 0),
             total: Number(so.grand_total || 0),
-            paymentMethod: so.payment_method || 'COD',
-            paymentMode: so.payment_method || 'COD',
-            paymentStatus: so.payment_status || 'Pending',
+            paymentMethod: so.payment_method || 'UPI (QR)',
+            paymentMode: so.payment_method || 'UPI (QR)',
+            paymentStatus: so.payment_status || 'Paid',
             orderStatus: so.order_status || 'Processing',
             status: so.order_status || 'Processing',
             itemsSummary: so.items_summary || '',
@@ -931,9 +931,9 @@ const fetchAllAdminOrdersHandler = async (req, res) => {
       userAddress: o.address || o.userAddress || (o.user ? o.user.address : 'Standard Delivery Address'),
       grandTotal: o.grandTotal || o.total || 0,
       total: o.grandTotal || o.total || 0,
-      paymentMethod: o.paymentMethod || o.paymentMode || 'COD',
-      paymentMode: o.paymentMethod || o.paymentMode || 'COD',
-      paymentStatus: o.paymentStatus || 'Pending',
+      paymentMethod: o.paymentMethod || o.paymentMode || 'UPI (QR)',
+      paymentMode: o.paymentMethod || o.paymentMode || 'UPI (QR)',
+      paymentStatus: o.paymentStatus || 'Paid',
       orderStatus: o.orderStatus || o.status || 'Processing',
       status: o.orderStatus || o.status || 'Processing',
       itemsSummary: o.itemsSummary || (Array.isArray(o.items) ? o.items.map(i => `${i.name} x${i.qty}`).join(', ') : 'Couture Item'),

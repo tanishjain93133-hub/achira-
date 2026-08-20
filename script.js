@@ -195,11 +195,42 @@ const initialProducts = [
         careInstructions: "Hand wash separately in cold water with gentle liquid soap.",
         deliveryInfo: "Dispatched within 24 hours. Express delivery in 3-5 days."
     },
+    {
+        id: 301,
+        sku: "ACH-STR-001",
+        name: "Zari & Zardozi Embroidered Olive Silk Sharara Set",
+        category: "Straight Fit",
+        parentCategory: "Ethnic Wear",
+        fabric: "Pure Raw Silk & Chanderi",
+        color: "Olive Green",
+        size: ["XS", "S", "M", "L", "XL", "XXL"],
+        price: 4899,
+        originalPrice: 5999,
+        discountPrice: 4899,
+        stock: 25,
+        status: "Active",
+        featured: true,
+        availability: "New Arrival",
+        occasion: "Festive & Wedding",
+        image: "products/straight-fit/product-01/front.jpg",
+        images: {
+            front: "products/straight-fit/product-01/front.jpg",
+            side: "",
+            zoom: "",
+            palazzo: "",
+            dupatta: "",
+            back: ""
+        },
+        rating: 5,
+        description: "Exquisite chartreuse olive-green raw silk sleeveless kurti with a V-neckline adorned with delicate zardozi and soft pink threadwork embroidery, paired with a matching flared pleated sharara bottom and scalloped zari embroidered dupatta.",
+        careInstructions: "Dry clean only to preserve raw silk texture and fine metallic zari embroidery.",
+        deliveryInfo: "Dispatched within 24-48 hours. Express delivery across India in 3-5 business days."
+    },
     { 
         id: 201, 
         sku: "ACH-KRT-001",
         name: "Mayura Mustard & Teal Blue Embroidered Kurta Pant Dupatta Set", 
-        category: "Kurta Sets", 
+        category: "Straight Fit", 
         parentCategory: "Ethnic Wear",
         fabric: "Pure Cotton Slub", 
         color: "Mustard Yellow & Teal", 
@@ -1705,13 +1736,117 @@ function changeCartQty(productId, change, size = null, color = null) {
     
     setDB('cart', cart);
     updateHeaderBadges();
+    renderCartDrawer();
 }
+
+// --- Interactive Product Gallery & Lightbox Controller ---
+let activeLightboxProductId = null;
+let activeLightboxImageIndex = 0;
+
+function handleGalleryZoom(e, wrapperEl) {
+    const img = wrapperEl.querySelector('.gallery-hero-img');
+    if (!img) return;
+    const rect = wrapperEl.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    img.style.transformOrigin = `${x}% ${y}%`;
+    wrapperEl.classList.add('zoomed');
+}
+
+function resetGalleryZoom(wrapperEl) {
+    wrapperEl.classList.remove('zoomed');
+    const img = wrapperEl.querySelector('.gallery-hero-img');
+    if (img) img.style.transformOrigin = 'center center';
+}
+
+function switchGalleryActiveImage(productId, idx) {
+    const p = getDB('products').find(prod => String(prod.id) === String(productId));
+    if (!p) return;
+    const imgList = (typeof getProductImagesList === 'function') ? getProductImagesList(p) : [{ url: p.image, label: 'Front View' }];
+    if (!imgList[idx]) return;
+
+    const heroImg = document.getElementById('qvMainImg');
+    const badgeSlot = document.getElementById('qvBadgeSlot');
+    if (heroImg) heroImg.src = imgList[idx].url;
+    if (badgeSlot) badgeSlot.textContent = (imgList[idx].label || p.availability || 'Couture').toUpperCase();
+
+    document.querySelectorAll('.gallery-thumb-item').forEach((thumb, i) => {
+        if (i === idx) thumb.classList.add('active');
+        else thumb.classList.remove('active');
+    });
+}
+
+function openAchiraLightbox(productId, idx = 0) {
+    const p = getDB('products').find(prod => String(prod.id) === String(productId));
+    if (!p) return;
+    const imgList = (typeof getProductImagesList === 'function') ? getProductImagesList(p) : [{ url: p.image, label: 'Front View' }];
+    if (imgList.length === 0) return;
+
+    activeLightboxProductId = productId;
+    activeLightboxImageIndex = Math.max(0, Math.min(idx, imgList.length - 1));
+
+    let lb = document.getElementById('achiraLightboxModal');
+    if (!lb) {
+        lb = document.createElement('div');
+        lb.id = 'achiraLightboxModal';
+        lb.className = 'achira-lightbox';
+        lb.innerHTML = `
+            <button class="lightbox-close-btn" onclick="closeAchiraLightbox()">&times;</button>
+            <button class="lightbox-nav-btn prev" onclick="navigateAchiraLightbox(-1)">&#8249;</button>
+            <div class="lightbox-content-wrap">
+                <img id="achiraLightboxImg" class="lightbox-img" src="" alt="Full View">
+            </div>
+            <button class="lightbox-nav-btn next" onclick="navigateAchiraLightbox(1)">&#8250;</button>
+            <div class="lightbox-caption" id="achiraLightboxCaption"></div>
+        `;
+        document.body.appendChild(lb);
+    }
+
+    updateAchiraLightboxContent();
+    lb.classList.add('active');
+}
+
+function updateAchiraLightboxContent() {
+    const p = getDB('products').find(prod => String(prod.id) === String(activeLightboxProductId));
+    if (!p) return;
+    const imgList = (typeof getProductImagesList === 'function') ? getProductImagesList(p) : [{ url: p.image, label: 'Front View' }];
+    const cur = imgList[activeLightboxImageIndex];
+    if (!cur) return;
+
+    const lbImg = document.getElementById('achiraLightboxImg');
+    const lbCap = document.getElementById('achiraLightboxCaption');
+    if (lbImg) lbImg.src = cur.url;
+    if (lbCap) lbCap.textContent = `${p.name} • ${cur.label} (${activeLightboxImageIndex + 1} of ${imgList.length})`;
+}
+
+function closeAchiraLightbox() {
+    const lb = document.getElementById('achiraLightboxModal');
+    if (lb) lb.classList.remove('active');
+}
+
+function navigateAchiraLightbox(step) {
+    const p = getDB('products').find(prod => String(prod.id) === String(activeLightboxProductId));
+    if (!p) return;
+    const imgList = (typeof getProductImagesList === 'function') ? getProductImagesList(p) : [{ url: p.image, label: 'Front View' }];
+    if (imgList.length <= 1) return;
+    activeLightboxImageIndex = (activeLightboxImageIndex + step + imgList.length) % imgList.length;
+    updateAchiraLightboxContent();
+}
+
+window.addEventListener('keydown', (e) => {
+    const lb = document.getElementById('achiraLightboxModal');
+    if (lb && lb.classList.contains('active')) {
+        if (e.key === 'Escape') closeAchiraLightbox();
+        else if (e.key === 'ArrowLeft') navigateAchiraLightbox(-1);
+        else if (e.key === 'ArrowRight') navigateAchiraLightbox(1);
+    }
+});
 
 let currentQuickViewQty = 1;
 
 // --- Quick View / Product Detail Modal ---
 function openQuickView(productId) {
-    const p = getDB('products').find(prod => prod.id === productId);
+    const p = getDB('products').find(prod => String(prod.id) === String(productId));
     if (!p) return;
 
     currentQuickViewQty = 1;
@@ -1745,22 +1880,29 @@ function openQuickView(productId) {
     const stockCount = p.stock !== undefined ? p.stock : 24;
     const isOutOfStock = p.status === 'Out of Stock' || stockCount <= 0;
 
-    const galleryImages = (p.images && Array.isArray(p.images) && p.images.length > 0) ? p.images : [p.image];
-    const thumbnailsHTML = galleryImages.length > 1 ? `
-        <div style="display: flex; gap: 8px; margin-top: 10px; overflow-x: auto;">
-            ${galleryImages.map((img, i) => `
-                <img src="${img}" alt="${p.name} ${i+1}" onclick="document.getElementById('qvMainImg').src='${img}'" style="width: 50px; height: 65px; object-fit: cover; border-radius: 6px; border: 1.5px solid rgba(184,138,68,0.3); cursor: pointer;">
+    const imgList = (typeof getProductImagesList === 'function') ? getProductImagesList(p) : [{ url: p.image, label: 'Front View' }];
+    const mainImgUrl = imgList[0] ? imgList[0].url : p.image;
+    const mainImgLabel = imgList[0] ? imgList[0].label : (p.availability || 'Couture');
+
+    const thumbnailsHTML = imgList.length > 1 ? `
+        <div class="gallery-thumbnails-strip">
+            ${imgList.map((imgObj, i) => `
+                <div class="gallery-thumb-item ${i === 0 ? 'active' : ''}" onclick="switchGalleryActiveImage('${p.id}', ${i})">
+                    <img src="${imgObj.url}" alt="${p.name} ${imgObj.label}" loading="lazy">
+                    <span>${imgObj.label}</span>
+                </div>
             `).join('')}
         </div>
     ` : '';
 
     const quickViewContent = document.getElementById('quickViewContent');
     quickViewContent.innerHTML = `
-        <div style="display: flex; flex-direction: column;">
-            <div style="height: 480px; overflow: hidden; border-radius: 12px; border: 1px solid rgba(184, 138, 68, 0.2); background: #FAF7F2; position: relative;">
-                <img id="qvMainImg" src="${p.image}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;">
-                <span style="position: absolute; top: 12px; left: 12px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; border: 1px solid #B88A44; letter-spacing: 0.05em;">${(p.availability || 'Couture').toUpperCase()}</span>
-                ${p.sku ? `<span style="position: absolute; bottom: 12px; left: 12px; background: rgba(0,0,0,0.65); color: #FFF; font-size: 0.68rem; font-family: monospace; padding: 2px 8px; border-radius: 4px;">SKU: ${p.sku}</span>` : ''}
+        <div class="product-gallery-container">
+            <div class="gallery-hero-wrapper" id="qvHeroWrapper" onmousemove="handleGalleryZoom(event, this)" onmouseleave="resetGalleryZoom(this)">
+                <img id="qvMainImg" class="gallery-hero-img" src="${mainImgUrl}" alt="${p.name}">
+                <span class="gallery-badge-slot" id="qvBadgeSlot">${mainImgLabel.toUpperCase()}</span>
+                ${p.sku ? `<span style="position: absolute; bottom: 12px; left: 12px; background: rgba(0,0,0,0.65); color: #FFF; font-size: 0.68rem; font-family: monospace; padding: 2px 8px; border-radius: 4px; z-index: 2;">SKU: ${p.sku}</span>` : ''}
+                <button class="gallery-expand-btn" title="View Fullscreen" onclick="openAchiraLightbox('${p.id}', 0)">🔍</button>
             </div>
             ${thumbnailsHTML}
         </div>
@@ -1816,8 +1958,8 @@ function openQuickView(productId) {
 
             <!-- Action Buttons -->
             <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
-                <button class="buy-now-btn" style="width: 100%; padding: 14px; border-radius: 30px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; font-weight: 700; border: 1px solid #B88A44; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 15px rgba(60, 0, 8, 0.3); font-size: 0.92rem; letter-spacing: 0.05em;" onclick="for(let q=0;q<currentQuickViewQty;q++){addItemToCart(${p.id}, currentQuickViewSize, currentQuickViewColor);} closeQuickViewModal(); openCheckoutModal();" ${isOutOfStock ? 'disabled' : ''}>⚡ ${isOutOfStock ? 'OUT OF STOCK' : 'BUY NOW'}</button>
-                <button class="add-to-bag" style="width: 100%; padding: 12px; border-radius: 30px; background: transparent; border: 1.5px solid #B88A44; color: #3C0008; font-weight: 700; cursor: pointer; font-size: 0.88rem; letter-spacing: 0.05em;" onclick="for(let q=0;q<currentQuickViewQty;q++){addItemToCart(${p.id}, currentQuickViewSize, currentQuickViewColor);} closeQuickViewModal();" ${isOutOfStock ? 'disabled' : ''}>ADD TO SHOPPING BAG</button>
+                <button class="buy-now-btn" style="width: 100%; padding: 14px; border-radius: 30px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; font-weight: 700; border: 1px solid #B88A44; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 15px rgba(60, 0, 8, 0.3); font-size: 0.92rem; letter-spacing: 0.05em;" onclick="for(let q=0;q<currentQuickViewQty;q++){addItemToCart('${p.id}', currentQuickViewSize, currentQuickViewColor);} closeQuickViewModal(); openCheckoutModal();" ${isOutOfStock ? 'disabled' : ''}>⚡ ${isOutOfStock ? 'OUT OF STOCK' : 'BUY NOW'}</button>
+                <button class="add-to-bag" style="width: 100%; padding: 12px; border-radius: 30px; background: transparent; border: 1.5px solid #B88A44; color: #3C0008; font-weight: 700; cursor: pointer; font-size: 0.88rem; letter-spacing: 0.05em;" onclick="for(let q=0;q<currentQuickViewQty;q++){addItemToCart('${p.id}', currentQuickViewSize, currentQuickViewColor);} closeQuickViewModal();" ${isOutOfStock ? 'disabled' : ''}>ADD TO SHOPPING BAG</button>
             </div>
 
             <!-- Description & Accordions -->
@@ -2670,11 +2812,11 @@ function verifyMobileOtp() {
 function togglePaymentViews(mode) {
     const upi = document.getElementById('upiQrBox');
     const cod = document.getElementById('codBox');
-    const card = document.getElementById('cardBox');
+    const card = document.getElementById('cardBox') || document.getElementById('onlineGatewayBox');
 
-    if (upi) upi.style.display = (mode === 'upi') ? 'block' : 'none';
+    if (upi) upi.style.display = (mode === 'upi' || mode === 'qr') ? 'block' : 'none';
     if (cod) cod.style.display = (mode === 'cod') ? 'block' : 'none';
-    if (card) card.style.display = (mode === 'card') ? 'block' : 'none';
+    if (card) card.style.display = (mode === 'card' || mode === 'online') ? 'block' : 'none';
 }
 
 function handlePlaceOrder(e) {
@@ -2940,8 +3082,8 @@ function completeOrderPlacement(realServerOrder) {
                 email: email,
                 phone: phone,
                 address: address,
-                payment_method: realServerOrder.paymentMode || 'COD',
-                payment_status: (realServerOrder.paymentMode || '').includes('COD') ? 'Pending' : 'Paid',
+                payment_method: realServerOrder.paymentMode || 'UPI (QR)',
+                payment_status: 'Paid',
                 order_status: 'Processing',
                 subtotal: Number(realServerOrder.subtotal || grandTotal),
                 discount: Number(realServerOrder.discount || 0),
@@ -3480,7 +3622,7 @@ async function renderAdminOrdersTable() {
         const uName = o.userName || o.customerName || 'Valued Patron';
         const uEmail = o.userEmail || o.email || 'N/A';
         const uPhone = o.userPhone || o.phone || '';
-        const payMode = o.paymentMode || o.paymentMethod || 'COD';
+        const payMode = o.paymentMode || o.paymentMethod || 'UPI (QR)';
         const st = o.status || o.orderStatus || 'Pending';
         const total = (o.grandTotal || o.total || 0).toLocaleString('en-IN');
         const displayId = String(o.id).startsWith('ACH-') ? o.id : ('ACH-' + o.id);
@@ -4061,16 +4203,12 @@ function injectModalsHTML() {
                             <span class="pay-label">📱 Scan &amp; Pay via UPI QR Code (GPay / PhonePe / Paytm / BHIM)</span>
                         </label>
                         <label class="pay-option">
-                            <input type="radio" name="paymentMethod" value="COD" onchange="togglePaymentViews('cod')">
-                            <span class="pay-label">💵 Cash on Delivery (COD)</span>
-                        </label>
-                        <label class="pay-option">
-                            <input type="radio" name="paymentMethod" value="Card" onchange="togglePaymentViews('card')">
-                            <span class="pay-label">💳 Credit Card / Debit Card / Net Banking</span>
+                            <input type="radio" name="paymentMethod" value="Online Gateway" onchange="togglePaymentViews('online')">
+                            <span class="pay-label">💳 Online Payment Gateway (Cards, Net Banking, Wallets)</span>
                         </label>
                     </div>
 
-                    <!-- Payment Option A: UPI -->
+                    <!-- Payment Option A: UPI QR Code -->
                     <div id="upiQrBox" style="background: rgba(184,138,68,0.06); border: 1.5px dashed #B88A44; padding: 16px; border-radius: 12px; text-align: center; margin-top: 15px;">
                         <span style="font-size: 0.85rem; font-weight: 700; color: #3C0008; display: block; margin-bottom: 8px;">Scan QR Code using GPay, PhonePe, Paytm, or BHIM UPI</span>
                         <div style="background: #FFF; padding: 10px; display: inline-block; border-radius: 10px; border: 1px solid rgba(184,138,68,0.3); box-shadow: 0 4px 15px rgba(0,0,0,0.06);">
@@ -4086,16 +4224,14 @@ function injectModalsHTML() {
                         </div>
                     </div>
 
-                    <!-- Payment Option B: COD -->
-                    <div id="codBox" style="display: none; background: rgba(0,102,51,0.06); border: 1.5px dashed #006633; padding: 16px; border-radius: 12px; margin-top: 15px; text-align: center;">
-                        <span style="font-size: 0.88rem; font-weight: 700; color: #006633; display: block; margin-bottom: 4px;">✓ Cash on Delivery Selected</span>
-                        <p style="font-size: 0.8rem; color: #2C2C2C; margin: 0;">Pay exact cash amount to our courier executive at your doorstep. Verified via Mobile SMS.</p>
-                    </div>
-
-                    <!-- Payment Option C: Card -->
+                    <!-- Payment Option B: Online Gateway -->
                     <div id="cardBox" style="display: none; background: rgba(60,0,8,0.04); border: 1.5px dashed #3C0008; padding: 16px; border-radius: 12px; margin-top: 15px;">
+                        <div style="font-size: 0.84rem; font-weight: 700; color: #3C0008; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                            <span>🔒 Secure 256-Bit Encrypted Payment Gateway</span>
+                        </div>
+                        <p style="font-size: 0.8rem; color: #555; margin-bottom: 12px;">Supports all Major Credit/Debit Cards, Net Banking &amp; Prepaid Wallets.</p>
                         <div class="input-group" style="margin-bottom: 10px;">
-                            <label>Card Number</label>
+                            <label>Card Number (Optional / Demo)</label>
                             <input type="text" placeholder="xxxx xxxx xxxx xxxx" id="cardNum" maxlength="19">
                         </div>
                         <div class="input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">

@@ -711,6 +711,7 @@
                 <div class="form-group">
                     <label>Category</label>
                     <select id="prodCategory" class="form-control">
+                        <option value="Straight Fit">Straight Fit</option>
                         <option value="Gown">Gown</option>
                         <option value="Cotton Kurtas">Cotton Dresses</option>
                         <option value="Anarkali Kurtas">Anarkali Dresses</option>
@@ -947,9 +948,9 @@
                             userAddress: so.address || 'Standard Delivery Address',
                             grandTotal: Number(so.grand_total || 0),
                             total: Number(so.grand_total || 0),
-                            paymentMethod: so.payment_method || 'COD',
-                            paymentMode: so.payment_method || 'COD',
-                            paymentStatus: so.payment_status || 'Pending',
+                            paymentMethod: so.payment_method || 'UPI (QR)',
+                            paymentMode: so.payment_method || 'UPI (QR)',
+                            paymentStatus: so.payment_status || 'Paid',
                             orderStatus: so.order_status || 'Processing',
                             status: so.order_status || 'Processing',
                             itemsSummary: so.items_summary || '',

@@ -615,6 +615,10 @@
                 <h5 class="filter-title" onclick="toggleFilterGroup(this)">Category</h5>
                 <div class="filter-options" id="filterCategory">
                     <label class="checkbox-label">
+                        <input type="checkbox" value="Straight Fit" onchange="applyFilters()"> Straight Fit
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="checkbox-label">
                         <input type="checkbox" value="Kurta Sets" onchange="applyFilters()"> Kurta Sets
                         <span class="checkmark"></span>
                     </label>
@@ -917,15 +921,32 @@
                 image: "anarkali8.jpg"
             },
             {
+                id: 301,
+                name: "Zari & Zardozi Embroidered Olive Silk Sharara Set",
+                category: "Straight Fit",
+                fabric: "Silk",
+                size: ["XS", "S", "M", "L", "XL", "XXL"],
+                color: "Green",
+                price: 4899,
+                availability: "New Arrival",
+                image: "products/straight-fit/product-01/front.jpg",
+                images: {
+                    front: "products/straight-fit/product-01/front.jpg"
+                }
+            },
+            {
                 id: 201,
                 name: "Mayura Mustard & Teal Blue Embroidered Kurta Pant Dupatta Set",
-                category: "Straight Kurti",
+                category: "Straight Fit",
                 fabric: "Cotton",
                 size: ["XS", "S", "M", "L", "XL", "XXL"],
                 color: "Yellow",
                 price: 3450,
                 availability: "New Arrival",
-                image: "kurtaset1.jpg"
+                image: "products/straight-fit/product-02/front.jpg",
+                images: {
+                    front: "products/straight-fit/product-02/front.jpg"
+                }
             },
             {
                 id: 202,
@@ -1337,6 +1358,7 @@
             }
         });
     </script>
-    <script src="script.js?v=3.0"></script>
+    <script src="products_data.js?v=4.0"></script>
+    <script src="script.js?v=4.0"></script>
 </body>
 </html>

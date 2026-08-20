@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600;700&family=Cinzel:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- External CSS -->
-    <link rel="stylesheet" href="styles.css?v=3.2">
+    <link rel="stylesheet" href="styles.css?v=4.0">
     <script>
         // Global UI Notification Guard - Strict error suppression & MutationObserver
         (function() {
@@ -110,7 +110,8 @@
                                 <div class="mega-column">
                                     <h4 class="mega-title">Couture Ethnic Wear</h4>
                                     <ul class="mega-links">
-                                        <li><a href="collections.html?category=Cotton%20Kurti"><span class="link-bullet">✦</span> Cotton Kurtis & Sets</a></li>
+                                        <li><a href="collections.html?category=Straight%20Fit"><span class="link-bullet">✦</span> Straight Fit &amp; Kurta Sets</a></li>
+                                        <li><a href="collections.html?category=Cotton%20Kurti"><span class="link-bullet">✦</span> Cotton Kurtis &amp; Sets</a></li>
                                         <li><a href="collections.html?category=Lucknowi%20Kurti"><span class="link-bullet">✦</span> Chikankari Tunics</a></li>
                                         <li><a href="collections.html?category=Anarkali%20Kurti"><span class="link-bullet">✦</span> Anarkali Suits</a></li>
                                         <li><a href="collections.html?category=Saree"><span class="link-bullet">✦</span> Banarasi Silk Sarees</a></li>
@@ -489,6 +490,10 @@
                     <div class="filter-group">
                         <h5 class="filter-title" onclick="toggleFeaturedFilter(this)">Category</h5>
                         <div class="filter-options" id="featCategory">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="Straight Fit" onchange="applyFeaturedFilters()"> Straight Fit
+                                <span class="checkmark"></span>
+                            </label>
                             <label class="checkbox-label">
                                 <input type="checkbox" value="Kurta Sets" onchange="applyFeaturedFilters()"> Kurta Sets
                                 <span class="checkmark"></span>
@@ -1024,16 +1029,12 @@
                             <span class="pay-label">📱 Scan &amp; Pay via UPI QR Code (GPay / PhonePe / Paytm / BHIM)</span>
                         </label>
                         <label class="pay-option">
-                            <input type="radio" name="paymentMethod" value="COD" onchange="togglePaymentViews('cod')">
-                            <span class="pay-label">💵 Cash on Delivery (COD)</span>
-                        </label>
-                        <label class="pay-option">
-                            <input type="radio" name="paymentMethod" value="Card" onchange="togglePaymentViews('card')">
-                            <span class="pay-label">💳 Credit Card / Debit Card / Net Banking</span>
+                            <input type="radio" name="paymentMethod" value="Online Gateway" onchange="togglePaymentViews('online')">
+                            <span class="pay-label">💳 Online Payment Gateway (Cards, Net Banking, Wallets)</span>
                         </label>
                     </div>
 
-                    <!-- Payment Option A: UPI -->
+                    <!-- Payment Option A: UPI QR Code -->
                     <div id="upiQrBox" style="background: rgba(184,138,68,0.06); border: 1.5px dashed #B88A44; padding: 16px; border-radius: 12px; text-align: center; margin-top: 15px;">
                         <span style="font-size: 0.85rem; font-weight: 700; color: #3C0008; display: block; margin-bottom: 8px;">Scan QR Code using GPay, PhonePe, Paytm, or BHIM UPI</span>
                         <div style="background: #FFF; padding: 10px; display: inline-block; border-radius: 10px; border: 1px solid rgba(184,138,68,0.3); box-shadow: 0 4px 15px rgba(0,0,0,0.06);">
@@ -1049,16 +1050,14 @@
                         </div>
                     </div>
 
-                    <!-- Payment Option B: COD -->
-                    <div id="codBox" style="display: none; background: rgba(0,102,51,0.06); border: 1.5px dashed #006633; padding: 16px; border-radius: 12px; margin-top: 15px; text-align: center;">
-                        <span style="font-size: 0.88rem; font-weight: 700; color: #006633; display: block; margin-bottom: 4px;">✓ Cash on Delivery Selected</span>
-                        <p style="font-size: 0.8rem; color: #2C2C2C; margin: 0;">Pay exact cash amount to our courier executive at your doorstep. Verified via Mobile SMS.</p>
-                    </div>
-
-                    <!-- Payment Option C: Card -->
+                    <!-- Payment Option B: Online Gateway -->
                     <div id="cardBox" style="display: none; background: rgba(60,0,8,0.04); border: 1.5px dashed #3C0008; padding: 16px; border-radius: 12px; margin-top: 15px;">
+                        <div style="font-size: 0.84rem; font-weight: 700; color: #3C0008; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                            <span>🔒 Secure 256-Bit Encrypted Payment Gateway</span>
+                        </div>
+                        <p style="font-size: 0.8rem; color: #555; margin-bottom: 12px;">Supports all Major Credit/Debit Cards, Net Banking &amp; Prepaid Wallets.</p>
                         <div class="input-group" style="margin-bottom: 10px;">
-                            <label>Card Number</label>
+                            <label>Card Number (Optional / Demo)</label>
                             <input type="text" placeholder="xxxx xxxx xxxx xxxx" id="cardNum" maxlength="19">
                         </div>
                         <div class="input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
@@ -1332,7 +1331,8 @@
     </div>
     <div class="toast-notification" id="toast">Item added to your shopping bag!</div>
 
-    <!-- External JavaScript -->
-    <script src="script.js?v=3.0"></script>
+    <!-- External JavaScript Data & Engine -->
+    <script src="products_data.js?v=4.0"></script>
+    <script src="script.js?v=4.0"></script>
 </body>
 </html>

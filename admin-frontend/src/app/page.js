@@ -1071,8 +1071,8 @@ export default function AdminDashboard() {
                         const cName = o.customerName || o.userName || 'Valued Patron';
                         const cPhone = o.phone || o.userPhone || '';
                         const cEmail = o.email || o.userEmail || '';
-                        const pMethod = o.paymentMethod || o.paymentMode || 'COD';
-                        const pStatus = o.paymentStatus || 'Pending';
+                        const pMethod = o.paymentMethod || o.paymentMode || 'UPI (QR)';
+                        const pStatus = o.paymentStatus || 'Paid';
                         const oStatus = o.orderStatus || o.status || 'Pending';
 
                         return (
