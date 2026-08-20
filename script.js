@@ -1335,34 +1335,48 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closeCartBtn) closeCartBtn.addEventListener('click', closeCart);
     if (drawerOverlay) drawerOverlay.addEventListener('click', closeCart);
 
-    // Search Modal Toggle
-    const searchBtn = document.getElementById('searchBtn');
-    const searchModal = document.getElementById('searchModal');
-    const closeSearchBtn = document.getElementById('closeSearchBtn');
-
-    function openSearch() {
-        if (searchModal) searchModal.classList.add('active');
-    }
-
-    function closeSearch() {
-        if (searchModal) searchModal.classList.remove('active');
-    }
-
-    if (searchBtn) searchBtn.addEventListener('click', openSearch);
-    if (closeSearchBtn) closeSearchBtn.addEventListener('click', closeSearch);
-
-    // Escape key closes modals
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            closeCart();
-            closeSearch();
-            closeAuthModal();
-            closeProfileModal();
-            closeCheckoutModal();
-            closeQuickViewModal();
-            closeAdminModal();
+    // Search Modal Controller
+    function openSearchModal() {
+        const modal = document.getElementById('searchModal');
+        if (modal) {
+            modal.classList.add('active');
+            const inp = modal.querySelector('#searchInput');
+            if (inp) {
+                setTimeout(() => inp.focus(), 100);
+            }
         }
-    });
+    }
+    window.openSearchModal = openSearchModal;
+
+    function closeSearchModal() {
+        const modal = document.getElementById('searchModal');
+        if (modal) modal.classList.remove('active');
+    }
+    window.closeSearchModal = closeSearchModal;
+
+    function executeSearch() {
+        const input = document.getElementById('searchInput');
+        const query = input ? input.value.trim().toLowerCase() : '';
+        if (query) {
+            const filtered = getDB('products').filter(p => (p.name || '').toLowerCase().includes(query) || (p.category || '').toLowerCase().includes(query));
+            renderFeaturedProducts(filtered);
+            const featSec = document.getElementById('products') || document.getElementById('featuredSection');
+            if (featSec) featSec.scrollIntoView({ behavior: 'smooth' });
+            closeSearchModal();
+            showToast(`Showing results for "${query}"`);
+        }
+    }
+    window.executeSearch = executeSearch;
+
+    function quickSearch(keyword) {
+        const filtered = getDB('products').filter(p => (p.name || '').toLowerCase().includes(keyword.toLowerCase()) || (p.category || '').toLowerCase().includes(keyword.toLowerCase()));
+        renderFeaturedProducts(filtered);
+        const featSec = document.getElementById('products') || document.getElementById('featuredSection');
+        if (featSec) featSec.scrollIntoView({ behavior: 'smooth' });
+        closeSearchModal();
+        showToast(`Showing "${keyword}" collection`);
+    }
+    window.quickSearch = quickSearch;
 
     // Search input event
     const searchInput = document.getElementById('searchInput');
@@ -1370,7 +1384,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase();
-            const filtered = getDB('products').filter(p => p.name.toLowerCase().includes(query));
+            const filtered = getDB('products').filter(p => (p.name || '').toLowerCase().includes(query) || (p.category || '').toLowerCase().includes(query));
             renderFeaturedProducts(filtered);
             
             clearTimeout(searchDebounce);
@@ -1378,6 +1392,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 searchDebounce = setTimeout(() => {
                     logSearchKeyword(query.trim());
                 }, 800);
+            }
+        });
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                executeSearch();
             }
         });
     }
