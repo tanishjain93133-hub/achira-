@@ -1,5 +1,6 @@
 /**
  * ACHIRA COUTURE - Centralized & Scalable Products Database
+ * 
  * Supports multi-slot image structures:
  * {
  *   front: "...",
@@ -12,7 +13,9 @@
  */
 
 const ACHIRA_PRODUCTS_DATA = [
-    // --- STRAIGHT FIT COLLECTION ---
+    // ==========================================
+    // --- STRAIGHT FIT COLLECTION (Ethnic Wear) ---
+    // ==========================================
     {
         id: "straight-001",
         numericId: 301,
@@ -22,10 +25,10 @@ const ACHIRA_PRODUCTS_DATA = [
         parentCategory: "Ethnic Wear",
         fabric: "Pure Raw Silk & Chanderi",
         color: "Olive Green",
-        size: ["XS", "S", "M", "L", "XL", "XXL"],
-        price: 4899,
-        originalPrice: 5999,
-        discountPrice: 4899,
+        size: ["L"],
+        price: null,
+        originalPrice: null,
+        discountPrice: null,
         stock: 25,
         status: "Active",
         featured: true,
@@ -47,22 +50,22 @@ const ACHIRA_PRODUCTS_DATA = [
     },
     {
         id: "straight-002",
-        numericId: 201,
+        numericId: 302,
         sku: "ACH-STR-002",
-        name: "Mayura Mustard & Teal Blue Embroidered Straight Kurta Pant Set",
+        name: "Gulabi Noor Dusty Rose Embroidered Raw Silk Kurta Set",
         category: "Straight Fit",
         parentCategory: "Ethnic Wear",
-        fabric: "Pure Cotton Slub",
-        color: "Mustard Yellow & Teal",
-        size: ["XS", "S", "M", "L", "XL", "XXL"],
-        price: 3450,
-        originalPrice: 4200,
-        discountPrice: 3450,
-        stock: 26,
+        fabric: "Pure Raw Silk",
+        color: "Dusty Rose Pink",
+        size: ["L"],
+        price: null,
+        originalPrice: null,
+        discountPrice: null,
+        stock: 22,
         status: "Active",
         featured: true,
-        availability: "Best Seller",
-        occasion: "Casual & Festive",
+        availability: "New Arrival",
+        occasion: "Wedding & Day Festive",
         image: "products/straight-fit/product-02/front.jpg",
         images: {
             front: "products/straight-fit/product-02/front.jpg",
@@ -73,28 +76,28 @@ const ACHIRA_PRODUCTS_DATA = [
             back: ""
         },
         rating: 5,
-        description: "Chic dual-tone straight kurta set in mustard yellow with a teal blue embroidered chest patch featuring geometric stitch-work, paired with matching tailored trousers and a lavish geometric printed teal dupatta.",
-        careInstructions: "Hand wash cold with mild detergent. Dry in shade.",
-        deliveryInfo: "Dispatched within 24-48 hours. Express delivery across India in 3-5 business days."
+        description: "Sophisticated dusty rose blush raw silk straight-cut kurta featuring delicate floral motif resham and zardozi threadwork on the V-neck yoke and sleeves, paired with tailored tonal churidar trousers and a heavily bordered floral embroidered sheer silk dupatta.",
+        careInstructions: "Dry clean only to protect delicate resham embroidery.",
+        deliveryInfo: "Dispatched within 24-48 hours. Express delivery across India."
     },
     {
         id: "straight-003",
-        numericId: 202,
+        numericId: 303,
         sku: "ACH-STR-003",
-        name: "Parijaat Lime Green V-Neck Motif Embroidered Kurta Set",
+        name: "Parijaat Seafoam Sage Green Silk Kurta Sharara Set",
         category: "Straight Fit",
         parentCategory: "Ethnic Wear",
-        fabric: "Pure Chanderi Silk",
-        color: "Lime Green",
-        size: ["XS", "S", "M", "L", "XL", "XXL"],
-        price: 3850,
-        originalPrice: 4600,
-        discountPrice: 3850,
+        fabric: "Chanderi Silk Blend",
+        color: "Seafoam Green",
+        size: ["L"],
+        price: null,
+        originalPrice: null,
+        discountPrice: null,
         stock: 20,
         status: "Active",
         featured: true,
         availability: "Trending",
-        occasion: "Day Festive & Office Wear",
+        occasion: "Festive & Party",
         image: "products/straight-fit/product-03/front.jpg",
         images: {
             front: "products/straight-fit/product-03/front.jpg",
@@ -105,28 +108,28 @@ const ACHIRA_PRODUCTS_DATA = [
             back: ""
         },
         rating: 5,
-        description: "Refreshing lime green straight kurta set accented with a contrasting dark green embroidered V-neckline border, tree of life central motif, geometric hem detailing, and matching printed tapered trousers.",
-        careInstructions: "Dry clean first wash. Gentle cold hand wash thereafter.",
+        description: "Regal seafoam sage green straight kurti embellished with intricate silver and pink floral zardozi neckline and border detailing, paired with matching flared tiered sharara bottoms and a sequined lace border dupatta.",
+        careInstructions: "Dry clean only.",
         deliveryInfo: "Dispatched within 24-48 hours. Express delivery in 3-5 business days."
     },
     {
         id: "straight-004",
-        numericId: 203,
+        numericId: 304,
         sku: "ACH-STR-004",
-        name: "Raktika Crimson Red Sleeveless Kurta Trouser Set",
+        name: "Meera Teal Raw Silk Kurta with Floral Zari Dupatta Set",
         category: "Straight Fit",
         parentCategory: "Ethnic Wear",
-        fabric: "Modal Satin Silk",
-        color: "Crimson Red",
-        size: ["XS", "S", "M", "L", "XL", "XXL"],
-        price: 4100,
-        originalPrice: 4900,
-        discountPrice: 4100,
-        stock: 18,
+        fabric: "Pure Raw Silk & Banarasi Silk",
+        color: "Teal Green",
+        size: ["L"],
+        price: null,
+        originalPrice: null,
+        discountPrice: null,
+        stock: 24,
         status: "Active",
         featured: true,
-        availability: "New Arrival",
-        occasion: "Party & Evening Festive",
+        availability: "Best Seller",
+        occasion: "Evening Festive & Wedding Guest",
         image: "products/straight-fit/product-04/front.jpg",
         images: {
             front: "products/straight-fit/product-04/front.jpg",
@@ -137,28 +140,28 @@ const ACHIRA_PRODUCTS_DATA = [
             back: ""
         },
         rating: 5,
-        description: "Bold and alluring crimson red sleeveless straight silhouette kurta tailored from lustrous modal satin silk, featuring minimal neckline piping, side slits, matching ankle-length trousers, and a lightweight printed contrast dupatta.",
-        careInstructions: "Dry clean recommended for maintaining satin silk lustre.",
-        deliveryInfo: "Dispatched within 24-48 hours. Express delivery across India in 3-5 business days."
+        description: "Stunning rich teal green straight raw silk kurta with a zardozi embellished V-neckline, paired with matching straight-cut palazzo trousers and a luxurious multi-colored floral printed Banarasi silk dupatta with golden zari borders.",
+        careInstructions: "Dry clean recommended.",
+        deliveryInfo: "Dispatched within 24 hours. Express delivery across India."
     },
     {
         id: "straight-005",
-        numericId: 204,
+        numericId: 305,
         sku: "ACH-STR-005",
-        name: "Gulbahar Ivory & Pink Floral Printed Straight Kurta Set",
+        name: "Aarohi Beige Mirror-Work Tassel Kurta Mauve Set",
         category: "Straight Fit",
         parentCategory: "Ethnic Wear",
-        fabric: "Mulmul Cotton",
-        color: "Ivory White",
-        size: ["XS", "S", "M", "L", "XL", "XXL"],
-        price: 3200,
-        originalPrice: 3800,
-        discountPrice: 3200,
-        stock: 30,
+        fabric: "Linen Cotton & Chanderi Silk",
+        color: "Ivory Beige & Mauve",
+        size: ["L"],
+        price: null,
+        originalPrice: null,
+        discountPrice: null,
+        stock: 18,
         status: "Active",
         featured: true,
-        availability: "Best Seller",
-        occasion: "Summer Festive & Daily Luxury",
+        availability: "New Arrival",
+        occasion: "Haldi & Day Festive",
         image: "products/straight-fit/product-05/front.jpg",
         images: {
             front: "products/straight-fit/product-05/front.jpg",
@@ -169,28 +172,28 @@ const ACHIRA_PRODUCTS_DATA = [
             back: ""
         },
         rating: 5,
-        description: "Serene ivory white straight kurta adorned with delicate pink hand-block floral sprigs, a lace-trimmed round neckline with keyhole notch, matching comfort-fit trousers, and a soft breathable mulmul dupatta.",
-        careInstructions: "Hand wash cold inside out with gentle detergent.",
-        deliveryInfo: "Dispatched within 24 hours. Delivery in 3-5 business days."
+        description: "Artisanal ivory beige straight kurta featuring traditional mirror-work bib embroidery with handcrafted dangling fringe tassels on the hem and sleeves, paired with mauve-purple gathered crushed silk palazzo pants and a solid sheer dupatta.",
+        careInstructions: "Dry clean or gentle cold hand wash.",
+        deliveryInfo: "Dispatched within 24-48 hours."
     },
     {
         id: "straight-006",
-        numericId: 205,
+        numericId: 306,
         sku: "ACH-STR-006",
-        name: "Shyamala Royal Indigo Chanderi Silk Kurta Set",
+        name: "Kesar Peach Silk Kurta with Fuchsia Leheriya Dupatta Set",
         category: "Straight Fit",
         parentCategory: "Ethnic Wear",
-        fabric: "Pure Chanderi Silk",
-        color: "Indigo Blue",
-        size: ["XS", "S", "M", "L", "XL", "XXL"],
-        price: 4350,
-        originalPrice: 5200,
-        discountPrice: 4350,
-        stock: 22,
+        fabric: "Pure Raw Silk",
+        color: "Peach & Fuchsia Pink",
+        size: ["L"],
+        price: null,
+        originalPrice: null,
+        discountPrice: null,
+        stock: 21,
         status: "Active",
         featured: true,
-        availability: "New Arrival",
-        occasion: "Festive & Dinner",
+        availability: "Trending",
+        occasion: "Festive & Sangeet",
         image: "products/straight-fit/product-06/front.jpg",
         images: {
             front: "products/straight-fit/product-06/front.jpg",
@@ -201,28 +204,28 @@ const ACHIRA_PRODUCTS_DATA = [
             back: ""
         },
         rating: 5,
-        description: "Deep indigo blue Chanderi silk straight kurta enriched with delicate silver zari threadwork along the neckline and cuffs, tonal trousers, and an organza dupatta embellished with scalloped borders.",
-        careInstructions: "Dry clean first wash. Gentle cold hand wash separately thereafter.",
-        deliveryInfo: "Dispatched within 24-48 hours. Express delivery across India in 3-5 business days."
+        description: "Elegant pastel peach straight raw silk kurta accented with magenta zardozi neckline embroidery, accompanied by a flowing flared peach skirt and a vibrant fuchsia pink & gold metallic striped leheriya dupatta.",
+        careInstructions: "Dry clean only.",
+        deliveryInfo: "Dispatched within 24 hours."
     },
     {
         id: "straight-007",
-        numericId: 206,
+        numericId: 307,
         sku: "ACH-STR-007",
-        name: "Zeenat Peach Mirror Work Straight Fit Kurta Set",
+        name: "Gulaal Berry Pink Mirror Medallion Strappy Kurta Set",
         category: "Straight Fit",
         parentCategory: "Ethnic Wear",
-        fabric: "Chanderi Cotton",
-        color: "Peach Pastel",
-        size: ["XS", "S", "M", "L", "XL", "XXL"],
-        price: 3650,
-        originalPrice: 4400,
-        discountPrice: 3650,
-        stock: 20,
+        fabric: "Chanderi Cotton Blend",
+        color: "Berry Pink",
+        size: ["L"],
+        price: null,
+        originalPrice: null,
+        discountPrice: null,
+        stock: 26,
         status: "Active",
         featured: true,
-        availability: "Trending",
-        occasion: "Day Wedding & Pooja",
+        availability: "New Arrival",
+        occasion: "Party & Summer Festive",
         image: "products/straight-fit/product-07/front.jpg",
         images: {
             front: "products/straight-fit/product-07/front.jpg",
@@ -233,28 +236,28 @@ const ACHIRA_PRODUCTS_DATA = [
             back: ""
         },
         rating: 5,
-        description: "Pastel peach straight kurta set embellished with subtle mirror work on the neck yoke, 3/4th sleeves with gota patti borders, tonal straight pants, and a featherlight printed chiffon dupatta.",
-        careInstructions: "Dry clean recommended to protect delicate mirror work.",
-        deliveryInfo: "Dispatched within 24-48 hours. Express delivery in 3-5 business days."
+        description: "Breezy berry pink strappy straight-fit kurta designed with a prominent circular mirror medallion on the bodice, delicate micro-booti weaving, and straight tailored cigarette trousers.",
+        careInstructions: "Hand wash cold with gentle soap.",
+        deliveryInfo: "Dispatched within 24 hours."
     },
     {
         id: "straight-008",
-        numericId: 207,
+        numericId: 308,
         sku: "ACH-STR-008",
-        name: "Aafreen Teal Floral Embroidered Straight Kurta Suit",
+        name: "Meghna Magenta Violet Ikat Handcrafted Kurta Set",
         category: "Straight Fit",
         parentCategory: "Ethnic Wear",
-        fabric: "Cotton Silk",
-        color: "Teal Green",
-        size: ["XS", "S", "M", "L", "XL", "XXL"],
-        price: 3999,
-        originalPrice: 4850,
-        discountPrice: 3999,
-        stock: 19,
+        fabric: "Pure Handloom Cotton",
+        color: "Magenta Violet",
+        size: ["L"],
+        price: null,
+        originalPrice: null,
+        discountPrice: null,
+        stock: 20,
         status: "Active",
         featured: true,
-        availability: "Best Seller",
-        occasion: "Festive & Family Gatherings",
+        availability: "Trending",
+        occasion: "Casual & Workwear Festive",
         image: "products/straight-fit/product-08/front.jpg",
         images: {
             front: "products/straight-fit/product-08/front.jpg",
@@ -265,28 +268,28 @@ const ACHIRA_PRODUCTS_DATA = [
             back: ""
         },
         rating: 5,
-        description: "Opulent teal green cotton silk straight kurta featuring floral needle embroidery on the placket, 3/4th sleeves with lace accents, matching tonal trousers, and a luxurious Banarasi border dupatta.",
-        careInstructions: "Hand wash cold with mild detergent or dry clean.",
-        deliveryInfo: "Dispatched within 24 hours. Delivery in 3-5 business days."
+        description: "Heritage handloom magenta violet straight kurta featuring striking white traditional ikat geometric patterns, notch neck detailing, matching solid straight trousers, and a full-length matching ikat printed dupatta.",
+        careInstructions: "Cold hand wash separately.",
+        deliveryInfo: "Dispatched within 24 hours."
     },
     {
         id: "straight-009",
-        numericId: 208,
+        numericId: 309,
         sku: "ACH-STR-009",
-        name: "Mehrunisa Ruby Maroon Velvet Touch Straight Kurti Set",
+        name: "Vrinda Lime Green Yoke Motif Embroidered Kurta Set",
         category: "Straight Fit",
         parentCategory: "Ethnic Wear",
-        fabric: "Silk Blend",
-        color: "Ruby Maroon",
-        size: ["XS", "S", "M", "L", "XL", "XXL"],
-        price: 4550,
-        originalPrice: 5500,
-        discountPrice: 4550,
-        stock: 17,
+        fabric: "Pure Chanderi Silk",
+        color: "Lime Green",
+        size: ["L"],
+        price: null,
+        originalPrice: null,
+        discountPrice: null,
+        stock: 25,
         status: "Active",
         featured: true,
         availability: "New Arrival",
-        occasion: "Winter Wedding & Reception",
+        occasion: "Day Festive & Puja",
         image: "products/straight-fit/product-09/front.jpg",
         images: {
             front: "products/straight-fit/product-09/front.jpg",
@@ -297,28 +300,28 @@ const ACHIRA_PRODUCTS_DATA = [
             back: ""
         },
         rating: 5,
-        description: "Regal ruby maroon straight cut suit set accented with delicate zari embroidery along the mandarin collar, sleeve cuffs, and side slits, complemented by silk trousers and a lightweight jacquard dupatta.",
-        careInstructions: "Strictly dry clean only.",
-        deliveryInfo: "Dispatched within 24-48 hours. Express delivery across India in 3-5 business days."
+        description: "Refreshing vibrant lime green silk straight-cut kurta featuring an intricate geometric motif embroidered yoke patch in chocolate brown and teal, matching tapered pants, and a printed contrast dupatta.",
+        careInstructions: "Dry clean first wash.",
+        deliveryInfo: "Dispatched within 24-48 hours."
     },
     {
         id: "straight-010",
-        numericId: 209,
+        numericId: 310,
         sku: "ACH-STR-010",
-        name: "Kashish Sage Green Handblock Straight Kurta Set",
+        name: "Neelambari Indigo Block Printed Flared Kurta Set",
         category: "Straight Fit",
         parentCategory: "Ethnic Wear",
-        fabric: "Organic Cotton",
-        color: "Sage Green",
-        size: ["XS", "S", "M", "L", "XL", "XXL"],
-        price: 3350,
-        originalPrice: 3999,
-        discountPrice: 3350,
-        stock: 28,
+        fabric: "Pure Cotton Mulmul",
+        color: "Indigo Blue",
+        size: ["L"],
+        price: null,
+        originalPrice: null,
+        discountPrice: null,
+        stock: 22,
         status: "Active",
         featured: true,
         availability: "Best Seller",
-        occasion: "Casual Chic & Workwear",
+        occasion: "Festive & Heritage Occasions",
         image: "products/straight-fit/product-10/front.jpg",
         images: {
             front: "products/straight-fit/product-10/front.jpg",
@@ -329,49 +332,20 @@ const ACHIRA_PRODUCTS_DATA = [
             back: ""
         },
         rating: 5,
-        description: "Subtle sage green handblock printed straight kurta featuring classic floral jaal motifs, buttoned placket, straight silhouette, ankle pants, and a matching handblock cotton doriya dupatta.",
-        careInstructions: "Hand wash separately in cold water with mild detergent.",
-        deliveryInfo: "Dispatched within 24 hours. Delivery in 3-5 business days."
-    },
-    {
-        id: "straight-011",
-        numericId: 210,
-        sku: "ACH-STR-011",
-        name: "Chandrika Lavender Zari Woven Straight Suit Set",
-        category: "Straight Fit",
-        parentCategory: "Ethnic Wear",
-        fabric: "Chanderi Silk",
-        color: "Lavender Purple",
-        size: ["XS", "S", "M", "L", "XL", "XXL"],
-        price: 4200,
-        originalPrice: 5100,
-        discountPrice: 4200,
-        stock: 21,
-        status: "Active",
-        featured: true,
-        availability: "Trending",
-        occasion: "Festive & Party",
-        image: "products/straight-fit/product-11/front.jpg",
-        images: {
-            front: "products/straight-fit/product-11/front.jpg",
-            side: "",
-            zoom: "",
-            palazzo: "",
-            dupatta: "",
-            back: ""
-        },
-        rating: 5,
-        description: "Graceful lavender purple Chanderi silk straight suit with all-over woven zari booti patterns, intricate lace detailing on the round neckline, tonal tailored trousers, and an airy matching dupatta.",
-        careInstructions: "Dry clean first wash. Gentle cold hand wash separately thereafter.",
-        deliveryInfo: "Dispatched within 24-48 hours. Express delivery in 3-5 business days."
+        description: "Deep indigo blue artisanal handblock printed kurta with terracotta floral booti motifs, lace accented V-yoke, front waist drawstring tassels, matching trousers, and an elaborate printed dupatta.",
+        careInstructions: "Gentle cold hand wash.",
+        deliveryInfo: "Dispatched within 24 hours."
     }
 ];
 
-// Helper to extract available images without broken/empty links
+/**
+ * Safely extracts non-empty image slots from a product object.
+ * Only returns image slots that actually have a valid file URL.
+ */
 function getProductImagesList(product) {
     if (!product) return [];
     
-    // Check structured images object (front, side, zoom, palazzo, dupatta, back)
+    // If product has structured slot images
     if (product.images && typeof product.images === 'object' && !Array.isArray(product.images)) {
         const slots = [
             { key: 'front', label: 'Front View' },
@@ -381,38 +355,42 @@ function getProductImagesList(product) {
             { key: 'dupatta', label: 'Dupatta' },
             { key: 'back', label: 'Back View' }
         ];
+        
         const list = [];
         slots.forEach(slot => {
-            const url = product.images[slot.key];
-            if (url && typeof url === 'string' && url.trim().length > 0) {
-                list.push({ type: slot.key, label: slot.label, url: url.trim() });
+            const val = product.images[slot.key];
+            if (val && typeof val === 'string' && val.trim() !== '') {
+                list.push({ slot: slot.key, label: slot.label, url: val.trim() });
             }
         });
+        
         if (list.length > 0) return list;
     }
     
-    // Check array format
+    // Array of string URLs fallback
     if (Array.isArray(product.images) && product.images.length > 0) {
-        return product.images.map((img, i) => ({
-            type: 'view-' + (i + 1),
-            label: i === 0 ? 'Front View' : `Angle ${i + 1}`,
-            url: typeof img === 'string' ? img : (img.url || '')
-        })).filter(item => item.url && item.url.trim().length > 0);
+        return product.images
+            .filter(url => url && typeof url === 'string' && url.trim() !== '')
+            .map((url, i) => ({ slot: `view_${i+1}`, label: i === 0 ? 'Front View' : `View ${i+1}`, url: url.trim() }));
     }
     
-    // Fallback to single primary image
-    if (product.image && typeof product.image === 'string' && product.image.trim().length > 0) {
-        return [{ type: 'front', label: 'Front View', url: product.image.trim() }];
+    // Single image fallback
+    if (product.image && typeof product.image === 'string' && product.image.trim() !== '') {
+        return [{ slot: 'front', label: 'Front View', url: product.image.trim() }];
     }
     
     return [];
 }
 
+// Global export for storefront and admin portals
 if (typeof window !== 'undefined') {
     window.ACHIRA_PRODUCTS_DATA = ACHIRA_PRODUCTS_DATA;
     window.getProductImagesList = getProductImagesList;
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { ACHIRA_PRODUCTS_DATA, getProductImagesList };
+    module.exports = {
+        ACHIRA_PRODUCTS_DATA,
+        getProductImagesList
+    };
 }

@@ -1852,17 +1852,18 @@ function openQuickView(productId) {
     currentQuickViewQty = 1;
 
     let availableSizes = [];
-    if (Array.isArray(p.size)) availableSizes = p.size;
+    if (Array.isArray(p.size) && p.size.length > 0) availableSizes = p.size;
     else if (typeof p.size === 'string' && p.size.trim()) availableSizes = p.size.split(',').map(s => s.trim());
+    else if (p.category === 'Straight Fit') availableSizes = ['L'];
     else if (p.category === 'Jewellery' || (p.name && p.name.toLowerCase().includes('earring'))) availableSizes = ['Adjustable', 'Standard'];
-    else availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+    else availableSizes = ['L'];
 
     let availableColors = [];
     if (Array.isArray(p.color)) availableColors = p.color;
     else if (typeof p.color === 'string' && p.color.trim()) availableColors = p.color.split(',').map(c => c.trim());
     else availableColors = ['Classic Shade', 'Festive Gold', 'Royal Jewel'];
 
-    currentQuickViewSize = availableSizes[0] || 'M';
+    currentQuickViewSize = availableSizes[0] || 'L';
     currentQuickViewColor = availableColors[0] || 'Standard';
 
     const sizesHTML = availableSizes.map((sz, idx) => `
@@ -1873,15 +1874,27 @@ function openQuickView(productId) {
         <button type="button" class="qc-pill-btn ${idx === 0 ? 'active' : ''}" onclick="selectQuickViewColor(this, '${clr}')">${clr}</button>
     `).join('');
 
-    const origPrice = p.originalPrice || (p.discountPrice ? Math.round(p.price * 1.22) : p.price);
-    const hasDiscount = origPrice > p.price;
-    const discountPercent = hasDiscount ? Math.round(((origPrice - p.price) / origPrice) * 100) : 0;
+    const hasValidPrice = p.price !== null && p.price !== undefined && Number(p.price) > 0;
+    const numPrice = hasValidPrice ? Number(p.price) : 0;
+    const origPrice = p.originalPrice || (p.discountPrice ? Math.round(numPrice * 1.22) : numPrice);
+    const hasDiscount = hasValidPrice && origPrice > numPrice;
+    const discountPercent = hasDiscount ? Math.round(((origPrice - numPrice) / origPrice) * 100) : 0;
+
+    const priceBoxHTML = hasValidPrice ? `
+        <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; padding: 8px 12px; background: #FAF7F2; border-radius: 8px; border: 1px solid rgba(184,138,68,0.15);">
+            <span style="font-family: var(--font-heading); font-size: 1.7rem; font-weight: 700; color: #3C0008;">₹${numPrice.toLocaleString('en-IN')}</span>
+            ${hasDiscount ? `
+                <span style="font-size: 1.05rem; color: #888; text-decoration: line-through;">₹${origPrice.toLocaleString('en-IN')}</span>
+                <span style="font-size: 0.75rem; background: rgba(0,102,51,0.12); color: #006633; padding: 3px 8px; border-radius: 4px; font-weight: 700;">${discountPercent}% OFF</span>
+            ` : ''}
+        </div>
+    ` : '';
 
     const stockCount = p.stock !== undefined ? p.stock : 24;
     const isOutOfStock = p.status === 'Out of Stock' || stockCount <= 0;
 
     const imgList = (typeof getProductImagesList === 'function') ? getProductImagesList(p) : [{ url: p.image, label: 'Front View' }];
-    const mainImgUrl = imgList[0] ? imgList[0].url : p.image;
+    const mainImgUrl = imgList[0] ? imgList[0].url : (p.image || 'products/straight-fit/product-01/front.jpg');
     const mainImgLabel = imgList[0] ? imgList[0].label : (p.availability || 'Couture');
 
     const thumbnailsHTML = imgList.length > 1 ? `
@@ -1908,7 +1921,7 @@ function openQuickView(productId) {
         </div>
         <div style="padding: 10px 14px; max-height: 520px; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <span style="font-family: var(--font-body); font-size: 0.78rem; font-weight: 700; color: #B88A44; letter-spacing: 0.08em;">${(p.parentCategory || 'ETHNIC WEAR').toUpperCase()} • ${p.category.toUpperCase()}</span>
+                <span style="font-family: var(--font-body); font-size: 0.78rem; font-weight: 700; color: #B88A44; letter-spacing: 0.08em;">${(p.parentCategory || 'ETHNIC WEAR').toUpperCase()} • ${(p.category || 'STRAIGHT FIT').toUpperCase()}</span>
                 <span style="font-size: 0.75rem; color: ${isOutOfStock ? '#dc3545' : '#28a745'}; font-weight: 700;">${isOutOfStock ? '● Out of Stock' : `● In Stock (${stockCount} available)`}</span>
             </div>
             <h3 class="modal-title-serif" style="margin-top: 4px; font-size: 1.45rem; line-height: 1.3; color: #3C0008;">${p.name}</h3>
@@ -1918,14 +1931,8 @@ function openQuickView(productId) {
                 <span style="font-size: 0.78rem; color: #777;">(5.0 / 28 Couture Reviews)</span>
             </div>
 
-            <!-- Price Box -->
-            <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; padding: 8px 12px; background: #FAF7F2; border-radius: 8px; border: 1px solid rgba(184,138,68,0.15);">
-                <span style="font-family: var(--font-heading); font-size: 1.7rem; font-weight: 700; color: #3C0008;">₹${p.price.toLocaleString('en-IN')}</span>
-                ${hasDiscount ? `
-                    <span style="font-size: 1.05rem; color: #888; text-decoration: line-through;">₹${origPrice.toLocaleString('en-IN')}</span>
-                    <span style="font-size: 0.75rem; background: rgba(0,102,51,0.12); color: #006633; padding: 3px 8px; border-radius: 4px; font-weight: 700;">${discountPercent}% OFF</span>
-                ` : ''}
-            </div>
+            <!-- Price Box (Hidden if no price set) -->
+            ${priceBoxHTML}
 
             <!-- Size Selection -->
             <div style="margin-bottom: 14px;">
