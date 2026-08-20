@@ -548,21 +548,23 @@ const checkoutHandler = async (req, res) => {
     }
 
     // Settings & discounts
-    let discount = 0;
-    if (couponCode) {
+    let discount = typeof body.discount === 'number' ? body.discount : 0;
+    if (couponCode && !discount) {
       const c = memoryStore.coupons.find(cp => cp.code === couponCode.toUpperCase());
       if (c) discount = Math.round(subtotal * (c.discount / 100));
     }
 
     const taxableAmount = Math.max(0, subtotal - discount);
-    const tax = Math.round(taxableAmount * 0.18);
-    const shippingFee = taxableAmount > 1999 ? 0 : 150;
-    const grandTotal = Math.round(taxableAmount + tax + shippingFee);
+    const tax = typeof body.tax === 'number' ? body.tax : Math.round(taxableAmount * 0.18);
+    const shippingFee = typeof body.shipping === 'number' ? body.shipping : (typeof body.shippingFee === 'number' ? body.shippingFee : (taxableAmount > 1999 ? 0 : 150));
+    const grandTotal = (typeof body.grandTotal === 'number' && body.grandTotal > 0) 
+      ? body.grandTotal 
+      : ((typeof body.total === 'number' && body.total > 0) ? body.total : Math.round(taxableAmount + tax + shippingFee));
 
-    const orderId = `ACH-${Math.floor(100000 + Math.random() * 900000)}`;
-    const invoiceNumber = `INV-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const orderId = body.id || body.orderId || `ACH-${Math.floor(100000 + Math.random() * 900000)}`;
+    const invoiceNumber = body.invoiceNumber || `INV-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-    const itemsSummary = orderItemsData.map(i => `${i.name} (x${i.qty})`).join(', ');
+    const itemsSummary = body.itemsSummary || orderItemsData.map(i => `${i.name} (x${i.qty})`).join(', ');
 
     const orderRecord = {
       id: orderId,
@@ -578,7 +580,7 @@ const checkoutHandler = async (req, res) => {
       paymentStatus: (paymentMethod === 'COD') ? 'Pending' : 'Paid',
       orderStatus: 'Processing',
       invoiceNumber,
-      subtotal,
+      subtotal: (typeof body.subtotal === 'number') ? body.subtotal : subtotal,
       discount,
       tax,
       shippingFee,
@@ -637,6 +639,10 @@ const checkoutHandler = async (req, res) => {
     }
 
     // Always store in memory store as real order
+    const clientItems = (Array.isArray(body.itemsDetail) && body.itemsDetail.length > 0) 
+      ? body.itemsDetail 
+      : ((Array.isArray(body.items) && body.items.length > 0) ? body.items : orderItemsData);
+
     const fullMemoryOrder = {
       ...orderRecord,
       userName: custName,
@@ -644,12 +650,18 @@ const checkoutHandler = async (req, res) => {
       userPhone: custPhone,
       userAddress: custAddress,
       total: grandTotal,
-      itemsDetail: orderItemsData,
-      items: orderItemsData,
+      itemsDetail: clientItems,
+      items: clientItems,
       date: new Date().toLocaleDateString('en-IN')
     };
 
-    memoryStore.orders.unshift(fullMemoryOrder);
+    // Deduplicate in memoryStore
+    const existingMemIdx = memoryStore.orders.findIndex(o => String(o.id) === String(orderId));
+    if (existingMemIdx !== -1) {
+      memoryStore.orders[existingMemIdx] = fullMemoryOrder;
+    } else {
+      memoryStore.orders.unshift(fullMemoryOrder);
+    }
 
     // Update user customer record
     const existingUser = memoryStore.users.find(u => u.email === custEmail);

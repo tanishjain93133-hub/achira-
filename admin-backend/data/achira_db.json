@@ -1,39 +1,39 @@
 {
   "orders": [
     {
-      "id": "ACH-251988",
+      "id": "ACH-392044",
       "userId": null,
-      "customerName": "Maharani Gayatri",
-      "email": "gayatri.devi@achira.com",
-      "phone": "+91 98765 11223",
-      "address": "City Palace, Jaipur, Rajasthan - 302002",
+      "customerName": "Princess Ananya Rao",
+      "email": "ananya.rao@achira.com",
+      "phone": "+91 98765 43210",
+      "address": "74 Heritage Boulevard, Malabar Hill, Mumbai, Maharashtra - 400006",
       "city": "",
       "state": "",
       "pincode": "",
-      "paymentMethod": "UPI",
-      "paymentStatus": "Paid",
+      "paymentMethod": "COD",
+      "paymentStatus": "Pending",
       "orderStatus": "Processing",
-      "invoiceNumber": "INV-1787167915512-8461",
+      "invoiceNumber": "INV-1787169039608-1026",
       "subtotal": 3999,
       "discount": 0,
       "tax": 720,
       "shippingFee": 0,
       "grandTotal": 4719,
-      "itemsSummary": "Noor-e-Kashmir Anarkali (x1)",
-      "createdAt": "2026-08-19T19:31:55.512Z",
-      "updatedAt": "2026-08-19T19:31:55.512Z",
-      "userName": "Maharani Gayatri",
-      "userEmail": "gayatri.devi@achira.com",
-      "userPhone": "+91 98765 11223",
-      "userAddress": "City Palace, Jaipur, Rajasthan - 302002",
+      "itemsSummary": "Noor-e-Kashmir Midnight Black Embroidered Anarkali Set (x1)",
+      "createdAt": "2026-08-19T19:50:39.612Z",
+      "updatedAt": "2026-08-19T19:50:39.612Z",
+      "userName": "Princess Ananya Rao",
+      "userEmail": "ananya.rao@achira.com",
+      "userPhone": "+91 98765 43210",
+      "userAddress": "74 Heritage Boulevard, Malabar Hill, Mumbai, Maharashtra - 400006",
       "total": 4719,
       "itemsDetail": [
         {
           "productId": 101,
-          "name": "Noor-e-Kashmir Anarkali",
+          "name": "Noor-e-Kashmir Midnight Black Embroidered Anarkali Set",
           "qty": 1,
           "price": 3999,
-          "image": "",
+          "image": "anarkali1.jpg",
           "selectedSize": "M",
           "selectedColor": "Royal Red"
         }
@@ -41,10 +41,10 @@
       "items": [
         {
           "productId": 101,
-          "name": "Noor-e-Kashmir Anarkali",
+          "name": "Noor-e-Kashmir Midnight Black Embroidered Anarkali Set",
           "qty": 1,
           "price": 3999,
-          "image": "",
+          "image": "anarkali1.jpg",
           "selectedSize": "M",
           "selectedColor": "Royal Red"
         }
@@ -116,13 +116,13 @@
     },
     {
       "id": 2,
-      "name": "Maharani Gayatri",
-      "email": "gayatri.devi@achira.com",
-      "phone": "+91 98765 11223",
-      "address": "City Palace, Jaipur, Rajasthan - 302002",
+      "name": "Princess Ananya Rao",
+      "email": "ananya.rao@achira.com",
+      "phone": "+91 98765 43210",
+      "address": "74 Heritage Boulevard, Malabar Hill, Mumbai, Maharashtra - 400006",
       "ordersCount": 1,
       "totalSpent": 4719,
-      "createdAt": "2026-08-19T19:31:55.590Z"
+      "createdAt": "2026-08-19T19:50:39.629Z"
     }
   ],
   "products": [
@@ -664,5 +664,5 @@
     "phone": "+91 98765 43210",
     "adminUsername": "admin2"
   },
-  "lastUpdated": "2026-08-19T19:31:55.592Z"
+  "lastUpdated": "2026-08-20T04:29:01.965Z"
 }
