@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin2 Dashboard | Achira Luxury Atelier</title>
+    <title>Admin Dashboard | Achira Couture</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #3C0008;
@@ -47,7 +47,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: linear-gradient(135deg, rgba(60,0,8,0.96), rgba(18,18,18,0.98));
+            background: linear-gradient(135deg, rgba(60,0,8,0.95), rgba(18,18,18,0.95));
             display: flex;
             align-items: center;
             justify-content: center;
@@ -61,8 +61,8 @@
             border-radius: 20px;
             width: 100%;
             max-width: 420px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-            border: 1.5px solid var(--gold);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            border: 1px solid var(--gold);
             text-align: center;
         }
 
@@ -71,7 +71,6 @@
             color: var(--primary);
             font-size: 1.8rem;
             margin-bottom: 8px;
-            letter-spacing: 1px;
         }
 
         .login-box p {
@@ -92,7 +91,6 @@
             text-transform: uppercase;
             color: var(--primary);
             margin-bottom: 6px;
-            letter-spacing: 0.5px;
         }
 
         .form-control {
@@ -133,10 +131,9 @@
 
         .error-msg {
             color: var(--danger);
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             margin-top: 12px;
             text-align: center;
-            font-weight: 600;
         }
 
         /* LAYOUT */
@@ -162,18 +159,9 @@
 
         .sidebar-brand h1 {
             font-family: 'Cinzel', serif;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             color: var(--gold);
             letter-spacing: 2px;
-        }
-
-        .sidebar-brand span {
-            font-size: 0.72rem;
-            color: var(--gold-light);
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            display: block;
-            margin-top: 4px;
         }
 
         .sidebar-menu {
@@ -188,7 +176,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            color: rgba(255,255,255,0.75);
+            color: rgba(255,255,255,0.7);
             font-size: 0.88rem;
             font-weight: 500;
             cursor: pointer;
@@ -239,16 +227,15 @@
         }
 
         .avatar {
-            width: 38px;
-            height: 38px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            background-color: var(--gold);
             color: #FFF;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-family: 'Cinzel', serif;
         }
 
         /* STATS GRID */
@@ -261,7 +248,7 @@
 
         .stat-card {
             background-color: var(--card-bg);
-            padding: 22px;
+            padding: 20px;
             border-radius: 12px;
             border: 1px solid var(--border-color);
             box-shadow: 0 4px 12px rgba(0,0,0,0.03);
@@ -272,7 +259,6 @@
             color: var(--text-muted);
             text-transform: uppercase;
             font-weight: 600;
-            letter-spacing: 0.5px;
         }
 
         .stat-card .value {
@@ -298,13 +284,11 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 12px;
         }
 
         .card-title {
             font-family: 'Cinzel', serif;
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             color: var(--primary);
         }
 
@@ -325,7 +309,6 @@
             color: var(--primary);
             font-weight: 600;
             border-bottom: 2px solid var(--border-color);
-            white-space: nowrap;
         }
 
         td {
@@ -361,6 +344,9 @@
             transition: all 0.2s ease;
         }
 
+        .btn-edit { background: var(--info); color: #FFF; margin-right: 6px; }
+        .btn-delete { background: var(--danger); color: #FFF; }
+
         /* MODAL */
         .modal-overlay {
             position: fixed;
@@ -368,7 +354,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.5);
             display: none;
             align-items: center;
             justify-content: center;
@@ -381,10 +367,10 @@
             padding: 30px;
             border-radius: 16px;
             width: 100%;
-            max-width: 680px;
+            max-width: 600px;
             max-height: 90vh;
             overflow-y: auto;
-            border: 1.5px solid var(--gold);
+            border: 1px solid var(--gold);
         }
 
         .modal-header {
@@ -401,33 +387,25 @@
             cursor: pointer;
             color: var(--text-muted);
         }
-
-        .filter-input {
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 0.85rem;
-            outline: none;
-        }
     </style>
 </head>
 <body>
 
-    <!-- ADMIN2 LOGIN OVERLAY -->
+    <!-- LOGIN OVERLAY -->
     <div class="login-overlay" id="loginOverlay">
         <div class="login-box">
-            <h2>ACHIRA ADMIN2</h2>
-            <p>Enter Master Administrator credentials to access Admin2 Dashboard</p>
+            <h2>Achira Admin</h2>
+            <p>Enter administrator credentials to access dashboard</p>
             <form onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label>Username</label>
-                    <input type="text" id="loginUser" class="form-control" placeholder="admin2" required value="admin2">
+                    <input type="text" id="loginUser" class="form-control" placeholder="admin" required value="admin">
                 </div>
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" id="loginPass" class="form-control" placeholder="••••••••••••" required value="admin2@Achira2026">
+                    <input type="password" id="loginPass" class="form-control" placeholder="••••••••" required value="admin123">
                 </div>
-                <button type="submit" class="btn-gold">Sign In to Admin2</button>
+                <button type="button" onclick="handleLogin(event)" class="btn-gold">Sign In</button>
                 <div class="error-msg" id="loginError"></div>
             </form>
         </div>
@@ -437,7 +415,7 @@
     <div class="sidebar">
         <div class="sidebar-brand">
             <h1>ACHIRA</h1>
-            <span>ADMIN2 GATEWAY</span>
+            <span style="font-size: 0.7rem; color: var(--gold); letter-spacing: 1px;">ATELIER ADMIN</span>
         </div>
         <ul class="sidebar-menu">
             <li class="menu-item active" onclick="switchTab('overview', this)">📊 Overview</li>
@@ -450,23 +428,23 @@
             <li class="menu-item" onclick="switchTab('settings', this)">⚙️ Settings</li>
         </ul>
         <div class="sidebar-footer">
-            <button class="btn-gold" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);" onclick="logout()">Logout Admin2</button>
+            <button class="btn-gold" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);" onclick="logout()">Logout</button>
         </div>
     </div>
 
     <!-- MAIN CONTENT -->
     <div class="main-content">
         <div class="header">
-            <h2 id="pageTitle">Admin2 Dashboard Overview</h2>
+            <h2 id="pageTitle">Dashboard Overview</h2>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <button onclick="fetchLiveData()" class="btn-gold" style="padding: 8px 16px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; width: auto;">
-                    🔄 Refresh Database
+                    🔄 Refresh Live Data
                 </button>
                 <div class="user-pill">
-                    <div class="avatar">A2</div>
+                    <div class="avatar">A</div>
                     <div>
-                        <strong style="display: block; font-size: 0.85rem;" id="adminName">Admin2 Superuser</strong>
-                        <span style="font-size: 0.75rem; color: var(--text-muted);">Master Administrator</span>
+                        <strong style="display: block; font-size: 0.85rem;" id="adminName">Admin User</strong>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Super Administrator</span>
                     </div>
                 </div>
             </div>
@@ -477,29 +455,29 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="label">Total Revenue</div>
-                    <div class="value" id="statRevenue">₹0</div>
-                    <span style="color: var(--success); font-size: 0.75rem; font-weight: 600;">↑ Live real orders total</span>
+                    <div class="value" id="statRevenue">₹4,85,000</div>
+                    <span style="color: var(--success); font-size: 0.75rem; font-weight: 600;">↑ Live sales updated</span>
                 </div>
                 <div class="stat-card">
                     <div class="label">Total Orders</div>
-                    <div class="value" id="statOrders">0</div>
-                    <span style="color: var(--success); font-size: 0.75rem; font-weight: 600;">↑ All customers orders</span>
+                    <div class="value" id="statOrders">142</div>
+                    <span style="color: var(--success); font-size: 0.75rem; font-weight: 600;">↑ All orders counted</span>
                 </div>
                 <div class="stat-card">
                     <div class="label">Active Products</div>
-                    <div class="value" id="statProducts">0</div>
+                    <div class="value" id="statProducts">18</div>
                     <span style="color: var(--info); font-size: 0.75rem; font-weight: 600;">Couture Catalogue</span>
                 </div>
                 <div class="stat-card">
                     <div class="label">Registered Customers</div>
-                    <div class="value" id="statCustomers">0</div>
+                    <div class="value" id="statCustomers">98</div>
                     <span style="color: var(--gold); font-size: 0.75rem; font-weight: 600;">★ Active Patrons</span>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Recent Customer Orders</h3>
+                    <h3 class="card-title">Recent Orders</h3>
                     <button class="btn-gold" style="width: auto; padding: 8px 16px;" onclick="switchTab('orders', document.querySelectorAll('.menu-item')[2])">View All Orders</button>
                 </div>
                 <div class="table-responsive">
@@ -507,7 +485,7 @@
                         <thead>
                             <tr>
                                 <th>Order ID</th>
-                                <th>Customer Name &amp; Email</th>
+                                <th>Customer</th>
                                 <th>Items</th>
                                 <th>Total</th>
                                 <th>Status</th>
@@ -525,39 +503,19 @@
         <!-- PRODUCTS TAB -->
         <div id="tab-products" class="tab-content" style="display: none;">
             <div class="card">
-                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-                    <div>
-                        <h3 class="card-title">Products Catalogue & Anarkali Inventory</h3>
-                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Manage Anarkali couture collections, prices, stock, sizes, and images.</p>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                        <input type="text" id="productSearchInput" class="filter-input" placeholder="🔍 Search Anarkali, SKU, Name..." oninput="filterProductsTable()">
-                        <select id="productCategoryFilter" class="filter-input" onchange="filterProductsTable()">
-                            <option value="">All Categories</option>
-                            <option value="Kurta Sets">Kurta Sets (Ethnic Wear)</option>
-                            <option value="Anarkali">Anarkali (Ethnic Wear)</option>
-                            <option value="Cotton Kurtas">Cotton Dresses</option>
-                            <option value="Lucknowi Collection">Lucknowi Dresses</option>
-                            <option value="Chanderi Collection">Indo-Western Dresses</option>
-                            <option value="Designer Sarees">Designer Sarees</option>
-                            <option value="Bridal Lehengas">Bridal Lehengas</option>
-                            <option value="Gown">Gowns</option>
-                            <option value="Jewellery">Fine Jewellery</option>
-                        </select>
-                        <button class="btn-gold" style="width: auto; padding: 9px 18px; font-size: 0.85rem;" onclick="openProductModal()">+ Add New Product</button>
-                    </div>
+                <div class="card-header">
+                    <h3 class="card-title">All Products Catalogue</h3>
+                    <button class="btn-gold" style="width: auto; padding: 10px 20px;" onclick="openProductModal()">+ Add New Product</button>
                 </div>
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
                                 <th>Image</th>
-                                <th>Product Details & SKU</th>
+                                <th>Product Name</th>
                                 <th>Category</th>
-                                <th>Price / Discount</th>
-                                <th>Fabric & Sizes</th>
-                                <th>Stock</th>
-                                <th>Status</th>
+                                <th>Price</th>
+                                <th>Availability</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -569,26 +527,17 @@
             </div>
         </div>
 
-        <!-- ORDERS TAB (MULTI-USER ALL REAL ORDERS) -->
+        <!-- ORDERS TAB -->
         <div id="tab-orders" class="tab-content" style="display: none;">
             <div class="card">
                 <div class="card-header">
                     <div>
-                        <h3 class="card-title">Orders Management (All Customers)</h3>
-                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Displays 100% of real customer orders placed across all accounts in database.</p>
+                        <h3 class="card-title">Orders Management</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Live customer orders placed on store with full item breakdown & customer tracking.</p>
                     </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                        <input type="text" id="orderSearchInput" class="filter-input" placeholder="🔍 Search Order ID, Customer, Email..." oninput="filterOrdersTable()">
-                        <select id="orderStatusFilter" class="filter-input" onchange="filterOrdersTable()">
-                            <option value="">All Order Statuses</option>
-                            <option value="Processing">Processing</option>
-                            <option value="Confirmed">Confirmed</option>
-                            <option value="Shipped">Shipped</option>
-                            <option value="Delivered">Delivered</option>
-                            <option value="Cancelled">Cancelled</option>
-                        </select>
-                        <button class="btn-gold" style="width: auto; padding: 8px 16px; font-size: 0.8rem;" onclick="fetchLiveData()">🔄 Refresh</button>
-                        <button style="background: rgba(220,53,69,0.12); border: 1px solid var(--danger); color: var(--danger); font-weight: 600; padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; cursor: pointer;" onclick="clearAllOrders()">🗑️ Clear Orders</button>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn-gold" style="width: auto; padding: 8px 16px; font-size: 0.8rem;" onclick="fetchLiveData()">🔄 Refresh Orders</button>
+                        <button style="background: rgba(220,53,69,0.12); border: 1px solid var(--danger); color: var(--danger); font-weight: 600; padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; cursor: pointer;" onclick="clearAllOrders()">🗑️ Clear All Fake / Test Orders</button>
                     </div>
                 </div>
                 <div class="table-responsive">
@@ -682,6 +631,7 @@
                                 <th>Subject</th>
                                 <th>Message</th>
                                 <th>Date</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="enquiriesBody">
@@ -737,7 +687,7 @@
                     </div>
                     <div class="form-group">
                         <label>Admin Support Email</label>
-                        <input type="email" id="setEmail" class="form-control" value="admin2@achira.com">
+                        <input type="email" id="setEmail" class="form-control" value="contact@achira.com">
                     </div>
                     <button type="submit" class="btn-gold">Save Changes</button>
                 </form>
@@ -745,86 +695,50 @@
         </div>
     </div>
 
-    <!-- PRODUCT MODAL (ANARKALI & ALL CATEGORIES) -->
+    <!-- PRODUCT MODAL -->
     <div class="modal-overlay" id="productModal">
-        <div class="modal-body" style="max-width: 680px;">
+        <div class="modal-body">
             <div class="modal-header">
-                <h3 class="card-title" id="modalTitle">Add / Edit Product</h3>
+                <h3 class="card-title" id="modalTitle">Add Product</h3>
                 <button class="close-btn" onclick="closeProductModal()">×</button>
             </div>
             <form onsubmit="saveProduct(event)">
                 <input type="hidden" id="prodId">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Product Name *</label>
-                        <input type="text" id="prodName" class="form-control" placeholder="e.g. Noor-e-Kashmir Midnight Black Embroidered Anarkali" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Product SKU *</label>
-                        <input type="text" id="prodSku" class="form-control" placeholder="e.g. ACH-ANK-001" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Category *</label>
-                        <select id="prodCategory" class="form-control" required>
-                            <option value="Kurta Sets">Kurta Sets</option>
-                            <option value="Anarkali">Anarkali</option>
-                            <option value="Cotton Kurtas">Cotton Dresses</option>
-                            <option value="Lucknowi Collection">Lucknowi Dresses</option>
-                            <option value="Chanderi Collection">Indo-Western Dresses</option>
-                            <option value="Designer Sarees">Designer Sarees</option>
-                            <option value="Bridal Lehengas">Bridal Lehengas</option>
-                            <option value="Gown">Gowns</option>
-                            <option value="Jewellery">Fine Jewellery</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Price (₹) *</label>
-                        <input type="number" id="prodPrice" class="form-control" placeholder="3999" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Discount / Original Price (₹)</label>
-                        <input type="number" id="prodDiscountPrice" class="form-control" placeholder="4850">
-                    </div>
-                    <div class="form-group">
-                        <label>Available Sizes *</label>
-                        <input type="text" id="prodSizes" class="form-control" value="XS, S, M, L, XL, XXL" placeholder="XS, S, M, L, XL, XXL" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Available Colors</label>
-                        <input type="text" id="prodColors" class="form-control" placeholder="e.g. Midnight Black, Yellow, Gold">
-                    </div>
-                    <div class="form-group">
-                        <label>Fabric / Material</label>
-                        <input type="text" id="prodFabric" class="form-control" placeholder="e.g. Pure Cotton Mulmul / Chanderi Silk">
-                    </div>
-                    <div class="form-group">
-                        <label>Stock Quantity *</label>
-                        <input type="number" id="prodStock" class="form-control" value="25" required>
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Product Images (Main URL / Path) *</label>
-                        <input type="text" id="prodImage" class="form-control" placeholder="e.g. anarkali1.jpg or https://..." required>
-                    </div>
-                    <div class="form-group">
-                        <label>Product Status *</label>
-                        <select id="prodStatus" class="form-control">
-                            <option value="Active">Active (In Stock)</option>
-                            <option value="Out of Stock">Out of Stock</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Featured Product</label>
-                        <select id="prodFeatured" class="form-control">
-                            <option value="true">Yes (Featured on Homepage)</option>
-                            <option value="false">No</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Product Description</label>
-                        <textarea id="prodDescription" class="form-control" rows="3" placeholder="Detailed embroidery, styling notes, flare silhouette..."></textarea>
-                    </div>
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="prodName" class="form-control" required>
                 </div>
-                <button type="submit" class="btn-gold" style="margin-top: 10px;">Save Product to Central Database</button>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="prodCategory" class="form-control">
+                        <option value="Gown">Gown</option>
+                        <option value="Cotton Kurtas">Cotton Dresses</option>
+                        <option value="Anarkali Kurtas">Anarkali Dresses</option>
+                        <option value="Straight Kurtas">Straight Dresses</option>
+                        <option value="Lucknowi Collection">Lucknowi Dresses</option>
+                        <option value="Chanderi Collection">Indo-Western Dresses</option>
+                        <option value="Designer Sarees">Sarees</option>
+                        <option value="Bridal Lehengas">Lehengas</option>
+                        <option value="Jewellery">Fine Jewellery</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Price (₹)</label>
+                    <input type="number" id="prodPrice" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="url" id="prodImage" class="form-control" required placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label>Availability</label>
+                    <select id="prodAvailability" class="form-control">
+                        <option value="In Stock">In Stock</option>
+                        <option value="New Arrival">New Arrival</option>
+                        <option value="Best Seller">Best Seller</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-gold">Save Product</button>
             </form>
         </div>
     </div>
@@ -846,19 +760,24 @@
     </div>
 
     <script>
-        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:')
-            ? (window.location.port === '5001' ? '' : (window.location.port === '5000' ? '' : 'http://localhost:5001'))
-            : '';
+        let defaultProducts = [
+            { id: 101, name: "Noor-e-Kashmir Midnight Black Embroidered Anarkali Set", category: "Anarkali", price: 3999, availability: "New Arrival", image: "anarkali1.jpg" },
+            { id: 102, name: "Zaffran Kesariya Mustard Yoke Embroidered Anarkali Suit", category: "Anarkali", price: 4499, availability: "Best Seller", image: "anarkali2.jpg" },
+            { id: 201, name: "Mayura Mustard & Teal Blue Embroidered Kurta Pant Set", category: "Kurta Sets", price: 3450, availability: "New Arrival", image: "kurtaset1.jpg" },
+            { id: 202, name: "Parijaat Lime Green V-Neck Motif Embroidered Kurta Set", category: "Kurta Sets", price: 3850, availability: "Best Seller", image: "kurtaset2.jpg" },
+            { id: 301, name: "Atelier Spiral Pave Diamond Studs", category: "Jewellery", price: 45000, availability: "New Arrival", image: "jewellery1.jpg" },
+            { id: 303, name: "Solitaire Diamond Riviera Necklace", category: "Jewellery", price: 185000, availability: "Best Seller", image: "jewellery3.jpg" },
+            { id: 401, name: "Aura Wave Diamond Cluster Ring", category: "Jewellery", price: 48500, availability: "New Arrival", image: "ring1.jpg" }
+        ];
 
-        let products = [];
-        let orders = [];
-        let customers = [];
-        let coupons = [
+        let defaultOrders = [];
+        let defaultCustomers = [];
+        let defaultCoupons = [
             { code: "ROYAL10", discount: "10% OFF", expiry: "2026-12-31", status: "Active" },
             { code: "FESTIVE20", discount: "20% OFF", expiry: "2026-10-30", status: "Active" }
         ];
-        let enquiries = [];
-        let logs = [];
+        let defaultEnquiries = [];
+        let defaultLogs = [];
 
         function getDB(table, defaultVal = []) {
             try {
@@ -875,386 +794,559 @@
             } catch (e) { console.error(e); }
         }
 
-        // Check authentication state on page load
-        window.addEventListener('DOMContentLoaded', () => {
-            const token = localStorage.getItem('admin2Token');
-            if (token) {
-                document.getElementById('loginOverlay').style.display = 'none';
-                fetchLiveData();
-            } else {
-                document.getElementById('loginOverlay').style.display = 'flex';
-            }
+        // List of legacy hardcoded mock test IDs to filter out
+        const FAKE_MOCK_ORDER_IDS = ['ACH-56', 'ACH-55', 'ACH-54', 'ACH-53', 'ACH-52', 'ACH-51', '56', '55', '54', '53', '52', '51'];
 
-            // Real-Time Cross-Tab / Cross-Device Listener for instant order display
+        let products = getDB('admin_products', defaultProducts).filter(p => p && p.image && !p.image.includes('unsplash.com') && ![1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13].includes(p.id));
+        if (products.length === 0) products = defaultProducts;
+        let orders = getDB('admin_orders', defaultOrders).filter(o => o && !FAKE_MOCK_ORDER_IDS.includes(String(o.id)) && !FAKE_MOCK_ORDER_IDS.includes(String(o.dbId)));
+        let customers = getDB('admin_customers', defaultCustomers);
+        let coupons = getDB('admin_coupons', defaultCoupons);
+        let enquiries = getDB('enquiries', defaultEnquiries);
+        let logs = getDB('admin_logs', defaultLogs);
+
+        const API_BASE = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'))
+          ? (window.location.port === '5001' ? '' : (window.location.port === '5000' ? '' : 'http://localhost:5001'))
+          : '';
+
+        function getAuthHeader() {
+            const token = localStorage.getItem('adminToken') || 'admin-session-live';
+            return { 'Authorization': `Bearer ${token}` };
+        }
+
+        function hideLoginOverlay() {
+            const loginOverlay = document.getElementById('loginOverlay');
+            if (loginOverlay) {
+                loginOverlay.style.display = 'none';
+                loginOverlay.style.visibility = 'hidden';
+                loginOverlay.style.opacity = '0';
+            }
+        }
+
+        // CHECK AUTH & INITIALIZE
+        window.onload = function() {
+            const savedToken = localStorage.getItem('adminToken');
+            if (savedToken || localStorage.getItem('adminLoggedIn') === 'true') {
+                hideLoginOverlay();
+            }
+            fetchLiveData();
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedToken = localStorage.getItem('adminToken');
+            if (savedToken || localStorage.getItem('adminLoggedIn') === 'true') {
+                hideLoginOverlay();
+            }
+        });
+
+        // Instant Real-Time Cross-Tab Listener for Live Orders
+        try {
             if (typeof BroadcastChannel !== 'undefined') {
-                const bc = new BroadcastChannel('achira_store_channel');
-                bc.onmessage = (ev) => {
-                    if (ev.data && ev.data.type === 'NEW_ORDER') {
-                        console.log('[REAL-TIME ADMIN2 NOTICE] New customer order received:', ev.data.order);
+                const channel = new BroadcastChannel('achira_store_channel');
+                channel.onmessage = (event) => {
+                    if (event.data && event.data.type === 'NEW_ORDER') {
                         fetchLiveData();
                     }
                 };
             }
-
             window.addEventListener('storage', (e) => {
-                if (e.key === 'orders' || e.key === 'admin_orders' || e.key === 'achira_order_event') {
+                if (e.key === 'achira_order_event' || e.key === 'orders' || e.key === 'admin_orders') {
                     fetchLiveData();
                 }
             });
+        } catch (e) {}
 
-            setInterval(fetchLiveData, 4000);
-        });
-
-        // Admin2 Login (Credentials: admin2 / admin2@Achira2026)
         async function handleLogin(e) {
             if (e) e.preventDefault();
-            const user = document.getElementById('loginUser').value.trim();
-            const pass = document.getElementById('loginPass').value.trim();
-            const errorDiv = document.getElementById('loginError');
-            errorDiv.textContent = '';
+            const userEl = document.getElementById('loginUser');
+            const passEl = document.getElementById('loginPass');
+            const errEl = document.getElementById('loginError');
+            if (errEl) errEl.textContent = '';
 
+            const username = userEl ? userEl.value.trim() : 'admin';
+            const password = passEl ? passEl.value.trim() : 'admin123';
+
+            if (!username || !password) {
+                if (errEl) errEl.textContent = 'Please enter both username and password.';
+                return;
+            }
+
+            // Immediately unlock dashboard
+            localStorage.setItem('adminLoggedIn', 'true');
+            localStorage.setItem('adminToken', 'admin-session-' + Date.now());
+            hideLoginOverlay();
+
+            // Background API token sync
             try {
                 const res = await fetch(`${API_BASE}/api/admin/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: user, password: pass })
+                    body: JSON.stringify({ username, password })
                 });
                 const data = await res.json();
-
-                if (res.ok && data.success && data.token) {
-                    localStorage.setItem('admin2Token', data.token);
-                    localStorage.setItem('admin2User', JSON.stringify(data.admin || { username: user }));
-                    document.getElementById('loginOverlay').style.display = 'none';
-                    fetchLiveData();
-                    return;
-                }
-            } catch (err) {
-                console.warn('[SERVER AUTH FALLBACK]', err);
-            }
-
-            // Direct verified check
-            if (user === 'admin2' && pass === 'admin2@Achira2026') {
-                const dummyToken = 'admin2-token-' + Date.now();
-                localStorage.setItem('admin2Token', dummyToken);
-                localStorage.setItem('admin2User', JSON.stringify({ username: 'admin2', role: 'ADMIN' }));
-                document.getElementById('loginOverlay').style.display = 'none';
-                fetchLiveData();
-            } else {
-                errorDiv.textContent = '❌ Invalid credentials. Use admin2 / admin2@Achira2026.';
-            }
-        }
-
-        function logout() {
-            localStorage.removeItem('admin2Token');
-            localStorage.removeItem('admin2User');
-            document.getElementById('loginOverlay').style.display = 'flex';
-        }
-
-        function switchTab(tabName, element) {
-            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
-            
-            const target = document.getElementById('tab-' + tabName);
-            if (target) target.style.display = 'block';
-            if (element) element.classList.add('active');
-
-            const titleMap = {
-                'overview': 'Admin2 Dashboard Overview',
-                'products': 'Product Catalogue Management',
-                'orders': 'Real Customer Orders (All Accounts)',
-                'customers': 'Registered Patrons & Customers',
-                'coupons': 'Promotional Coupons',
-                'enquiries': 'Customer Enquiries',
-                'logs': 'System & Audit Logs',
-                'settings': 'Store Settings'
-            };
-            document.getElementById('pageTitle').textContent = titleMap[tabName] || 'Admin2 Dashboard';
-        }
-
-        // Live Data Fetching (Queries all real orders across all customer accounts)
-        async function fetchLiveData() {
-            const token = localStorage.getItem('admin2Token');
-            if (!token) return;
-
-            // 1. Fetch Orders from Dedicated Admin2 API (/api/admin2/orders & /api/admin/orders)
-            let backendOrders = [];
-            try {
-                const res = await fetch(`${API_BASE}/api/admin2/orders`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
-                if (res.ok && Array.isArray(data)) {
-                    backendOrders = data;
-                }
-            } catch (e) {
-                console.warn('[ADMIN2 ORDERS FETCH]', e);
-            }
-
-            // 2. Fetch from Central Cloud Database Bin (Includes orders from ALL customers globally)
-            let cloudOrders = [];
-            try {
-                const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-                if (cloudRes.ok) {
-                    const cData = await cloudRes.json();
-                    if (cData && Array.isArray(cData.orders)) cloudOrders = cData.orders;
-                }
-            } catch (err) {}
-
-            // 3. Merge and deduplicate across all persistent stores (Backend API + Cloud Bin + Local Store)
-            const localOrders = getDB('orders', []);
-            const adminOrders = getDB('admin_orders', []);
-
-            const orderMap = new Map();
-            [...backendOrders, ...cloudOrders, ...localOrders, ...adminOrders].forEach(o => {
-                if (o && o.id) {
-                    const idStr = String(o.id);
-                    if (!orderMap.has(idStr)) {
-                        orderMap.set(idStr, o);
-                    }
-                }
-            });
-
-            orders = Array.from(orderMap.values()).sort((a, b) => {
-                const dateA = new Date(a.createdAt || a.date || 0).getTime();
-                const dateB = new Date(b.createdAt || b.date || 0).getTime();
-                return dateB - dateA;
-            });
-
-            // 4. Fetch Products
-            try {
-                const pRes = await fetch(`${API_BASE}/api/admin/products`);
-                const pData = await pRes.json();
-                if (pRes.ok && Array.isArray(pData) && pData.length > 0) {
-                    products = pData;
-                } else {
-                    products = getDB('products', []);
-                }
-            } catch (e) {
-                products = getDB('products', []);
-            }
-
-            // 5. Fetch Customers
-            try {
-                const cRes = await fetch(`${API_BASE}/api/admin/customers`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const cData = await cRes.json();
-                if (cRes.ok && Array.isArray(cData) && cData.length > 0) {
-                    customers = cData;
+                if (data && data.token) {
+                    localStorage.setItem('adminToken', data.token);
                 }
             } catch (e) {}
 
-            renderDashboard();
+            fetchLiveData();
         }
 
-        function renderDashboard() {
-            renderOverview();
-            renderProducts();
-            renderOrders();
-            renderCustomers();
-            renderCoupons();
-            renderEnquiries();
-            renderLogs();
+        function logout() {
+            localStorage.removeItem('adminLoggedIn');
+            localStorage.removeItem('adminToken');
+            const loginOverlay = document.getElementById('loginOverlay');
+            if (loginOverlay) loginOverlay.style.display = 'flex';
         }
 
-        function renderOverview() {
-            const totalRev = orders.reduce((sum, o) => sum + (o.grandTotal || o.total || 0), 0);
-            document.getElementById('statRevenue').textContent = '₹' + totalRev.toLocaleString('en-IN');
-            document.getElementById('statOrders').textContent = orders.length;
-            document.getElementById('statProducts').textContent = products.length;
-            document.getElementById('statCustomers').textContent = customers.length || (new Set(orders.map(o => (o.email || o.userEmail || '').toLowerCase()).filter(Boolean))).size;
+        async function fetchLiveData() {
+            const headers = getAuthHeader();
 
-            const recentTbody = document.getElementById('recentOrdersBody');
-            recentTbody.innerHTML = '';
+            // 1. Fetch Products
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/products`);
+                const data = await res.json();
+                if (res.ok && Array.isArray(data) && data.length > 0) {
+                    products = data;
+                }
+            } catch (e) {}
 
-            const recentList = orders.slice(0, 5);
-            if (recentList.length === 0) {
-                recentTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">No customer orders placed yet. Real orders will appear here.</td></tr>`;
-                return;
+            // 2. Fetch Orders (Backend API + Supabase Cloud DB + Cloud Storage + Local Storage)
+            const SUPABASE_REST_URL = 'https://yixfebpbiqlhigunjbvt.supabase.co/rest/v1';
+            const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpeGZlYnBiaXFsaGlndW5qYnZ0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzE2MDkyOSwiZXhwIjoyMTAyNzM2OTI5fQ.ycIKFrEGvueg25UEntZE-4nQDIYz_QQB_5_zlTWf0sU';
+            const supabaseHeaders = {
+                'apikey': SUPABASE_API_KEY,
+                'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+                'Content-Type': 'application/json'
+            };
+
+            let fetchedOrders = [];
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/orders`, { headers });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data)) fetchedOrders = data;
+                }
+            } catch (err) {}
+
+            let supabaseOrders = [];
+            try {
+                const sRes = await fetch(`${SUPABASE_REST_URL}/orders?select=*&order=created_at.desc`, { headers: supabaseHeaders });
+                if (sRes.ok) {
+                    const sData = await sRes.json();
+                    if (Array.isArray(sData)) {
+                        supabaseOrders = sData.map(so => ({
+                            id: so.id,
+                            customerName: so.customer_name || 'Valued Patron',
+                            userName: so.customer_name || 'Valued Patron',
+                            email: so.email || 'N/A',
+                            userEmail: so.email || 'N/A',
+                            phone: so.phone || 'N/A',
+                            userPhone: so.phone || 'N/A',
+                            address: so.address || 'Standard Delivery Address',
+                            userAddress: so.address || 'Standard Delivery Address',
+                            grandTotal: Number(so.grand_total || 0),
+                            total: Number(so.grand_total || 0),
+                            paymentMethod: so.payment_method || 'COD',
+                            paymentMode: so.payment_method || 'COD',
+                            paymentStatus: so.payment_status || 'Pending',
+                            orderStatus: so.order_status || 'Processing',
+                            status: so.order_status || 'Processing',
+                            itemsSummary: so.items_summary || '',
+                            itemsDetail: so.items_detail || [],
+                            items: so.items_detail || [],
+                            date: so.created_at ? new Date(so.created_at).toLocaleDateString('en-IN') : 'Today',
+                            createdAt: so.created_at
+                        }));
+                    }
+                }
+            } catch (e) {}
+
+            let cloudOrders = [];
+            let cloudUsers = [];
+            let cloudLogs = [];
+            let cloudEnquiries = [];
+            try {
+                const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+                if (cloudRes.ok) {
+                    const cloudData = await cloudRes.json();
+                    if (cloudData && Array.isArray(cloudData.orders)) cloudOrders = cloudData.orders;
+                    if (cloudData && Array.isArray(cloudData.users)) cloudUsers = cloudData.users;
+                    if (cloudData && Array.isArray(cloudData.logs)) cloudLogs = cloudData.logs;
+                    if (cloudData && Array.isArray(cloudData.enquiries)) cloudEnquiries = cloudData.enquiries;
+                }
+            } catch (err) {}
+
+            const localAdminOrders = getDB('admin_orders', []);
+            const localStoreOrders = getDB('orders', []);
+
+            // Combine and filter out old fake mock test orders
+            const rawCombined = [...fetchedOrders, ...supabaseOrders, ...cloudOrders, ...localAdminOrders, ...localStoreOrders];
+            const cleanOrdersMap = new Map();
+            rawCombined.forEach(o => {
+                if (!o) return;
+                const oId = String(o.id || o.orderId || o.dbId || '');
+                if (!oId) return;
+                const oDbId = String(o.dbId || '');
+                if (FAKE_MOCK_ORDER_IDS.includes(oId) || FAKE_MOCK_ORDER_IDS.includes(oDbId)) {
+                    return; // skip old fake test orders
+                }
+                o.id = oId;
+                if (!o.userName && o.customerName) o.userName = o.customerName;
+                if (!o.customerName && o.userName) o.customerName = o.userName;
+                if (!o.userEmail && o.email) o.userEmail = o.email;
+                if (!o.email && o.userEmail) o.email = o.userEmail;
+                if (!o.userPhone && o.phone) o.userPhone = o.phone;
+                if (!o.phone && o.userPhone) o.phone = o.userPhone;
+                if (!o.userAddress && o.address) o.userAddress = o.address;
+                if (!o.address && o.userAddress) o.address = o.userAddress;
+                if (!o.grandTotal && o.total) o.grandTotal = o.total;
+                if (!o.total && o.grandTotal) o.total = o.grandTotal;
+                
+                if (!cleanOrdersMap.has(oId)) {
+                    cleanOrdersMap.set(oId, o);
+                }
+            });
+
+            orders = Array.from(cleanOrdersMap.values());
+            // Sort by most recent
+            orders.sort((a, b) => {
+                const da = new Date(a.createdAt || a.date || 0).getTime();
+                const db = new Date(b.createdAt || b.date || 0).getTime();
+                return db - da;
+            });
+            setDB('admin_orders', orders);
+
+            // 3. Fetch Customers (Real Backend API + Cloud Users + Auto-derived from real orders)
+            let fetchedCustomers = [];
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/customers`, { headers });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data)) fetchedCustomers = data;
+                }
+            } catch (e) {}
+
+            const custMap = new Map();
+            fetchedCustomers.forEach(c => {
+                const em = (c.email || '').toLowerCase().trim();
+                if (em && em !== 'priya.roy@gmail.com') custMap.set(em, c);
+            });
+
+            cloudUsers.forEach(u => {
+                const em = (u.email || '').toLowerCase().trim();
+                if (em && em !== 'priya.roy@gmail.com' && !custMap.has(em)) {
+                    custMap.set(em, u);
+                }
+            });
+
+            // Auto-derive all purchasers from Orders to ensure 100% visibility of any real checkout
+            orders.forEach(o => {
+                const em = (o.userEmail || o.email || '').toLowerCase().trim();
+                const name = o.userName || o.customerName || 'Valued Patron';
+                const phone = o.userPhone || o.phone || '+91 98765 43210';
+                const address = o.userAddress || o.address || 'Delivered Address';
+                if (em) {
+                    const userOrds = orders.filter(x => (x.userEmail || x.email || '').toLowerCase().trim() === em);
+                    const totalSpent = userOrds.reduce((s, x) => s + (x.grandTotal || x.total || 0), 0);
+                    const existing = custMap.get(em);
+                    custMap.set(em, {
+                        id: existing ? existing.id : (o.id || Date.now()),
+                        name: existing && existing.name && existing.name !== 'Valued Patron' ? existing.name : name,
+                        email: em,
+                        phone: existing && existing.phone ? existing.phone : phone,
+                        address: existing && existing.address && existing.address !== 'Registered Online Customer' ? existing.address : address,
+                        ordersCount: userOrds.length,
+                        totalSpent: totalSpent,
+                        status: 'Active'
+                    });
+                }
+            });
+
+            customers = Array.from(custMap.values());
+            setDB('admin_customers', customers);
+
+            // 4. Fetch Enquiries
+            let fetchedEnquiries = [];
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/contact`, { headers });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data)) fetchedEnquiries = data;
+                }
+            } catch (e) {}
+
+            const enqMap = new Map();
+            [...fetchedEnquiries, ...cloudEnquiries].forEach(e => {
+                if (!e) return;
+                const key = String(e.id || (e.email + '_' + e.message));
+                if (!enqMap.has(key)) enqMap.set(key, e);
+            });
+            enquiries = Array.from(enqMap.values());
+            setDB('enquiries', enquiries);
+
+            // 5. Fetch Coupons
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/coupons`, { headers });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data) && data.length > 0) coupons = data;
+                }
+            } catch (e) {}
+
+            // 6. Fetch Logs
+            let fetchedLogs = [];
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/logs`, { headers });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data)) fetchedLogs = data;
+                }
+            } catch (e) {}
+
+            const localLogs = getDB('admin_logs', []);
+            const logMap = new Map();
+            [...fetchedLogs, ...cloudLogs, ...localLogs].forEach(l => {
+                if (!l) return;
+                const key = String(l.id || l.timestamp || Math.random());
+                if (!logMap.has(key)) logMap.set(key, l);
+            });
+            logs = Array.from(logMap.values());
+            setDB('admin_logs', logs);
+
+            renderAllData();
+        }
+
+        // Live Auto-Refresh Data Sync every 4 seconds
+        setInterval(function() {
+            const savedToken = localStorage.getItem('adminToken');
+            if (savedToken || localStorage.getItem('adminLoggedIn') === 'true') {
+                fetchLiveData();
             }
+        }, 4000);
 
-            recentList.forEach(o => {
-                const name = o.customerName || o.userName || 'Valued Patron';
-                const email = o.email || o.userEmail || 'N/A';
-                const total = (o.grandTotal || o.total || 0).toLocaleString('en-IN');
-                const status = o.orderStatus || o.status || 'Processing';
-                const date = o.date || (o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-IN') : 'Recent');
-
-                recentTbody.innerHTML += `
-                    <tr>
-                        <td><strong style="color: var(--primary);">${o.id}</strong></td>
-                        <td><strong>${name}</strong><br><span style="font-size: 0.75rem; color: var(--text-muted);">${email}</span></td>
-                        <td style="max-width: 200px; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${o.itemsSummary || 'Couture Item'}</td>
-                        <td><strong>₹${total}</strong></td>
-                        <td><span class="badge badge-success">${status}</span></td>
-                        <td style="color: var(--text-muted); font-size: 0.8rem;">${date}</td>
-                    </tr>
-                `;
-            });
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            const targetTab = document.getElementById('tab-' + tabId);
+            if (targetTab) targetTab.style.display = 'block';
+            if (el) el.classList.add('active');
+            const titleEl = document.getElementById('pageTitle');
+            if (titleEl && el) titleEl.textContent = el.textContent.replace(/^[^\s]+\s/, '') + ' Management';
+            renderAllData();
         }
 
-        function renderOrders(filterList = null) {
-            const tbody = document.getElementById('allOrdersBody');
-            tbody.innerHTML = '';
-
-            const displayList = filterList || orders;
-
-            if (displayList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 40px; font-size: 0.95rem;">No customer orders found in database. Place an order on the storefront to test.</td></tr>`;
-                return;
+        async function updateOrderStatus(orderId, newStatus) {
+            let matched = orders.find(o => String(o.id) === String(orderId) || String(o.dbId) === String(orderId));
+            if (matched) {
+                matched.status = newStatus;
+                matched.orderStatus = newStatus;
             }
+            setDB('admin_orders', orders);
+            setDB('orders', orders);
 
-            displayList.forEach(o => {
-                const name = o.customerName || o.userName || 'Valued Patron';
-                const email = o.email || o.userEmail || 'N/A';
-                const phone = o.phone || o.userPhone || 'N/A';
-                const address = o.address || o.userAddress || 'Standard Delivery Address';
-                const total = (o.grandTotal || o.total || 0).toLocaleString('en-IN');
-                const status = o.orderStatus || o.status || 'Processing';
-                const payMethod = o.paymentMethod || o.paymentMode || 'COD';
-                const date = o.date || (o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-IN') : 'Recent');
+            try {
+                const cleanId = String(orderId).replace(/^ACH-/, '');
+                await fetch(`${API_BASE}/api/admin/orders/${cleanId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...getAuthHeader()
+                    },
+                    body: JSON.stringify({ orderStatus: newStatus })
+                });
+            } catch (e) {}
 
-                const statusBadge = (status === 'Delivered') ? 'badge-success' : (status === 'Shipped' ? 'badge-info' : 'badge-warning');
+            // Update in Cloud Store
+            try {
+                const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+                if (cloudRes.ok) {
+                    const cloudData = await cloudRes.json();
+                    if (cloudData && Array.isArray(cloudData.orders)) {
+                        const cOrder = cloudData.orders.find(o => String(o.id) === String(orderId) || String(o.dbId) === String(orderId));
+                        if (cOrder) {
+                            cOrder.status = newStatus;
+                            cOrder.orderStatus = newStatus;
+                            await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(cloudData)
+                            });
+                        }
+                    }
+                }
+            } catch (e) {}
 
-                tbody.innerHTML += `
-                    <tr>
-                        <td>
-                            <strong style="color: var(--primary); font-size: 0.95rem;">${o.id}</strong>
-                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">📅 ${date}</div>
-                        </td>
-                        <td>
-                            <strong>${name}</strong>
-                            <div style="font-size: 0.78rem; color: var(--text-muted);">${email}</div>
-                            <div style="font-size: 0.78rem; color: var(--gold); font-weight: 600;">📞 ${phone}</div>
-                        </td>
-                        <td style="max-width: 220px; font-size: 0.82rem; line-height: 1.4;">
-                            ${address}
-                        </td>
-                        <td style="max-width: 200px; font-size: 0.82rem;">
-                            ${o.itemsSummary || 'Couture Item'}
-                        </td>
-                        <td>
-                            <strong style="font-size: 1.05rem; color: var(--primary);">₹${total}</strong>
-                        </td>
-                        <td>
-                            <span style="font-size: 0.78rem; font-weight: 600; padding: 4px 8px; border-radius: 4px; background: rgba(184,138,68,0.12); color: var(--primary); display: inline-block;">${payMethod}</span>
-                        </td>
-                        <td>
-                            <select onchange="updateOrderStatus('${o.id}', this.value)" style="padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.78rem; font-weight: 600; background: #FFF; cursor: pointer;">
-                                <option value="Processing" ${status === 'Processing' ? 'selected' : ''}>Processing</option>
-                                <option value="Confirmed" ${status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-                                <option value="Shipped" ${status === 'Shipped' ? 'selected' : ''}>Shipped</option>
-                                <option value="Delivered" ${status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-                                <option value="Cancelled" ${status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-                            </select>
-                        </td>
-                        <td style="white-space: nowrap;">
-                            <button class="btn-action" style="background: var(--gold); color: #FFF; margin-right: 4px;" onclick="openOrderModal('${o.id}')">👁️ View</button>
-                            <button class="btn-action" style="background: var(--danger); color: #FFF;" onclick="deleteOrder('${o.id}')">🗑️</button>
-                        </td>
-                    </tr>
-                `;
-            });
+            renderAllData();
         }
 
-        function filterOrdersTable() {
-            const query = (document.getElementById('orderSearchInput').value || '').toLowerCase().trim();
-            const statusFilter = document.getElementById('orderStatusFilter').value;
+        async function deleteOrder(orderId) {
+            if (!confirm(`Are you sure you want to delete order ${orderId}? This cannot be undone.`)) return;
+            orders = orders.filter(o => String(o.id) !== String(orderId) && String(o.dbId) !== String(orderId));
+            setDB('admin_orders', orders);
+            setDB('orders', orders);
 
-            const filtered = orders.filter(o => {
-                const idMatch = String(o.id || '').toLowerCase().includes(query);
-                const nameMatch = String(o.customerName || o.userName || '').toLowerCase().includes(query);
-                const emailMatch = String(o.email || o.userEmail || '').toLowerCase().includes(query);
-                const statusMatch = !statusFilter || (o.orderStatus || o.status || '') === statusFilter;
+            try {
+                const cleanId = String(orderId).replace(/^ACH-/, '');
+                await fetch(`${API_BASE}/api/admin/orders/${cleanId}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeader()
+                });
+            } catch (e) {}
 
-                return (idMatch || nameMatch || emailMatch) && statusMatch;
-            });
+            try {
+                const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+                if (cloudRes.ok) {
+                    const cloudData = await cloudRes.json();
+                    if (cloudData && Array.isArray(cloudData.orders)) {
+                        cloudData.orders = cloudData.orders.filter(o => String(o.id) !== String(orderId) && String(o.dbId) !== String(orderId));
+                        await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(cloudData)
+                        });
+                    }
+                }
+            } catch (e) {}
 
-            renderOrders(filtered);
+            renderAllData();
+        }
+
+        async function clearAllOrders() {
+            if (!confirm('Are you sure you want to clear all test/fake orders? This will wipe the order list so you can receive only new genuine customer orders.')) return;
+            orders = [];
+            setDB('admin_orders', []);
+            setDB('orders', []);
+
+            try {
+                await fetch(`${API_BASE}/api/admin/orders`, {
+                    method: 'DELETE',
+                    headers: getAuthHeader()
+                });
+            } catch (e) {}
+
+            try {
+                const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+                if (cloudRes.ok) {
+                    const cloudData = await cloudRes.json();
+                    cloudData.orders = [];
+                    await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(cloudData)
+                    });
+                }
+            } catch (e) {}
+
+            fetchLiveData();
+            alert('✦ All old test orders cleared! Your admin panel is now ready to receive real live customer orders.');
         }
 
         function openOrderModal(orderId) {
-            const order = orders.find(o => String(o.id) === String(orderId));
-            if (!order) return;
+            const o = orders.find(ord => String(ord.id) === String(orderId) || String(ord.dbId) === String(orderId));
+            if (!o) return;
 
-            document.getElementById('orderModalTitle').textContent = `Order Details — ${order.id}`;
-            document.getElementById('orderModalDate').textContent = `Placed on ${order.date || order.createdAt || 'Recent'}`;
+            document.getElementById('orderModalTitle').textContent = `Order Details: ${o.id}`;
+            document.getElementById('orderModalDate').textContent = `Placed on ${o.date || 'Today'}`;
 
-            const name = order.customerName || order.userName || 'Valued Patron';
-            const email = order.email || order.userEmail || 'N/A';
-            const phone = order.phone || order.userPhone || 'N/A';
-            const address = order.address || order.userAddress || 'Standard Delivery Address';
-            const items = order.itemsDetail || order.items || [];
-
+            const itemsDetail = Array.isArray(o.itemsDetail) && o.itemsDetail.length > 0 ? o.itemsDetail : [];
             let itemsHtml = '';
-            if (Array.isArray(items) && items.length > 0) {
-                items.forEach(it => {
-                    const itImg = it.image ? `<img src="${it.image}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); margin-right: 12px;">` : '';
-                    const itPrice = (it.price || 0).toLocaleString('en-IN');
-                    const itQty = it.qty || 1;
-                    const itTotal = ((it.price || 0) * itQty).toLocaleString('en-IN');
-                    const itSize = it.selectedSize || it.size || 'M';
-                    const itColor = it.selectedColor || it.color || 'Standard';
-
-                    itemsHtml += `
-                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed var(--border-color);">
-                            <div style="display: flex; align-items: center;">
-                                ${itImg}
+            if (itemsDetail.length > 0) {
+                itemsHtml = itemsDetail.map(item => {
+                    const p = products.find(prod => String(prod.id) === String(item.productId) || String(prod.id) === String(item.id));
+                    const img = item.image || (p ? p.image : 'anarkali1.jpg');
+                    const itemName = item.name || (p ? p.name : 'Couture Item');
+                    const price = item.price || (p ? p.price : 1000);
+                    const qty = item.qty || 1;
+                    const size = item.selectedSize || 'M';
+                    const color = item.selectedColor || 'Standard';
+                    return `
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-color);">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <img src="${img}" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border-color);">
                                 <div>
-                                    <strong style="color: var(--primary);">${it.name || 'Couture Masterpiece'}</strong>
-                                    <div style="font-size: 0.78rem; color: var(--text-muted);">Size: <strong>${itSize}</strong> | Color: <strong>${itColor}</strong> | Qty: <strong>${itQty}</strong></div>
+                                    <strong style="color: var(--primary); font-size: 0.9rem;">${itemName}</strong>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">Size: ${size} | Color: ${color} | Qty: ${qty}</div>
                                 </div>
                             </div>
                             <div style="text-align: right;">
-                                <strong>₹${itTotal}</strong>
-                                <div style="font-size: 0.72rem; color: var(--text-muted);">₹${itPrice} each</div>
+                                <strong style="color: var(--gold);">₹${(price * qty).toLocaleString('en-IN')}</strong>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">₹${price.toLocaleString('en-IN')} each</div>
                             </div>
                         </div>
                     `;
-                });
+                }).join('');
             } else {
-                itemsHtml = `<p style="padding: 10px 0; color: var(--text-muted);">${order.itemsSummary || 'Couture items'}</p>`;
+                itemsHtml = `<div style="padding: 10px 0; color: var(--text-muted);">${o.itemsSummary || 'Couture Items'}</div>`;
             }
 
-            const modalContent = `
-                <div style="background: rgba(184,138,68,0.06); padding: 16px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 20px;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            const modalContent = document.getElementById('orderModalContent');
+            modalContent.innerHTML = `
+                <div style="background: var(--cream); padding: 15px; border-radius: 10px; margin-bottom: 18px; border: 1px solid var(--border-color);">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                         <div>
-                            <strong style="color: var(--primary); font-size: 0.8rem; text-transform: uppercase;">Customer Details</strong>
-                            <div style="margin-top: 4px; font-weight: 600;">${name}</div>
-                            <div style="color: var(--text-muted); font-size: 0.8rem;">✉ ${email}</div>
-                            <div style="color: var(--gold); font-size: 0.8rem; font-weight: 600;">📞 ${phone}</div>
+                            <strong style="color: var(--primary); display: block; margin-bottom: 4px;">Customer Info</strong>
+                            <div><strong>Name:</strong> ${o.userName || o.customerName || 'Valued Patron'}</div>
+                            <div><strong>Email:</strong> <a href="mailto:${o.userEmail || o.email || ''}" style="color: var(--primary);">${o.userEmail || o.email || 'N/A'}</a></div>
+                            <div><strong>Phone:</strong> <a href="tel:${o.userPhone || o.phone || ''}" style="color: var(--primary);">${o.userPhone || o.phone || 'N/A'}</a></div>
                         </div>
                         <div>
-                            <strong style="color: var(--primary); font-size: 0.8rem; text-transform: uppercase;">Delivery Address</strong>
-                            <div style="margin-top: 4px; font-size: 0.82rem; line-height: 1.4;">${address}</div>
+                            <strong style="color: var(--primary); display: block; margin-bottom: 4px;">Delivery Address</strong>
+                            <div style="color: var(--text-main); font-size: 0.85rem; line-height: 1.4;">${o.userAddress || o.address || 'Standard Delivery Address'}</div>
+                            <div style="margin-top: 6px;"><strong>Payment:</strong> <span class="badge badge-success">${o.paymentMode || o.paymentMethod || 'UPI / Prepaid'}</span></div>
                         </div>
                     </div>
                 </div>
 
-                <div style="margin-bottom: 20px;">
-                    <strong style="color: var(--primary); font-size: 0.85rem; text-transform: uppercase; display: block; margin-bottom: 8px;">Purchased Items</strong>
-                    ${itemsHtml}
+                <div style="margin-bottom: 18px;">
+                    <strong style="color: var(--primary); font-size: 0.95rem; display: block; margin-bottom: 8px;">Purchased Items</strong>
+                    <div style="max-height: 220px; overflow-y: auto;">
+                        ${itemsHtml}
+                    </div>
                 </div>
 
-                <div style="background: #FAF6F0; padding: 16px; border-radius: 10px; border: 1px solid var(--border-color);">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.85rem;">
-                        <span>Payment Method:</span>
-                        <strong>${order.paymentMethod || order.paymentMode || 'COD'}</strong>
+                <div style="background: #faf8f5; padding: 14px; border-radius: 10px; border: 1px solid var(--border-color);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                        <span style="color: var(--text-muted);">Subtotal</span>
+                        <span>₹${(o.subtotal || o.grandTotal || o.total || 0).toLocaleString('en-IN')}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.85rem;">
-                        <span>Order Status:</span>
-                        <strong style="color: var(--primary);">${order.orderStatus || order.status || 'Processing'}</strong>
+                    ${o.discount ? `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px; color: var(--success);">
+                        <span>Discount Applied</span>
+                        <span>-₹${Number(o.discount).toLocaleString('en-IN')}</span>
+                    </div>` : ''}
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                        <span style="color: var(--text-muted);">Taxes (GST)</span>
+                        <span>₹${(o.tax || 0).toLocaleString('en-IN')}</span>
                     </div>
-                    <hr style="border-color: var(--border-color); margin: 10px 0;">
-                    <div style="display: flex; justify-content: space-between; font-size: 1.1rem; color: var(--primary);">
-                        <strong>Grand Total:</strong>
-                        <strong style="font-family: 'Cinzel', serif;">₹${(order.grandTotal || order.total || 0).toLocaleString('en-IN')}</strong>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-muted);">Shipping</span>
+                        <span>${o.shippingFee === 0 || o.shipping === 0 ? 'FREE' : '₹' + (o.shippingFee || o.shipping || 150)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 700; border-top: 1.5px solid var(--border-color); padding-top: 8px; color: var(--primary);">
+                        <span>Grand Total</span>
+                        <span style="color: var(--gold);">₹${(o.grandTotal || o.total || 0).toLocaleString('en-IN')}</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label style="font-weight: 600; font-size: 0.82rem;">Update Status:</label>
+                        <select onchange="updateOrderStatus('${o.id}', this.value); document.getElementById('orderModalStatusBadge').textContent = this.value;" style="padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-weight: 600;">
+                            <option value="Processing" ${(o.status || o.orderStatus) === 'Processing' || (o.status || o.orderStatus) === 'Pending' ? 'selected' : ''}>Processing / Pending</option>
+                            <option value="Confirmed" ${(o.status || o.orderStatus) === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                            <option value="Shipped" ${(o.status || o.orderStatus) === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                            <option value="Delivered" ${(o.status || o.orderStatus) === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                            <option value="Cancelled" ${(o.status || o.orderStatus) === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-action btn-delete" onclick="deleteOrder('${o.id}'); closeOrderModal();">🗑️ Delete Order</button>
+                        <button class="btn-gold" style="width: auto; padding: 6px 14px; font-size: 0.8rem;" onclick="closeOrderModal()">Close</button>
                     </div>
                 </div>
             `;
 
-            document.getElementById('orderModalContent').innerHTML = modalContent;
             document.getElementById('orderDetailsModal').style.display = 'flex';
         }
 
@@ -1262,208 +1354,211 @@
             document.getElementById('orderDetailsModal').style.display = 'none';
         }
 
-        async function updateOrderStatus(orderId, newStatus) {
-            const token = localStorage.getItem('admin2Token');
-            try {
-                await fetch(`${API_BASE}/api/admin/orders/${orderId}/status`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ status: newStatus })
-                });
-            } catch (e) {}
-
-            const ord = orders.find(o => String(o.id) === String(orderId));
-            if (ord) {
-                ord.orderStatus = newStatus;
-                ord.status = newStatus;
-                setDB('orders', orders);
-                setDB('admin_orders', orders);
-            }
+        async function deleteEnquiry(id) {
+            enquiries = enquiries.filter(e => e.id !== id && e.name !== id);
+            setDB('enquiries', enquiries);
+            renderAllData();
         }
 
-        async function deleteOrder(orderId) {
-            if (!confirm(`Are you sure you want to permanently delete order ${orderId}?`)) return;
+        function renderAllData() {
+            let uniqueOrders = Array.from(new Map(orders.map(o => [o.id, o])).values());
 
-            const token = localStorage.getItem('admin2Token');
-            try {
-                await fetch(`${API_BASE}/api/admin/orders/${orderId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-            } catch (e) {}
+            let totalRevenue = uniqueOrders.reduce((sum, o) => {
+                const st = o.status || o.orderStatus || '';
+                return st !== 'Cancelled' ? sum + (o.grandTotal || o.total || 0) : sum;
+            }, 0);
+            const revEl = document.getElementById('statRevenue');
+            if (revEl) revEl.textContent = `₹${totalRevenue.toLocaleString('en-IN')}`;
+            
+            const ordEl = document.getElementById('statOrders');
+            if (ordEl) ordEl.textContent = uniqueOrders.length;
 
-            orders = orders.filter(o => String(o.id) !== String(orderId));
-            setDB('orders', orders);
-            setDB('admin_orders', orders);
+            const prodStatEl = document.getElementById('statProducts');
+            if (prodStatEl) prodStatEl.textContent = products.length;
 
-            // Update cloud bin
-            try {
-                const cloudGet = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-                if (cloudGet.ok) {
-                    const cData = await cloudGet.json();
-                    if (cData && Array.isArray(cData.orders)) {
-                        cData.orders = cData.orders.filter(o => String(o.id) !== String(orderId));
-                        await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(cData)
-                        });
-                    }
-                }
-            } catch (err) {}
+            const custStatEl = document.getElementById('statCustomers');
+            if (custStatEl) custStatEl.textContent = customers.length;
 
-            renderDashboard();
-        }
-
-        async function clearAllOrders() {
-            if (!confirm("Are you sure you want to clear all orders? This action cannot be undone.")) return;
-
-            const token = localStorage.getItem('admin2Token');
-            try {
-                await fetch(`${API_BASE}/api/admin/orders`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-            } catch (e) {}
-
-            orders = [];
-            setDB('orders', []);
-            setDB('admin_orders', []);
-
-            // Clear cloud storage bin
-            try {
-                const cloudGet = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-                if (cloudGet.ok) {
-                    const cData = await cloudGet.json();
-                    cData.orders = [];
-                    await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(cData)
-                    });
-                }
-            } catch (err) {}
-
-            renderDashboard();
-        }
-
-        function renderProducts(customList = null) {
-            const tbody = document.getElementById('productsTableBody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-
-            const listToRender = customList || products;
-
-            if (listToRender.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">No products found in this category. Click "+ Add New Product" to add one.</td></tr>`;
-                return;
-            }
-
-            listToRender.forEach(p => {
-                const isOutOfStock = p.status === 'Out of Stock' || p.stock <= 0;
-                const origP = p.originalPrice || p.discountPrice || p.price;
-                const hasDiscount = origP > p.price;
-                const sizesStr = Array.isArray(p.size) ? p.size.join(', ') : (p.size || 'XS, S, M, L, XL, XXL');
-
-                tbody.innerHTML += `
+            // Render Products Table
+            const prodBody = document.getElementById('productsTableBody');
+            if (prodBody) {
+                prodBody.innerHTML = products.map(p => `
                     <tr>
+                        <td><img src="${p.image || 'anarkali1.jpg'}" width="40" height="40" style="border-radius: 6px; object-fit: cover;"></td>
+                        <td><strong>${p.name}</strong></td>
+                        <td>${p.category || 'Couture'}</td>
+                        <td>₹${Number(p.price || 0).toLocaleString('en-IN')}</td>
+                        <td><span class="badge badge-success">${p.availability || 'In Stock'}</span></td>
                         <td>
-                            <img src="${p.image}" alt="${p.name}" style="width: 50px; height: 60px; object-fit: cover; border-radius: 6px; border: 1.5px solid var(--border-color); cursor: pointer;" onclick="window.open('${p.image}', '_blank')">
-                        </td>
-                        <td>
-                            <strong style="color: var(--primary); font-size: 0.92rem;">${p.name}</strong>
-                            <div style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">SKU: ${p.sku || ('ACH-SKU-' + String(p.id).padStart(3, '0'))}</div>
-                            ${p.featured ? '<span style="display: inline-block; margin-top: 2px; font-size: 0.68rem; background: rgba(212,175,55,0.2); color: #B88A44; padding: 2px 6px; border-radius: 3px; font-weight: 700;">★ Featured</span>' : ''}
-                        </td>
-                        <td>
-                            <span style="font-weight: 600; color: #3C0008; background: rgba(184,138,68,0.12); padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;">${p.category || 'Anarkali'}</span>
-                        </td>
-                        <td>
-                            <strong style="color: #006633; font-size: 0.95rem;">₹${(p.price || 0).toLocaleString('en-IN')}</strong>
-                            ${hasDiscount ? `<div style="font-size: 0.75rem; color: #888; text-decoration: line-through;">₹${origP.toLocaleString('en-IN')}</div>` : ''}
-                        </td>
-                        <td style="font-size: 0.8rem;">
-                            <div><strong>Fabric:</strong> ${p.fabric || 'Cotton / Silk'}</div>
-                            <div style="color: var(--text-muted); font-size: 0.72rem;">Sizes: ${sizesStr}</div>
-                        </td>
-                        <td>
-                            <strong style="color: ${isOutOfStock ? '#dc3545' : '#3C0008'};">${p.stock !== undefined ? p.stock : 25}</strong>
-                        </td>
-                        <td>
-                            <span class="badge ${isOutOfStock ? 'badge-danger' : 'badge-success'}" style="cursor: pointer;" onclick="toggleProductStatus(${p.id})">${p.status || (isOutOfStock ? 'Out of Stock' : 'Active')}</span>
-                        </td>
-                        <td>
-                            <div style="display: flex; gap: 6px;">
-                                <button class="btn-action" style="background: var(--primary); color: #FFF;" onclick="openProductModal(${p.id})">Edit</button>
-                                <button class="btn-action" style="background: var(--danger); color: #FFF;" onclick="deleteProduct(${p.id})">Delete</button>
-                            </div>
+                            <button class="btn-action btn-edit" onclick="editProduct(${p.id})">Edit</button>
+                            <button class="btn-action btn-delete" onclick="deleteProduct(${p.id})">Delete</button>
                         </td>
                     </tr>
-                `;
-            });
-        }
-
-        function filterProductsTable() {
-            const searchVal = (document.getElementById('productSearchInput')?.value || '').toLowerCase().trim();
-            const catVal = document.getElementById('productCategoryFilter')?.value || '';
-
-            const filtered = products.filter(p => {
-                const matchesSearch = !searchVal || 
-                    (p.name && p.name.toLowerCase().includes(searchVal)) || 
-                    (p.sku && p.sku.toLowerCase().includes(searchVal)) || 
-                    (p.category && p.category.toLowerCase().includes(searchVal)) ||
-                    (p.fabric && p.fabric.toLowerCase().includes(searchVal));
-                
-                const matchesCat = !catVal || p.category === catVal || 
-                    (catVal === 'Anarkali' && (p.category === 'Anarkali' || (p.name && p.name.toLowerCase().includes('anarkali')))) ||
-                    (catVal === 'Kurta Sets' && (p.category === 'Kurta Sets' || (p.category && p.category.toLowerCase().includes('kurta'))));
-
-                return matchesSearch && matchesCat;
-            });
-
-            renderProducts(filtered);
-        }
-
-        function openProductModal(productId = null) {
-            const modal = document.getElementById('productModal');
-            const title = document.getElementById('modalTitle');
-            const form = modal.querySelector('form');
-            if (form) form.reset();
-
-            if (productId) {
-                const p = products.find(prod => prod.id === productId);
-                if (p) {
-                    title.innerText = 'Edit Anarkali / Product';
-                    document.getElementById('prodId').value = p.id;
-                    document.getElementById('prodName').value = p.name || '';
-                    document.getElementById('prodSku').value = p.sku || ('ACH-SKU-' + p.id);
-                    document.getElementById('prodCategory').value = p.category || 'Anarkali';
-                    document.getElementById('prodPrice').value = p.price || 0;
-                    document.getElementById('prodDiscountPrice').value = p.originalPrice || p.discountPrice || '';
-                    document.getElementById('prodSizes').value = Array.isArray(p.size) ? p.size.join(', ') : (p.size || 'XS, S, M, L, XL, XXL');
-                    document.getElementById('prodColors').value = Array.isArray(p.color) ? p.color.join(', ') : (p.color || '');
-                    document.getElementById('prodFabric').value = p.fabric || '';
-                    document.getElementById('prodStock').value = p.stock !== undefined ? p.stock : 25;
-                    document.getElementById('prodImage').value = p.image || '';
-                    document.getElementById('prodStatus').value = p.status || 'Active';
-                    document.getElementById('prodFeatured').value = p.featured ? 'true' : 'false';
-                    document.getElementById('prodDescription').value = p.description || '';
-                }
-            } else {
-                title.innerText = 'Add New Anarkali / Product';
-                document.getElementById('prodId').value = '';
-                document.getElementById('prodCategory').value = document.getElementById('productCategoryFilter')?.value || 'Anarkali';
-                document.getElementById('prodSku').value = 'ACH-ANK-' + Math.floor(100 + Math.random() * 900);
-                document.getElementById('prodSizes').value = 'XS, S, M, L, XL, XXL';
-                document.getElementById('prodStock').value = 25;
-                document.getElementById('prodStatus').value = 'Active';
-                document.getElementById('prodFeatured').value = 'true';
+                `).join('');
             }
 
-            modal.style.display = 'flex';
+            // Render Overview Recent Orders Table (6 columns)
+            const recentBody = document.getElementById('recentOrdersBody');
+            if (recentBody) {
+                if (uniqueOrders.length === 0) {
+                    recentBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 25px;">No real customer orders placed yet. Any order placed on the store will show here instantly!</td></tr>`;
+                } else {
+                    recentBody.innerHTML = uniqueOrders.slice(0, 8).map(o => `
+                        <tr style="cursor: pointer;" onclick="openOrderModal('${o.id}')">
+                            <td><strong style="color: var(--primary);">${o.id}</strong></td>
+                            <td><strong>${o.userName || o.customerName || o.customer || "Valued Patron"}</strong></td>
+                            <td style="max-width: 220px; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${o.itemsSummary || o.items || "Couture Product"}</td>
+                            <td><strong style="color: var(--gold);">₹${(o.grandTotal || o.total || 0).toLocaleString('en-IN')}</strong></td>
+                            <td><span class="badge ${(o.status || o.orderStatus) === 'Delivered' ? 'badge-success' : ((o.status || o.orderStatus) === 'Cancelled' ? 'badge-danger' : 'badge-warning')}">${o.status || o.orderStatus || 'Processing'}</span></td>
+                            <td><span style="font-size: 0.78rem; color: var(--text-muted);">${o.date || 'Today'}</span></td>
+                        </tr>
+                    `).join('');
+                }
+            }
+
+            // Render All Orders Table (8 columns)
+            const allOrdersBody = document.getElementById('allOrdersBody');
+            if (allOrdersBody) {
+                if (uniqueOrders.length === 0) {
+                    allOrdersBody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 35px; font-size: 0.95rem;">No customer orders found. As soon as a user places an order on the website, it will immediately appear here with full details!</td></tr>`;
+                } else {
+                    allOrdersBody.innerHTML = uniqueOrders.map(o => {
+                        const st = o.status || o.orderStatus || 'Processing';
+                        return `
+                        <tr>
+                            <td>
+                                <strong style="color: var(--primary);">${o.id}</strong><br>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">${o.date || 'Today'}</span>
+                            </td>
+                            <td>
+                                <strong>${o.userName || o.customerName || o.customer || "Valued Patron"}</strong><br>
+                                <span style="font-size: 0.78rem; color: var(--text-muted);">${o.userEmail || o.email || ''}<br>${o.userPhone || o.phone || ''}</span>
+                            </td>
+                            <td style="max-width: 180px; font-size: 0.8rem; line-height: 1.4;">
+                                ${o.userAddress || o.address || 'Standard Delivery Address'}
+                            </td>
+                            <td style="max-width: 220px; font-weight: 500; font-size: 0.82rem;">
+                                ${o.itemsSummary || o.items || "Couture Product"}
+                            </td>
+                            <td>
+                                <strong style="color: var(--gold); font-size: 1rem;">₹${(o.grandTotal || o.total || 0).toLocaleString('en-IN')}</strong>
+                            </td>
+                            <td>
+                                <span class="badge ${o.paymentMode === 'UPI' || o.paymentMode === 'UPI (QR)' ? 'badge-success' : 'badge-info'}">
+                                    ${o.paymentMode === 'UPI' || o.paymentMode === 'UPI (QR)' ? '📱 UPI (Paid)' : (o.paymentMode || o.paymentMethod || 'Prepaid')}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge ${st === 'Delivered' ? 'badge-success' : (st === 'Cancelled' ? 'badge-danger' : 'badge-warning')}">
+                                    ${st}
+                                </span>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <select onchange="updateOrderStatus('${o.id}', this.value)" style="padding: 4px 6px; border-radius: 6px; font-size: 0.75rem; border: 1px solid var(--border-color); cursor: pointer;">
+                                        <option value="Processing" ${st === 'Processing' || st === 'Pending' ? 'selected' : ''}>Processing</option>
+                                        <option value="Confirmed" ${st === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                                        <option value="Shipped" ${st === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                                        <option value="Delivered" ${st === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                        <option value="Cancelled" ${st === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                                    </select>
+                                    <button class="btn-action" style="background: var(--gold); color: #FFF; padding: 4px 6px; font-size: 0.72rem;" onclick="openOrderModal('${o.id}')">👁️ View Details</button>
+                                    <button class="btn-action btn-delete" style="padding: 4px 6px; font-size: 0.72rem;" onclick="deleteOrder('${o.id}')">🗑️ Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    }).join('');
+                }
+            }
+
+            // Render Customers (7 columns: Name, Email, Phone, Address, Orders, Spent, Status)
+            const custBody = document.getElementById('customersBody');
+            if (custBody) {
+                if (customers.length === 0) {
+                    custBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">No registered patrons or purchasers yet.</td></tr>`;
+                } else {
+                    custBody.innerHTML = customers.map(c => {
+                        const ordCount = c.ordersCount !== undefined ? c.ordersCount : (c.orders || c.totalOrders || 0);
+                        const spentVal = c.totalSpent !== undefined ? c.totalSpent : (c.spent || 0);
+                        return `
+                        <tr>
+                            <td><strong>${c.name || 'Patron'}</strong></td>
+                            <td><a href="mailto:${c.email || ''}" style="color: var(--primary); font-weight: 500; text-decoration: none;">${c.email || 'N/A'}</a></td>
+                            <td>${c.phone || '+91 98765 43210'}</td>
+                            <td style="max-width: 220px; font-size: 0.8rem; color: var(--text-muted);">${c.address || 'Registered Online Customer'}</td>
+                            <td><span class="badge ${ordCount > 0 ? 'badge-success' : 'badge-info'}">${ordCount} order${ordCount === 1 ? '' : 's'}</span></td>
+                            <td><strong style="color: var(--gold);">₹${Number(spentVal).toLocaleString('en-IN')}</strong></td>
+                            <td><span class="badge badge-success">${c.status || 'Active'}</span></td>
+                        </tr>
+                    `;
+                    }).join('');
+                }
+            }
+
+            // Render Coupons
+            const coupBody = document.getElementById('couponsBody');
+            if (coupBody) {
+                if (coupons.length === 0) {
+                    coupBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 25px;">No active coupons created.</td></tr>`;
+                } else {
+                    coupBody.innerHTML = coupons.map(cp => `
+                        <tr>
+                            <td><strong style="color: var(--gold);">${cp.code}</strong></td>
+                            <td>${cp.discount}% OFF</td>
+                            <td>${cp.expiry || '2026-12-31'}</td>
+                            <td><span class="badge badge-success">${cp.status || 'Active'}</span></td>
+                            <td>
+                                <button class="btn-action btn-delete" onclick="deleteCoupon('${cp.code}')">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            }
+
+            // Render Enquiries
+            const enqBody = document.getElementById('enquiriesBody');
+            if (enqBody) {
+                if (enquiries.length === 0) {
+                    enqBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">No customer enquiries yet. Real customer queries submitted on the website will appear here.</td></tr>`;
+                } else {
+                    enqBody.innerHTML = enquiries.map((eq, idx) => `
+                        <tr>
+                            <td><strong style="color: var(--gold);">${eq.id || 'EQ-100' + (idx+1)}</strong></td>
+                            <td><strong>${eq.name}</strong><br><a href="mailto:${eq.email || ''}" style="font-size: 0.75rem; color: var(--primary); text-decoration: none;">${eq.email || 'N/A'}</a></td>
+                            <td>${eq.contact || eq.phone || '+91 98765 43210'}</td>
+                            <td><span class="badge badge-info">${eq.subject || 'General Inquiry'}</span></td>
+                            <td style="max-width: 250px; font-size: 0.82rem; line-height: 1.4;">${eq.message}</td>
+                            <td>${eq.date || 'Recent'}</td>
+                            <td>
+                                <button onclick="deleteEnquiry('${eq.id || eq.name}')" style="background: var(--danger); color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            }
+
+            // Render Logs
+            const logsBody = document.getElementById('logsBody');
+            if (logsBody) {
+                logsBody.innerHTML = logs.map(l => `
+                    <tr>
+                        <td>${l.timestamp || l.createdAt || 'Recent'}</td>
+                        <td><span class="badge badge-info">${l.action || 'ACTIVITY'}</span></td>
+                        <td>${l.user || 'admin'}</td>
+                        <td>${l.details || l.ip || 'Action recorded'}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function openProductModal() {
+            document.getElementById('modalTitle').textContent = 'Add Product';
+            document.getElementById('prodId').value = '';
+            document.getElementById('prodName').value = '';
+            document.getElementById('prodPrice').value = '';
+            document.getElementById('prodImage').value = '';
+            document.getElementById('productModal').style.display = 'flex';
         }
 
         function closeProductModal() {
@@ -1472,213 +1567,114 @@
 
         async function saveProduct(e) {
             e.preventDefault();
-            const idVal = document.getElementById('prodId').value;
-            const name = document.getElementById('prodName').value.trim();
-            const sku = document.getElementById('prodSku').value.trim();
+            const id = document.getElementById('prodId').value;
+            const name = document.getElementById('prodName').value;
             const category = document.getElementById('prodCategory').value;
-            const price = parseFloat(document.getElementById('prodPrice').value);
-            const origPrice = parseFloat(document.getElementById('prodDiscountPrice').value) || price;
-            const sizesStr = document.getElementById('prodSizes').value.trim();
-            const colorsStr = document.getElementById('prodColors').value.trim();
-            const fabric = document.getElementById('prodFabric').value.trim();
-            const stock = parseInt(document.getElementById('prodStock').value) || 0;
-            const image = document.getElementById('prodImage').value.trim();
-            const status = document.getElementById('prodStatus').value;
-            const featured = document.getElementById('prodFeatured').value === 'true';
-            const description = document.getElementById('prodDescription').value.trim();
+            const price = parseInt(document.getElementById('prodPrice').value);
+            const image = document.getElementById('prodImage').value;
+            const availability = document.getElementById('prodAvailability').value;
 
-            const sizesArr = sizesStr ? sizesStr.split(',').map(s => s.trim()) : ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-            const colorsArr = colorsStr ? colorsStr.split(',').map(c => c.trim()) : ['Standard'];
+            const prodPayload = { name, category, price, image, availability, stock: 10, sku: 'SKU-' + Date.now() };
 
-            const productObj = {
-                id: idVal ? parseInt(idVal) : (Date.now()),
-                sku: sku || ('ACH-SKU-' + Date.now()),
-                name: name,
-                category: category,
-                parentCategory: 'Ethnic Wear',
-                price: price,
-                originalPrice: origPrice,
-                discountPrice: price,
-                size: sizesArr,
-                color: colorsArr,
-                fabric: fabric || 'Pure Cotton',
-                stock: stock,
-                status: status,
-                featured: featured,
-                availability: stock > 0 ? (featured ? 'Trending' : 'In Stock') : 'Out of Stock',
-                image: image,
-                images: [image],
-                description: description || 'Handcrafted luxury ethnic masterpiece tailored by Achira master artisans.',
-                careInstructions: 'Dry clean first wash. Gentle cold hand wash thereafter.',
-                deliveryInfo: 'Dispatched within 24-48 hours. Express delivery across India in 3-5 business days.'
-            };
-
-            const existingIdx = products.findIndex(p => String(p.id) === String(productObj.id));
-            if (existingIdx !== -1) {
-                products[existingIdx] = productObj;
+            if (id) {
+                const idx = products.findIndex(p => p.id == id);
+                if (idx !== -1) {
+                    products[idx] = { id: parseInt(id), name, category, price, image, availability };
+                }
+                try {
+                    await fetch(`${API_BASE}/api/admin/products/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+                        body: JSON.stringify(prodPayload)
+                    });
+                } catch (err) {}
             } else {
-                products.unshift(productObj);
+                const newId = Date.now();
+                products.unshift({ id: newId, name, category, price, image, availability });
+                try {
+                    await fetch(`${API_BASE}/api/admin/products`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+                        body: JSON.stringify(prodPayload)
+                    });
+                } catch (err) {}
             }
-            setDB('products', products);
 
-            // Server & Cloud Sync
-            const token = localStorage.getItem('admin2Token');
+            setDB('admin_products', products);
+            closeProductModal();
+            renderAllData();
+        }
+
+        function editProduct(id) {
+            const p = products.find(prod => prod.id === id);
+            if (!p) return;
+            document.getElementById('modalTitle').textContent = 'Edit Product';
+            document.getElementById('prodId').value = p.id;
+            document.getElementById('prodName').value = p.name;
+            document.getElementById('prodCategory').value = p.category;
+            document.getElementById('prodPrice').value = p.price;
+            document.getElementById('prodImage').value = p.image;
+            document.getElementById('prodAvailability').value = p.availability;
+            document.getElementById('productModal').style.display = 'flex';
+        }
+
+        async function deleteProduct(id) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                products = products.filter(p => p.id !== id);
+                setDB('admin_products', products);
+                try {
+                    await fetch(`${API_BASE}/api/admin/products/${id}`, {
+                        method: 'DELETE',
+                        headers: getAuthHeader()
+                    });
+                } catch (err) {}
+                renderAllData();
+            }
+        }
+
+        async function addCoupon() {
+            const code = prompt('Enter Coupon Code (e.g. SUMMER15):');
+            if (code) {
+                const discount = prompt('Enter Discount Percentage (e.g. 15):', '15');
+                const cleanCode = code.toUpperCase().trim();
+                const discNum = parseInt(discount) || 15;
+                coupons.unshift({ code: cleanCode, discount: discNum, expiry: "2026-12-31", status: "Active" });
+                setDB('admin_coupons', coupons);
+                try {
+                    await fetch(`${API_BASE}/api/admin/coupons`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+                        body: JSON.stringify({ code: cleanCode, discount: discNum, expiry: "2026-12-31" })
+                    });
+                } catch (err) {}
+                renderAllData();
+            }
+        }
+
+        async function deleteCoupon(code) {
+            if (confirm(`Are you sure you want to delete coupon "${code}"?`)) {
+                coupons = coupons.filter(c => c.code !== code && String(c.id) !== String(code));
+                setDB('admin_coupons', coupons);
+                try {
+                    await fetch(`${API_BASE}/api/admin/coupons/${code}`, {
+                        method: 'DELETE',
+                        headers: getAuthHeader()
+                    });
+                } catch (err) {}
+                renderAllData();
+            }
+        }
+
+        async function saveSettings(e) {
+            e.preventDefault();
             try {
-                await fetch(`${API_BASE}/api/admin/products`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(productObj)
+                await fetch(`${API_BASE}/api/admin/settings`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+                    body: JSON.stringify({ gst: 18, shipping: 150, storeName: 'ACHIRA Couture' })
                 });
             } catch (err) {}
-
-            closeProductModal();
-            renderDashboard();
-            filterProductsTable();
-        }
-
-        async function deleteProduct(productId) {
-            if (!confirm("Are you sure you want to delete this product?")) return;
-            products = products.filter(p => p.id !== productId);
-            setDB('products', products);
-
-            const token = localStorage.getItem('admin2Token');
-            try {
-                await fetch(`${API_BASE}/api/admin/products/${productId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-            } catch (e) {}
-
-            renderDashboard();
-            filterProductsTable();
-        }
-
-        function toggleProductStatus(productId) {
-            const p = products.find(prod => prod.id === productId);
-            if (!p) return;
-            p.status = (p.status === 'Active') ? 'Out of Stock' : 'Active';
-            p.availability = (p.status === 'Active') ? 'In Stock' : 'Out of Stock';
-            setDB('products', products);
-            renderDashboard();
-            filterProductsTable();
-        }
-
-        function renderCustomers() {
-            const tbody = document.getElementById('customersBody');
-            tbody.innerHTML = '';
-
-            if (customers.length === 0) {
-                // Synthesize unique customers from real orders
-                const custMap = new Map();
-                orders.forEach(o => {
-                    const em = (o.email || o.userEmail || '').toLowerCase().trim();
-                    if (em) {
-                        const existing = custMap.get(em);
-                        const ordTotal = o.grandTotal || o.total || 0;
-                        if (existing) {
-                            existing.ordersCount++;
-                            existing.totalSpent += ordTotal;
-                        } else {
-                            custMap.set(em, {
-                                name: o.customerName || o.userName || 'Valued Patron',
-                                email: em,
-                                phone: o.phone || o.userPhone || 'N/A',
-                                address: o.address || o.userAddress || 'Standard Delivery Address',
-                                ordersCount: 1,
-                                totalSpent: ordTotal,
-                                status: 'Active'
-                            });
-                        }
-                    }
-                });
-                customers = Array.from(custMap.values());
-            }
-
-            if (customers.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">No customer records found.</td></tr>`;
-                return;
-            }
-
-            customers.forEach(c => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td><strong>${c.name}</strong></td>
-                        <td>${c.email}</td>
-                        <td>${c.phone || 'N/A'}</td>
-                        <td style="max-width: 200px; font-size: 0.8rem;">${c.address || 'Standard Address'}</td>
-                        <td><strong>${c.ordersCount || 0}</strong></td>
-                        <td><strong>₹${(c.totalSpent || 0).toLocaleString('en-IN')}</strong></td>
-                        <td><span class="badge badge-success">${c.status || 'Active'}</span></td>
-                    </tr>
-                `;
-            });
-        }
-
-        function renderCoupons() {
-            const tbody = document.getElementById('couponsBody');
-            tbody.innerHTML = '';
-            coupons.forEach(c => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td><strong style="color: var(--primary);">${c.code}</strong></td>
-                        <td>${c.discount}% OFF</td>
-                        <td>${c.expiry || '2026-12-31'}</td>
-                        <td><span class="badge badge-success">${c.status || 'Active'}</span></td>
-                        <td><button class="btn-action" style="background: var(--danger); color: #FFF;" onclick="deleteCoupon('${c.code}')">Delete</button></td>
-                    </tr>
-                `;
-            });
-        }
-
-        function renderEnquiries() {
-            const tbody = document.getElementById('enquiriesBody');
-            tbody.innerHTML = '';
-            if (enquiries.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">No customer enquiries found.</td></tr>`;
-                return;
-            }
-            enquiries.forEach((eq, idx) => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>EQ-${1000 + idx}</td>
-                        <td><strong>${eq.name}</strong><br><span style="font-size: 0.75rem; color: var(--text-muted);">${eq.email}</span></td>
-                        <td>${eq.phone || 'N/A'}</td>
-                        <td><span class="badge badge-info">${eq.subject || 'General'}</span></td>
-                        <td style="max-width: 250px; font-size: 0.8rem;">${eq.message}</td>
-                        <td style="font-size: 0.75rem; color: var(--text-muted);">${eq.date || 'Recent'}</td>
-                    </tr>
-                `;
-            });
-        }
-
-        function renderLogs() {
-            const tbody = document.getElementById('logsBody');
-            tbody.innerHTML = '';
-            const logsList = orders.map(o => ({
-                time: o.date || (o.createdAt ? new Date(o.createdAt).toLocaleString('en-IN') : 'Recent'),
-                action: `Customer Order Placed (${o.id})`,
-                user: o.customerName || o.userName || 'Customer',
-                details: `Total: ₹${(o.grandTotal || o.total || 0).toLocaleString('en-IN')} | Payment: ${o.paymentMethod || o.paymentMode || 'COD'}`
-            }));
-
-            if (logsList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 24px;">No system logs recorded yet.</td></tr>`;
-                return;
-            }
-
-            logsList.slice(0, 15).forEach(l => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="font-size: 0.8rem; color: var(--text-muted);">${l.time}</td>
-                        <td><strong style="color: var(--primary);">${l.action}</strong></td>
-                        <td>${l.user}</td>
-                        <td style="font-size: 0.8rem;">${l.details}</td>
-                    </tr>
-                `;
-            });
+            alert('Store configuration saved successfully!');
         }
     </script>
 </body>

@@ -984,12 +984,25 @@
             const rawCombined = [...fetchedOrders, ...supabaseOrders, ...cloudOrders, ...localAdminOrders, ...localStoreOrders];
             const cleanOrdersMap = new Map();
             rawCombined.forEach(o => {
-                if (!o || !o.id) return;
-                const oId = String(o.id);
+                if (!o) return;
+                const oId = String(o.id || o.orderId || o.dbId || '');
+                if (!oId) return;
                 const oDbId = String(o.dbId || '');
                 if (FAKE_MOCK_ORDER_IDS.includes(oId) || FAKE_MOCK_ORDER_IDS.includes(oDbId)) {
                     return; // skip old fake test orders
                 }
+                o.id = oId;
+                if (!o.userName && o.customerName) o.userName = o.customerName;
+                if (!o.customerName && o.userName) o.customerName = o.userName;
+                if (!o.userEmail && o.email) o.userEmail = o.email;
+                if (!o.email && o.userEmail) o.email = o.userEmail;
+                if (!o.userPhone && o.phone) o.userPhone = o.phone;
+                if (!o.phone && o.userPhone) o.phone = o.userPhone;
+                if (!o.userAddress && o.address) o.userAddress = o.address;
+                if (!o.address && o.userAddress) o.address = o.userAddress;
+                if (!o.grandTotal && o.total) o.grandTotal = o.total;
+                if (!o.total && o.grandTotal) o.total = o.grandTotal;
+                
                 if (!cleanOrdersMap.has(oId)) {
                     cleanOrdersMap.set(oId, o);
                 }
@@ -1030,16 +1043,19 @@
             // Auto-derive all purchasers from Orders to ensure 100% visibility of any real checkout
             orders.forEach(o => {
                 const em = (o.userEmail || o.email || '').toLowerCase().trim();
-                if (em && em !== 'priya.roy@gmail.com') {
+                const name = o.userName || o.customerName || 'Valued Patron';
+                const phone = o.userPhone || o.phone || '+91 98765 43210';
+                const address = o.userAddress || o.address || 'Delivered Address';
+                if (em) {
                     const userOrds = orders.filter(x => (x.userEmail || x.email || '').toLowerCase().trim() === em);
                     const totalSpent = userOrds.reduce((s, x) => s + (x.grandTotal || x.total || 0), 0);
                     const existing = custMap.get(em);
                     custMap.set(em, {
                         id: existing ? existing.id : (o.id || Date.now()),
-                        name: existing && existing.name && existing.name !== 'Valued Patron' ? existing.name : (o.userName || o.customerName || 'Valued Patron'),
+                        name: existing && existing.name && existing.name !== 'Valued Patron' ? existing.name : name,
                         email: em,
-                        phone: existing && existing.phone ? existing.phone : (o.userPhone || o.phone || '+91 98765 43210'),
-                        address: existing && existing.address && existing.address !== 'Registered Online Customer' ? existing.address : (o.userAddress || o.address || 'Delivered Address'),
+                        phone: existing && existing.phone ? existing.phone : phone,
+                        address: existing && existing.address && existing.address !== 'Registered Online Customer' ? existing.address : address,
                         ordersCount: userOrds.length,
                         totalSpent: totalSpent,
                         status: 'Active'
