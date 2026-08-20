@@ -619,43 +619,35 @@
                         <span class="checkmark"></span>
                     </label>
                     <label class="checkbox-label">
+                        <input type="checkbox" value="Anarkali" onchange="applyFilters()"> Anarkali
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="checkbox-label">
                         <input type="checkbox" value="Kurta Sets" onchange="applyFilters()"> Kurta Sets
                         <span class="checkmark"></span>
                     </label>
                     <label class="checkbox-label">
-                        <input type="checkbox" value="Gown" onchange="applyFilters()"> Gown
+                        <input type="checkbox" value="Lehenga" onchange="applyFilters()"> Lehenga
                         <span class="checkmark"></span>
                     </label>
                     <label class="checkbox-label">
-                        <input type="checkbox" value="Cotton Kurti" onchange="applyFilters()"> Cotton Dresses
+                        <input type="checkbox" value="Saree" onchange="applyFilters()"> Saree
                         <span class="checkmark"></span>
                     </label>
                     <label class="checkbox-label">
-                        <input type="checkbox" value="Anarkali" onchange="applyFilters()"> Royal Anarkali
+                        <input type="checkbox" value="Sharara" onchange="applyFilters()"> Sharara
                         <span class="checkmark"></span>
                     </label>
                     <label class="checkbox-label">
-                        <input type="checkbox" value="Straight Kurti" onchange="applyFilters()"> Straight Dresses
+                        <input type="checkbox" value="Gharara" onchange="applyFilters()"> Gharara
                         <span class="checkmark"></span>
                     </label>
                     <label class="checkbox-label">
-                        <input type="checkbox" value="Lucknowi Kurti" onchange="applyFilters()"> Lucknowi Dresses
+                        <input type="checkbox" value="Co-ord Sets" onchange="applyFilters()"> Co-ord Sets
                         <span class="checkmark"></span>
                     </label>
                     <label class="checkbox-label">
-                        <input type="checkbox" value="Indo Western Kurti" onchange="applyFilters()"> Indo-Western Dresses
-                        <span class="checkmark"></span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" value="Saree" onchange="applyFilters()"> Sarees
-                        <span class="checkmark"></span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" value="Lehenga" onchange="applyFilters()"> Lehengas
-                        <span class="checkmark"></span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" value="Rings" onchange="applyFilters()"> Diamond Rings
+                        <input type="checkbox" value="Jewellery" onchange="applyFilters()"> Fine Jewellery
                         <span class="checkmark"></span>
                     </label>
                 </div>
@@ -829,389 +821,37 @@
     <div class="toast-notification" id="toast">Item added to your shopping bag!</div>
 
     <!-- Dynamic JavaScript -->
+    <script src="products_data.js?v=5.0"></script>
     <script>
-        // Collection Products Data
-        const productsData = [
-            {
-                id: 101,
-                name: "Noor-e-Kashmir Midnight Black Embroidered Anarkali Set",
-                category: "Anarkali Kurti",
-                fabric: "Cotton",
-                size: ["XS", "S", "M", "L", "XL", "XXL"],
-                color: "Black",
-                price: 3999,
-                availability: "New Arrival",
-                image: "anarkali1.jpg"
-            },
-            {
-                id: 102,
-                name: "Zaffran Kesariya Mustard Yoke Embroidered Anarkali Suit",
-                category: "Anarkali Kurti",
-                fabric: "Silk",
-                size: ["XS", "S", "M", "L", "XL", "XXL"],
-                color: "Yellow",
-                price: 4499,
-                availability: "Best Seller",
-                image: "anarkali2.jpg"
-            },
-            {
-                id: 103,
-                name: "Gul-e-Chanderi Lime Green Anarkali with Kalamkari Dupatta",
-                category: "Anarkali Kurti",
-                fabric: "Chanderi",
-                size: ["XS", "S", "M", "L", "XL", "XXL"],
-                color: "Green",
-                price: 5199,
-                availability: "Trending",
-                image: "anarkali3.jpg"
-            },
-            {
-                id: 104,
-                name: "Gulabi Meher Blush Pink Gota Handblock Anarkali Suit",
-                category: "Anarkali Kurti",
-                fabric: "Cotton",
-                size: ["XS", "S", "M", "L", "XL", "XXL"],
-                color: "Pink",
-                price: 3799,
-                availability: "New Arrival",
-                image: "anarkali4.jpg"
-            },
-            {
-                id: 105,
-                name: "Lavanya Lilac Floral Tiered Anarkali Suit Set",
-                category: "Anarkali Kurti",
-                fabric: "Cotton",
-                size: ["XS", "S", "M", "L", "XL", "XXL"],
-                color: "Pink",
-                price: 4250,
-                availability: "Best Seller",
-                image: "anarkali5.jpg"
-            },
-            {
-                id: 106,
-                name: "Neelambari Teal Blue Angrakha Embroidered Anarkali Set",
-                category: "Anarkali Kurti",
-                fabric: "Chanderi",
-                size: ["XS", "S", "M", "L", "XL", "XXL"],
-                color: "Blue",
-                price: 4650,
-                availability: "New Arrival",
-                image: "anarkali6.jpg"
-            },
-            {
-                id: 107,
-                name: "Vanyashri Olive Green Tiered Embroidered Cotton Anarkali Suit",
-                category: "Anarkali Kurti",
-                fabric: "Cotton",
-                size: ["XS", "S", "M", "L", "XL", "XXL"],
-                color: "Green",
-                price: 3950,
-                availability: "Best Seller",
-                image: "anarkali7.jpg"
-            },
-            {
-                id: 108,
-                name: "Sanjh-e-Khaas Indigo Black Handblock Printed Anarkali Suit",
-                category: "Anarkali Kurti",
-                fabric: "Cotton",
-                size: ["XS", "S", "M", "L", "XL", "XXL"],
-                color: "Black",
-                price: 4150,
-                availability: "Trending",
-                image: "anarkali8.jpg"
-            },
-            {
-                id: 301,
-                name: "Zari & Zardozi Embroidered Olive Silk Sharara Set",
-                category: "Straight Fit",
-                fabric: "Silk",
-                size: ["XS", "S", "M", "L", "XL", "XXL"],
-                color: "Green",
-                price: 4899,
-                availability: "New Arrival",
-                image: "products/straight-fit/product-01/front.jpg",
-                images: {
-                    front: "products/straight-fit/product-01/front.jpg"
+        // Use authentic centralized catalog
+        let productsData = (typeof ACHIRA_PRODUCTS_DATA !== 'undefined' && Array.isArray(ACHIRA_PRODUCTS_DATA)) 
+            ? JSON.parse(JSON.stringify(ACHIRA_PRODUCTS_DATA)) 
+            : [];
+
+        // Check if fresh admin updates exist in localStorage
+        try {
+            const localSaved = localStorage.getItem('products');
+            if (localSaved) {
+                const parsed = JSON.parse(localSaved);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    // Overwrite if valid products exist
+                    productsData = parsed;
                 }
-            },
-            {
-                id: 201,
-                name: "Mayura Mustard & Teal Blue Embroidered Kurta Pant Dupatta Set",
-                category: "Straight Fit",
-                fabric: "Cotton",
-                size: ["XS", "S", "M", "L", "XL", "XXL"],
-                color: "Yellow",
-                price: 3450,
-                availability: "New Arrival",
-                image: "products/straight-fit/product-02/front.jpg",
-                images: {
-                    front: "products/straight-fit/product-02/front.jpg"
-                }
-            },
-            {
-                id: 202,
-                name: "Parijaat Lime Green V-Neck Motif Embroidered Kurta Set",
-                category: "Straight Kurti",
-                fabric: "Silk",
-                size: ["XS", "S", "M", "L", "XL", "XXL"],
-                color: "Green",
-                price: 3850,
-                availability: "Best Seller",
-                image: "kurtaset2.jpg"
-            },
-            {
-                id: 203,
-                name: "Raktika Crimson Red Sleeveless Kurta Trouser Set",
-                category: "Straight Kurti",
-                fabric: "Linen",
-                size: ["XS", "S", "M", "L", "XL", "XXL"],
-                color: "Red",
-                price: 3250,
-                availability: "Trending",
-                image: "kurtaset3.jpg"
-            },
-            {
-                id: 204,
-                name: "Aarohi Coral Peach Mirror-Work Strappy Kurta Pant Set",
-                category: "A-Line Kurti",
-                fabric: "Chanderi",
-                size: ["XS", "S", "M", "L", "XL", "XXL"],
-                color: "Pink",
-                price: 3600,
-                availability: "New Arrival",
-                image: "kurtaset4.jpg"
-            },
-            {
-                id: 205,
-                name: "Suryamukhi Scarlet Red Embroidered Kurta Trouser Dupatta Set",
-                category: "Straight Kurti",
-                fabric: "Silk",
-                size: ["XS", "S", "M", "L", "XL", "XXL"],
-                color: "Red",
-                price: 4100,
-                availability: "Best Seller",
-                image: "kurtaset5.jpg"
-            },
-            {
-                id: 206,
-                name: "Basanti Floral Belted Sleeveless Kurta Salwar Set",
-                category: "A-Line Kurti",
-                fabric: "Cotton",
-                size: ["XS", "S", "M", "L", "XL", "XXL"],
-                color: "Yellow",
-                price: 3550,
-                availability: "New Arrival",
-                image: "kurtaset6.jpg"
-            },
-            {
-                id: 207,
-                name: "Gulaal Berry Pink Mirror Medallion Strappy Kurta Set",
-                category: "Indo Western Kurti",
-                fabric: "Chanderi",
-                size: ["XS", "S", "M", "L", "XL", "XXL"],
-                color: "Pink",
-                price: 3700,
-                availability: "Trending",
-                image: "kurtaset7.jpg"
-            },
-            {
-                id: 208,
-                name: "Meghna Slate Blue Embroidered Square Yoke Kurta Trouser Set",
-                category: "Straight Kurti",
-                fabric: "Linen",
-                size: ["XS", "S", "M", "L", "XL", "XXL"],
-                color: "Blue",
-                price: 3890,
-                availability: "Best Seller",
-                image: "kurtaset8.jpg"
-            },
-            {
-                id: 209,
-                name: "Swarna Kesari Mustard Yoke Embroidered Kurta Set with Kalamkari Dupatta",
-                category: "Embroidered Kurti",
-                fabric: "Silk",
-                size: ["XS", "S", "M", "L", "XL", "XXL"],
-                color: "Yellow",
-                price: 4350,
-                availability: "New Arrival",
-                image: "kurtaset9.jpg"
-            },
-            {
-                id: 210,
-                name: "Vrinda Lime Green V-Neck A-Line Kurta Salwar Set",
-                category: "A-Line Kurti",
-                fabric: "Chanderi",
-                size: ["XS", "S", "M", "L", "XL", "XXL"],
-                color: "Green",
-                price: 3990,
-                availability: "Best Seller",
-                image: "kurtaset10.jpg"
-            },
-            {
-                id: 401,
-                name: "Aura Wave Diamond Cluster Ring",
-                category: "Rings",
-                fabric: "18K Gold",
-                size: ["S", "M", "L"],
-                color: "Gold",
-                price: 48500,
-                availability: "New Arrival",
-                image: "ring1.jpg"
-            },
-            {
-                id: 402,
-                name: "Empress Oval Halo Floral Diamond Ring",
-                category: "Rings",
-                fabric: "18K Gold",
-                size: ["S", "M", "L"],
-                color: "Gold",
-                price: 42000,
-                availability: "Best Seller",
-                image: "ring2.jpg"
-            },
-            {
-                id: 403,
-                name: "Royal Diamond Lattice Statement Ring",
-                category: "Rings",
-                fabric: "18K Gold",
-                size: ["S", "M", "L"],
-                color: "Gold",
-                price: 68000,
-                availability: "Trending",
-                image: "ring3.jpg"
-            },
-            {
-                id: 404,
-                name: "Cushion Fleur Diamond Halo Ring",
-                category: "Rings",
-                fabric: "18K Gold",
-                size: ["S", "M", "L"],
-                color: "Gold",
-                price: 54000,
-                availability: "New Arrival",
-                image: "ring4.jpg"
-            },
-            {
-                id: 405,
-                name: "Papillon Leaf Diamond Rose Gold Ring",
-                category: "Rings",
-                fabric: "18K Rose Gold",
-                size: ["S", "M", "L"],
-                color: "Rose Gold",
-                price: 46000,
-                availability: "New Arrival",
-                image: "ring5.jpg"
-            },
-            {
-                id: 406,
-                name: "Lattice Floral Crown Dual Rosette Ring",
-                category: "Rings",
-                fabric: "18K Gold",
-                size: ["S", "M", "L"],
-                color: "Gold",
-                price: 62000,
-                availability: "Best Seller",
-                image: "ring6.jpg"
-            },
-            {
-                id: 407,
-                name: "Chevron Beaded Mesh Diamond Solitaire Ring",
-                category: "Rings",
-                fabric: "18K Gold",
-                size: ["S", "M", "L"],
-                color: "Gold",
-                price: 51500,
-                availability: "Trending",
-                image: "ring7.jpg"
-            },
-            {
-                id: 408,
-                name: "Floating Rhombus Pavé Bypass Diamond Ring",
-                category: "Rings",
-                fabric: "18K Gold",
-                size: ["S", "M", "L"],
-                color: "Gold",
-                price: 59000,
-                availability: "New Arrival",
-                image: "ring8.jpg"
-            },
-            {
-                id: 409,
-                name: "Bloom Mandala Petal Solitaire Ring",
-                category: "Rings",
-                fabric: "18K Gold",
-                size: ["S", "M", "L"],
-                color: "Gold",
-                price: 57500,
-                availability: "Best Seller",
-                image: "ring9.jpg"
-            },
-            {
-                id: 410,
-                name: "Empress Marquise Bypass Dual Pavé Solitaire Ring",
-                category: "Rings",
-                fabric: "18K Gold",
-                size: ["S", "M", "L"],
-                color: "Gold",
-                price: 64500,
-                availability: "New Arrival",
-                image: "ring10.jpg"
-            },
-            {
-                id: 411,
-                name: "Royal Blue Sapphire Teardrop Infinity Ring",
-                category: "Rings",
-                fabric: "18K Gold",
-                size: ["S", "M", "L"],
-                color: "Gold",
-                price: 58000,
-                availability: "Trending",
-                image: "ring11.jpg"
-            },
-            {
-                id: 412,
-                name: "Bloom Blossom 5-Petal Solitaire Rosette Ring",
-                category: "Rings",
-                fabric: "18K Gold",
-                size: ["S", "M", "L"],
-                color: "Gold",
-                price: 44500,
-                availability: "Best Seller",
-                image: "ring12.jpg"
-            },
-            {
-                id: 413,
-                name: "Floating Pear Cut Diamond Teardrop Halo Ring",
-                category: "Rings",
-                fabric: "18K Gold",
-                size: ["S", "M", "L"],
-                color: "Gold",
-                price: 69000,
-                availability: "New Arrival",
-                image: "ring13.jpg"
-            },
-            {
-                id: 414,
-                name: "Crisscross Infinity Micro-Pavé Diamond Band",
-                category: "Rings",
-                fabric: "18K Gold",
-                size: ["S", "M", "L"],
-                color: "Gold",
-                price: 49500,
-                availability: "Best Seller",
-                image: "ring14.jpg"
             }
-        ];
+        } catch (e) {}
 
         // Toggle filters category accordions
         function toggleFilterGroup(element) {
             element.classList.toggle('collapsed');
-            element.nextElementSibling.classList.toggle('collapsed');
+            if (element.nextElementSibling) {
+                element.nextElementSibling.classList.toggle('collapsed');
+            }
         }
 
         // Update price range slider label
         function updatePriceLabel(value) {
-            document.getElementById('maxPriceLabel').textContent = parseInt(value).toLocaleString('en-IN');
+            const labelEl = document.getElementById('maxPriceLabel');
+            if (labelEl) labelEl.textContent = parseInt(value).toLocaleString('en-IN');
             applyFilters();
         }
 
@@ -1220,35 +860,38 @@
             const grid = document.getElementById('productsGrid');
             const displayedCount = document.getElementById('displayedCount');
             
+            if (!grid) return;
             grid.innerHTML = '';
-            displayedCount.textContent = products.length;
+            if (displayedCount) displayedCount.textContent = products.length;
 
             if (products.length === 0) {
-                grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; font-family: var(--font-heading); font-size: 1.5rem; color: var(--color-gold-dark);">No products matches the selected criteria.</div>`;
+                grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; font-family: var(--font-heading); font-size: 1.3rem; color: #B88A44;">No products found in this selection.</div>`;
                 return;
             }
 
             products.forEach(p => {
                 const imgUrl = (p.images && p.images.front) ? p.images.front : (p.image || 'products/straight-fit/product-01/front.jpg');
                 const hasValidPrice = p.price !== null && p.price !== undefined && Number(p.price) > 0;
+                
+                // STRICT RULE: If price is null or 0, DO NOT DISPLAY ANY PRICE HTML AT ALL
                 const priceHTML = hasValidPrice 
-                    ? `<div class="card-price" style="margin-bottom: 12px;"><span class="price">₹${Number(p.price).toLocaleString('en-IN')}</span></div>`
-                    : `<div class="card-price" style="margin-bottom: 12px; display: none;"></div>`;
+                    ? `<div class="card-price" style="margin-bottom: 12px;"><span class="price" style="font-weight: 700; font-size: 1.1rem; color: #3C0008;">₹${Number(p.price).toLocaleString('en-IN')}</span></div>`
+                    : ``;
                 
                 const sizeLabel = Array.isArray(p.size) ? p.size.join(', ') : (p.size || 'L');
 
                 const card = `
-                    <div class="collection-card" style="animation: fadeIn 0.5s ease; cursor: pointer;" onclick="if(typeof openQuickView==='function'){openQuickView('${p.id}');}">
-                        <div class="card-image-wrap" style="height: 340px;">
-                            <img src="${imgUrl}" alt="${p.name}" loading="lazy">
+                    <div class="collection-card" style="animation: fadeIn 0.4s ease; cursor: pointer;" onclick="if(typeof openQuickView==='function'){openQuickView('${p.id}');}">
+                        <div class="card-image-wrap" style="height: 380px; position: relative; overflow: hidden; background: #faf8f5;">
+                            <img src="${imgUrl}" alt="${p.name}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
                             <button class="wishlist-toggle" aria-label="Add to Wishlist" onclick="event.stopPropagation()">♥</button>
-                            <span class="featured-badge" style="position: absolute; top: 12px; left: 12px; background: var(--color-gold-gradient); color: var(--color-black-text); font-size: 0.65rem; font-weight: 700; padding: 3px 8px; border-radius: 10px;">${p.availability || 'Couture'}</span>
+                            <span class="featured-badge" style="position: absolute; top: 12px; left: 12px; background: linear-gradient(135deg, #B88A44 0%, #E8D3A7 100%); color: #3C0008; font-size: 0.65rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; letter-spacing: 0.05em; text-transform: uppercase;">${p.availability || 'New Arrival'}</span>
                         </div>
-                        <div class="card-content">
-                            <span class="card-cat">${(p.category || 'Straight Fit').toUpperCase()} • SIZE: ${sizeLabel}</span>
-                            <h4 style="font-size: 1.15rem; min-height: 48px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${p.name}</h4>
+                        <div class="card-content" style="padding: 16px;">
+                            <span class="card-cat" style="font-size: 0.72rem; letter-spacing: 0.08em; font-weight: 700; color: #B88A44; text-transform: uppercase; display: block; margin-bottom: 6px;">${(p.category || 'Straight Fit').toUpperCase()} • SIZE: ${sizeLabel}</span>
+                            <h4 style="font-size: 1.05rem; line-height: 1.35; min-height: 44px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: #3C0008; margin-bottom: 8px;">${p.name}</h4>
                             ${priceHTML}
-                            <button class="add-cart-btn" onclick="event.stopPropagation(); if(typeof openQuickView==='function'){openQuickView('${p.id}');}" style="background: var(--color-gold-gradient); color: var(--color-black-text); font-weight: 700;">VIEW PRODUCT</button>
+                            <button class="add-cart-btn" onclick="event.stopPropagation(); if(typeof openQuickView==='function'){openQuickView('${p.id}');}" style="background: linear-gradient(135deg, #B88A44 0%, #D4AF37 100%); color: #FFFFFF; font-weight: 700; letter-spacing: 0.06em; padding: 10px 16px; border: none; border-radius: 6px; width: 100%; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; margin-top: 6px;">VIEW PRODUCT</button>
                         </div>
                     </div>
                 `;
@@ -1261,41 +904,50 @@
 
         // Apply filters dynamically
         function applyFilters() {
-            const searchQuery = document.getElementById('filterSearch').value.toLowerCase();
-            const maxPrice = parseInt(document.getElementById('priceRange').value);
+            const searchInput = document.getElementById('filterSearch');
+            const searchQuery = searchInput ? searchInput.value.toLowerCase() : '';
 
             // Get selected categories
-            const selectedCategories = Array.from(document.querySelectorAll('#filterCategory input:checked')).map(el => el.value);
+            const selectedCategories = Array.from(document.querySelectorAll('#filterCategory input:checked')).map(el => el.value.toLowerCase());
             // Get selected sizes
-            const selectedSizes = Array.from(document.querySelectorAll('#filterSize input:checked')).map(el => el.value);
+            const selectedSizes = Array.from(document.querySelectorAll('#filterSize input:checked')).map(el => el.value.toLowerCase());
             // Get selected availability
-            const selectedAvailability = Array.from(document.querySelectorAll('#filterAvailability input:checked')).map(el => el.value);
+            const selectedAvailability = Array.from(document.querySelectorAll('#filterAvailability input:checked')).map(el => el.value.toLowerCase());
 
             let filtered = productsData.filter(p => {
                 // Search query filter
                 if (searchQuery && !p.name.toLowerCase().includes(searchQuery)) return false;
-                
-                // Price filter
-                if (p.price > maxPrice) return false;
 
                 // Category filter
-                if (selectedCategories.length > 0 && !selectedCategories.includes(p.category)) return false;
+                if (selectedCategories.length > 0) {
+                    const prodCat = (p.category || '').toLowerCase();
+                    const matchesCat = selectedCategories.some(c => prodCat === c || prodCat.includes(c) || c.includes(prodCat));
+                    if (!matchesCat) return false;
+                }
 
                 // Size filter
-                if (selectedSizes.length > 0 && !p.size.some(s => selectedSizes.includes(s))) return false;
+                if (selectedSizes.length > 0) {
+                    const prodSizes = Array.isArray(p.size) ? p.size.map(s => s.toLowerCase()) : [(p.size || 'l').toLowerCase()];
+                    const matchesSize = selectedSizes.some(s => prodSizes.includes(s));
+                    if (!matchesSize) return false;
+                }
 
                 // Availability filter
-                if (selectedAvailability.length > 0 && !selectedAvailability.includes(p.availability)) return false;
+                if (selectedAvailability.length > 0) {
+                    const prodAvail = (p.availability || '').toLowerCase();
+                    if (!selectedAvailability.includes(prodAvail)) return false;
+                }
 
                 return true;
             });
 
             // Sort products
-            const sortBy = document.getElementById('sortBy').value;
+            const sortEl = document.getElementById('sortBy');
+            const sortBy = sortEl ? sortEl.value : 'featured';
             if (sortBy === 'low-high') {
-                filtered.sort((a, b) => a.price - b.price);
+                filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
             } else if (sortBy === 'high-low') {
-                filtered.sort((a, b) => b.price - a.price);
+                filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
             } else if (sortBy === 'newest') {
                 filtered = filtered.filter(p => p.availability === 'New Arrival').concat(filtered.filter(p => p.availability !== 'New Arrival'));
             }
@@ -1310,9 +962,8 @@
 
         // Clear all filters
         function clearAllFilters() {
-            document.getElementById('filterSearch').value = '';
-            document.getElementById('priceRange').value = 25000;
-            document.getElementById('maxPriceLabel').textContent = '25,000';
+            const searchInput = document.getElementById('filterSearch');
+            if (searchInput) searchInput.value = '';
             
             document.querySelectorAll('.filter-sidebar input[type="checkbox"]').forEach(cb => cb.checked = false);
             applyFilters();
@@ -1324,21 +975,22 @@
             const wishlistCountBadge = document.getElementById('wishlistCount');
             
             wishlistToggles.forEach(toggle => {
-                // Remove previous click events to avoid double bindings
                 const newToggle = toggle.cloneNode(true);
                 toggle.parentNode.replaceChild(newToggle, toggle);
                 
                 newToggle.addEventListener('click', function(e) {
                     e.stopPropagation();
                     this.classList.toggle('active');
-                    let current = parseInt(wishlistCountBadge.textContent) || 0;
-                    if (this.classList.contains('active')) {
-                        current++;
-                        showToast('Item saved to your Wishlist ♥');
-                    } else {
-                        current = Math.max(0, current - 1);
+                    if (wishlistCountBadge) {
+                        let current = parseInt(wishlistCountBadge.textContent) || 0;
+                        if (this.classList.contains('active')) {
+                            current++;
+                            showToast('Item saved to your Wishlist ♥');
+                        } else {
+                            current = Math.max(0, current - 1);
+                        }
+                        wishlistCountBadge.textContent = current;
                     }
-                    wishlistCountBadge.textContent = current;
                 });
             });
         }
@@ -1364,7 +1016,6 @@
             }
         });
     </script>
-    <script src="products_data.js?v=4.0"></script>
-    <script src="script.js?v=4.0"></script>
+    <script src="script.js?v=5.0"></script>
 </body>
 </html>

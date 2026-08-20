@@ -1260,30 +1260,29 @@ function initDatabase() {
     getDB('admins', [{ username: 'admin', password: 'password' }]);
     getDB('users', []);
     
-    // Core check to purge legacy/dummy unsplash products and synchronize clean products
+    const cleanStraightFit = (typeof ACHIRA_PRODUCTS_DATA !== 'undefined' && Array.isArray(ACHIRA_PRODUCTS_DATA)) 
+        ? JSON.parse(JSON.stringify(ACHIRA_PRODUCTS_DATA)) 
+        : [];
+
     let stored = localStorage.getItem('products');
-    let products = stored ? JSON.parse(stored) : [];
-    
-    // Filter out any unsplash placeholders or legacy mock IDs
+    let products = [];
+    try {
+        if (stored) products = JSON.parse(stored);
+    } catch(e) {}
+
+    // Purge legacy mock products
     products = products.filter(p => {
-        if (!p || !p.image) return false;
-        if (typeof p.image === 'string' && (p.image.includes('unsplash.com') || p.image.includes('http://') || p.image.includes('https://'))) return false;
-        if ([1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13].includes(p.id)) return false;
+        if (!p) return false;
+        if ([1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210].includes(p.id)) return false;
+        if (typeof p.id === 'string' && p.id.startsWith('straight-')) return false;
         return true;
     });
 
-    if (products.length === 0) {
-        products = [...initialProducts];
-    } else {
-        initialProducts.forEach(ip => {
-            const idx = products.findIndex(p => p.id === ip.id || p.sku === ip.sku);
-            if (idx === -1) {
-                products.push(ip);
-            } else {
-                products[idx] = { ...ip, ...products[idx] };
-            }
-        });
-    }
+    // Ensure all 12 authentic Straight Fit products are present at top
+    cleanStraightFit.slice().reverse().forEach(sf => {
+        products.unshift(sf);
+    });
+
     setDB('products', products);
 
     getDB('orders', []);
@@ -1464,18 +1463,25 @@ function renderFeaturedProducts(products) {
     }
 
     products.forEach(p => {
+        const imgUrl = (p.images && p.images.front) ? p.images.front : (p.image || 'products/straight-fit/product-01/front.jpg');
+        const hasValidPrice = p.price !== null && p.price !== undefined && Number(p.price) > 0;
+        const priceHTML = hasValidPrice 
+            ? `<span class="info-price" style="font-weight: 700; color: #3C0008; font-size: 1.05rem; display: block; margin: 4px 0;">₹${Number(p.price).toLocaleString('en-IN')}</span>` 
+            : ``;
+        const sizeLabel = Array.isArray(p.size) ? p.size.join(', ') : (p.size || 'L');
+
         const card = `
-            <div class="featured-product-card" style="animation: fadeIn 0.4s ease;">
-                <div class="featured-card-img-wrap" onclick="openQuickView(${p.id})">
-                    <img src="${p.image}" alt="${p.name}">
-                    <span class="featured-card-badge">${p.availability}</span>
-                    <button class="wishlist-heart-btn" aria-label="Add to Wishlist" onclick="event.stopPropagation(); toggleFeaturedWishlist(this, ${p.id})">♥</button>
+            <div class="featured-product-card" style="animation: fadeIn 0.4s ease; cursor: pointer;">
+                <div class="featured-card-img-wrap" onclick="openQuickView('${p.id}')" style="background: #faf8f5;">
+                    <img src="${imgUrl}" alt="${p.name}" loading="lazy">
+                    <span class="featured-card-badge">${p.availability || 'New Arrival'}</span>
+                    <button class="wishlist-heart-btn" aria-label="Add to Wishlist" onclick="event.stopPropagation(); toggleFeaturedWishlist(this, '${p.id}')">♥</button>
                 </div>
                 <div class="featured-card-info">
-                    <span class="info-meta">${p.category.toUpperCase()} • ${p.fabric.toUpperCase()}</span>
-                    <h4 class="info-title" onclick="openQuickView(${p.id})">${p.name}</h4>
-                    <span class="info-price">₹${p.price.toLocaleString('en-IN')}</span>
-                    <button class="add-bag-pill-btn" style="background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border-color: #B88A44; font-weight: 700;" onclick="openQuickView(${p.id})">⚡ BUY NOW</button>
+                    <span class="info-meta">${(p.category || 'Straight Fit').toUpperCase()} • SIZE: ${sizeLabel}</span>
+                    <h4 class="info-title" onclick="openQuickView('${p.id}')">${p.name}</h4>
+                    ${priceHTML}
+                    <button class="add-bag-pill-btn" style="background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border-color: #B88A44; font-weight: 700; margin-top: 6px;" onclick="openQuickView('${p.id}')">VIEW PRODUCT</button>
                 </div>
             </div>
         `;
