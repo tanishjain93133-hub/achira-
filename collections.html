@@ -871,7 +871,8 @@
 
             products.forEach(p => {
                 const imgUrl = (p.images && p.images.front) ? p.images.front : (p.image || 'products/straight-fit/product-01/front.jpg');
-                const hasValidPrice = p.price !== null && p.price !== undefined && Number(p.price) > 0;
+                const isJewel = (p.category || '').toLowerCase().includes('jewel') || (p.parentCategory || '').toLowerCase().includes('jewel') || (p.fabric || '').toLowerCase().includes('gold') || (p.fabric || '').toLowerCase().includes('gemstone');
+                const hasValidPrice = !isJewel && p.price !== null && p.price !== undefined && Number(p.price) > 0;
                 
                 // STRICT RULE: If price is null or 0, DO NOT DISPLAY ANY PRICE HTML AT ALL
                 const priceHTML = hasValidPrice 
