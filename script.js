@@ -195,42 +195,11 @@ const initialProducts = [
         careInstructions: "Hand wash separately in cold water with gentle liquid soap.",
         deliveryInfo: "Dispatched within 24 hours. Express delivery in 3-5 days."
     },
-    {
-        id: 301,
-        sku: "ACH-STR-001",
-        name: "Zari & Zardozi Embroidered Olive Silk Sharara Set",
-        category: "Straight Fit",
-        parentCategory: "Ethnic Wear",
-        fabric: "Pure Raw Silk & Chanderi",
-        color: "Olive Green",
-        size: ["XS", "S", "M", "L", "XL", "XXL"],
-        price: 4899,
-        originalPrice: 5999,
-        discountPrice: 4899,
-        stock: 25,
-        status: "Active",
-        featured: true,
-        availability: "New Arrival",
-        occasion: "Festive & Wedding",
-        image: "products/straight-fit/product-01/front.jpg",
-        images: {
-            front: "products/straight-fit/product-01/front.jpg",
-            side: "",
-            zoom: "",
-            palazzo: "",
-            dupatta: "",
-            back: ""
-        },
-        rating: 5,
-        description: "Exquisite chartreuse olive-green raw silk sleeveless kurti with a V-neckline adorned with delicate zardozi and soft pink threadwork embroidery, paired with a matching flared pleated sharara bottom and scalloped zari embroidered dupatta.",
-        careInstructions: "Dry clean only to preserve raw silk texture and fine metallic zari embroidery.",
-        deliveryInfo: "Dispatched within 24-48 hours. Express delivery across India in 3-5 business days."
-    },
     { 
         id: 201, 
         sku: "ACH-KRT-001",
         name: "Mayura Mustard & Teal Blue Embroidered Kurta Pant Dupatta Set", 
-        category: "Straight Fit", 
+        category: "Kurta Sets", 
         parentCategory: "Ethnic Wear",
         fabric: "Pure Cotton Slub", 
         color: "Mustard Yellow & Teal", 
@@ -1282,14 +1251,16 @@ function initDatabase() {
     }).filter(p => {
         if (!p) return false;
         if ([1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210].includes(p.id)) return false;
+        if (p.category === 'Straight Fit') return false;
         if (typeof p.id === 'string' && p.id.startsWith('straight-')) return false;
         return true;
     });
 
-    // Ensure all 12 authentic Straight Fit products are present at top
-    cleanStraightFit.slice().reverse().forEach(sf => {
-        products.unshift(sf);
-    });
+    if (cleanStraightFit.length > 0) {
+        cleanStraightFit.slice().reverse().forEach(sf => {
+            products.unshift(sf);
+        });
+    }
 
     setDB('products', products);
 
