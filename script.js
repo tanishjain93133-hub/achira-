@@ -3262,20 +3262,26 @@ function renderBestSellers() {
     const bestSellers = getDB('products').filter(p => p.availability === "Best Seller");
     
     bestSellers.forEach(p => {
+        const isJewel = isJewelleryProduct(p);
+        const hasValidPrice = !isJewel && p.price !== null && p.price !== undefined && Number(p.price) > 0;
+        const priceHTML = hasValidPrice ? `₹${Number(p.price).toLocaleString('en-IN')}` : `<span style="font-size: 0.85rem; font-style: italic; color: #B88A44;">Price on Request</span>`;
+        const fabricText = (p.fabric || 'Pure Silk').toUpperCase();
+        const colorText = (p.color || 'Artisanal').toUpperCase();
+
         const item = `
             <div class="collection-card" style="min-width: 290px; flex-shrink: 0;">
-                <div class="card-image-wrap" style="height: 360px;" onclick="openQuickView(${p.id})">
+                <div class="card-image-wrap" style="height: 360px;" onclick="openQuickView('${p.id}')">
                     <img src="${p.image}" alt="${p.name}">
-                    <button class="wishlist-toggle" onclick="event.stopPropagation(); toggleFeaturedWishlist(this, ${p.id})">♥</button>
+                    <button class="wishlist-toggle" onclick="event.stopPropagation(); toggleFeaturedWishlist(this, '${p.id}')">♥</button>
                     <span class="featured-badge" style="position: absolute; top: 12px; left: 12px; background: var(--color-gold-gradient); color: #1A1817; font-size: 0.65rem; font-weight: 700; padding: 3px 8px; border-radius: 4px;">BEST SELLER</span>
                 </div>
                 <div class="card-content">
-                    <span class="card-cat">${p.fabric.toUpperCase()} • ${p.color.toUpperCase()}</span>
-                    <h4 style="font-size: 1.15rem; min-height: 48px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 4px;" onclick="openQuickView(${p.id})">${p.name}</h4>
+                    <span class="card-cat">${fabricText} • ${colorText}</span>
+                    <h4 style="font-size: 1.15rem; min-height: 48px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 4px;" onclick="openQuickView('${p.id}')">${p.name}</h4>
                     <div class="card-price" style="margin-bottom: 14px;">
-                        <span class="price">₹${p.price.toLocaleString('en-IN')}</span>
+                        <span class="price">${priceHTML}</span>
                     </div>
-                    <button class="add-to-bag" style="width: 100%; border-radius: 30px; padding: 10px; font-size: 0.75rem; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border-color: #B88A44; font-weight: 700;" onclick="openQuickView(${p.id})">⚡ BUY NOW</button>
+                    <button class="add-to-bag" style="width: 100%; border-radius: 30px; padding: 10px; font-size: 0.75rem; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border-color: #B88A44; font-weight: 700;" onclick="openQuickView('${p.id}')">⚡ BUY NOW</button>
                 </div>
             </div>
         `;
@@ -3313,18 +3319,24 @@ function renderNewArrivals() {
     const newArrivals = getDB('products').filter(p => p.availability === "New Arrival").slice(0, 4);
     
     newArrivals.forEach(p => {
+        const isJewel = isJewelleryProduct(p);
+        const hasValidPrice = !isJewel && p.price !== null && p.price !== undefined && Number(p.price) > 0;
+        const priceHTML = hasValidPrice ? `₹${Number(p.price).toLocaleString('en-IN')}` : `<span style="font-size: 0.85rem; font-style: italic; color: #B88A44;">Price on Request</span>`;
+        const catText = (p.category || 'Couture').toUpperCase();
+        const fabricText = (p.fabric || 'Pure Silk').toUpperCase();
+
         const card = `
             <div class="featured-product-card" style="animation: fadeIn 0.4s ease;">
-                <div class="featured-card-img-wrap" onclick="openQuickView(${p.id})">
+                <div class="featured-card-img-wrap" onclick="openQuickView('${p.id}')">
                     <img src="${p.image}" alt="${p.name}">
                     <span class="featured-card-badge">NEW ARRIVAL</span>
-                    <button class="wishlist-heart-btn" aria-label="Add to Wishlist" onclick="event.stopPropagation(); toggleFeaturedWishlist(this, ${p.id})">♥</button>
+                    <button class="wishlist-heart-btn" aria-label="Add to Wishlist" onclick="event.stopPropagation(); toggleFeaturedWishlist(this, '${p.id}')">♥</button>
                 </div>
                 <div class="featured-card-info">
-                    <span class="info-meta">${p.category.toUpperCase()} • ${p.fabric.toUpperCase()}</span>
-                    <h4 class="info-title" onclick="openQuickView(${p.id})">${p.name}</h4>
-                    <span class="info-price">₹${p.price.toLocaleString('en-IN')}</span>
-                    <button class="add-bag-pill-btn" style="background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border-color: #B88A44; font-weight: 700;" onclick="openQuickView(${p.id})">⚡ BUY NOW</button>
+                    <span class="info-meta">${catText} • ${fabricText}</span>
+                    <h4 class="info-title" onclick="openQuickView('${p.id}')">${p.name}</h4>
+                    <span class="info-price">${priceHTML}</span>
+                    <button class="add-bag-pill-btn" style="background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border-color: #B88A44; font-weight: 700;" onclick="openQuickView('${p.id}')">⚡ BUY NOW</button>
                 </div>
             </div>
         `;
