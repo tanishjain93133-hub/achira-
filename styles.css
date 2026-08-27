@@ -97,6 +97,7 @@ body::before {
 }
 
 /* ==========================================================================
+/* ==========================================================================
    TOP ANNOUNCEMENT BAR
    ========================================================================== */
 .announcement-bar {
@@ -104,27 +105,22 @@ body::before {
     color: var(--color-gold-light);
     font-size: 0.75rem;
     font-weight: 500;
-    letter-spacing: 0.08em;
-    padding: 7px 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 8px 0;
     text-align: center;
     border-bottom: 1px solid rgba(200, 164, 93, 0.2);
     overflow: hidden;
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
     position: relative;
     z-index: 1001;
 }
 
 .announcement-content {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-wrap: wrap;
-    gap: 8px 16px;
-    max-width: var(--container-max-width);
-    margin: 0 auto;
-    line-height: 1.4;
+    gap: 16px;
+    white-space: nowrap;
     animation: fadeIn 1s ease-in-out;
 }
 
@@ -4083,13 +4079,9 @@ body::before {
    CIRCULAR SHOP BY CATEGORY (MYNTRA LUXURY STYLE)
    ========================================================================== */
 .shop-by-category-circular {
-    padding: 30px 0 20px 0;
+    padding: 85px 0;
     background: #FAF8F5;
     border-bottom: 1px solid rgba(184, 138, 68, 0.15);
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    overflow: hidden;
 }
 
 .shop-by-category-circular.sub-hero-collections {
@@ -4097,27 +4089,16 @@ body::before {
     border-bottom: none;
     background: #FAF8F5;
 }
-
 .circular-category-container {
     max-width: var(--container-max-width);
-    width: 100%;
     margin: 0 auto;
-    padding: 4px 16px;
+    padding: 0 24px;
     display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
-    gap: 16px;
+    justify-content: center;
+    gap: 20px;
     flex-wrap: nowrap;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
     scrollbar-width: none; /* Hide standard scrollbar */
-    box-sizing: border-box;
-}
-
-@media (min-width: 1280px) {
-    .circular-category-container {
-        justify-content: center;
-    }
 }
 
 .circular-category-container::-webkit-scrollbar {
@@ -4130,20 +4111,20 @@ body::before {
     align-items: center;
     cursor: pointer;
     text-align: center;
-    width: 95px;
-    flex: 0 0 95px;
+    width: 120px;
+    flex-shrink: 0;
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .circular-img-wrap {
-    width: 86px;
-    height: 86px;
+    width: 110px;
+    height: 110px;
     border-radius: 50%;
     overflow: hidden;
     position: relative;
     border: 3px solid #FFFFFF;
     background: #FAF8F5;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -4180,14 +4161,13 @@ body::before {
 }
 
 .circular-cat-title {
-    margin-top: 6px;
+    margin-top: 8px;
     font-family: var(--font-body);
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     font-weight: 700;
     color: var(--color-black-text);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-    line-height: 1.2;
+    letter-spacing: 0.05em;
     transition: color 0.3s ease;
 }
 
@@ -4212,13 +4192,10 @@ body::before {
 
 /* Single elegant marquee styling */
 .elegant-single-marquee {
-    padding: 14px 0;
+    padding: 16px 0;
     background: #FFFFFF;
     border-top: 1px solid rgba(184, 138, 68, 0.12);
     border-bottom: 1px solid rgba(184, 138, 68, 0.12);
-    width: 100%;
-    max-width: 100%;
-    overflow: hidden;
 }
 
 @media (max-width: 768px) {
@@ -5129,42 +5106,38 @@ body::before {
 }
 
 /* ==========================================================================
-   AMAZING EDITORIAL LUXURY HERO SHOWCASE (RESPONSIVE 50/50 SHOWCASE)
+   AMAZING EDITORIAL LUXURY HERO SHOWCASE (FULL SCREEN SHOWCASE)
    ========================================================================== */
 .editorial-hero-split {
     background: linear-gradient(135deg, #FDFBF7 0%, #F5F0E6 100%); /* Premium Warm Luxury Cream Gradient */
-    padding: 40px 24px;
+    padding: 40px 48px;
     width: 100%;
-    max-width: 100%;
+    min-height: 85vh;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     overflow: hidden;
-    box-sizing: border-box;
     border-bottom: 1px solid rgba(200, 155, 74, 0.2);
 }
 
 .hero-split-wrapper {
-    max-width: var(--container-max-width);
+    max-width: 1480px;
     width: 100%;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
+    grid-template-columns: 45% 55%; /* 45% Text / 55% Image */
+    gap: 48px;
     align-items: center;
-    box-sizing: border-box;
 }
 
-/* LEFT SIDE: Styled Text */
+/* LEFT SIDE (45%): Amazing Styled Text */
 .hero-split-left {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     text-align: left;
-    padding-right: 8px;
-    width: 100%;
-    box-sizing: border-box;
+    padding-right: 16px;
 }
 
 .hero-brand-meta {
@@ -5182,14 +5155,14 @@ body::before {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    margin-bottom: 12px;
+    margin-bottom: 18px;
 }
 
 .hero-owner-tag {
     font-family: var(--font-body);
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     font-weight: 700;
-    letter-spacing: 0.25em;
+    letter-spacing: 0.3em;
     color: #B88A44; /* Rich Gold */
     text-transform: uppercase;
 }
@@ -5202,40 +5175,38 @@ body::before {
 .hero-since-tag,
 .hero-since-subtag {
     font-family: var(--font-body);
-    font-size: 0.75rem;
+    font-size: 0.82rem;
     font-weight: 600;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.25em;
     color: #4A423D;
     text-transform: uppercase;
-    margin-top: 2px;
+    margin-top: 3px;
 }
 
 .hero-brand-title {
     font-family: var(--font-heading);
-    font-size: clamp(2.4rem, 5vw, 4.5rem);
+    font-size: 5.8rem;
     font-weight: 700;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.24em;
     background: linear-gradient(135deg, #1A1615 0%, #3D332E 50%, #B88A44 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin: 4px 0 12px 0;
-    line-height: 1.1;
+    margin: 4px 0 14px 0;
+    line-height: 1;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.06));
-    word-break: break-word;
-    max-width: 100%;
 }
 
 .hero-brand-tagline {
     font-family: var(--font-heading);
-    font-size: clamp(1rem, 1.8vw, 1.25rem);
+    font-size: 1.3rem;
     font-weight: 600;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.16em;
     color: #B88A44; /* Gold Accent */
     text-transform: uppercase;
-    margin-bottom: 18px;
+    margin-bottom: 22px;
     line-height: 1.45;
     position: relative;
-    padding-bottom: 10px;
+    padding-bottom: 12px;
 }
 
 .hero-brand-tagline::after {
@@ -5250,43 +5221,39 @@ body::before {
 
 .hero-brand-desc {
     font-family: var(--font-body);
-    font-size: 0.98rem;
-    line-height: 1.7;
+    font-size: 1.1rem;
+    line-height: 1.75;
     color: #4A423D;
     max-width: 520px;
-    margin-bottom: 28px;
+    margin-bottom: 36px;
     font-weight: 400;
 }
 
 .hero-actions {
     display: flex;
     align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
+    gap: 20px;
 }
 
-/* RIGHT SIDE: Storefront Image Showcase */
+/* RIGHT SIDE (55%): Full Storefront Image Showcase */
 .hero-split-right {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    box-sizing: border-box;
+    height: 100%;
 }
 
 .showroom-card-frame {
     width: 100%;
-    height: auto;
-    aspect-ratio: 4 / 3;
-    max-height: 480px;
-    min-height: 240px;
-    border-radius: 20px;
+    height: 100%;
+    min-height: 550px;
+    border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 16px 40px rgba(26, 24, 23, 0.15);
+    box-shadow: 0 20px 50px rgba(26, 24, 23, 0.18);
     border: 1px solid rgba(200, 155, 74, 0.25);
     background: #FAF8F5;
     padding: 0;
-    box-sizing: border-box;
 }
 
 .showroom-img {
@@ -5295,7 +5262,7 @@ body::before {
     display: block;
     object-fit: cover;
     object-position: center;
-    border-radius: 20px;
+    border-radius: 24px;
 }
 
 /* Responsive Breakpoints */
@@ -6781,37 +6748,125 @@ img, video, iframe, canvas, svg {
     }
 
     /* Category Circular Carousel Mobile */
-    .circular-categories-section {
-        padding: 36px 0 24px !important;
+    .shop-by-category-circular {
+        padding: 18px 0 12px 0 !important;
+        overflow: hidden !important;
     }
 
-    .circular-categories-wrap {
+    .circular-category-container {
         display: flex !important;
+        justify-content: flex-start !important;
         gap: 12px !important;
         overflow-x: auto !important;
-        padding: 10px 14px 16px !important;
+        padding: 4px 14px !important;
         -webkit-overflow-scrolling: touch !important;
         scrollbar-width: none !important;
     }
 
-    .circular-categories-wrap::-webkit-scrollbar {
+    .circular-category-container::-webkit-scrollbar {
         display: none !important;
     }
 
     .circular-cat-card {
-        flex: 0 0 82px !important;
+        flex: 0 0 76px !important;
+        width: 76px !important;
         text-align: center !important;
     }
 
-    .circular-cat-img-box {
-        width: 76px !important;
-        height: 76px !important;
-        margin: 0 auto 6px !important;
+    .circular-img-wrap {
+        width: 68px !important;
+        height: 68px !important;
+        border-width: 2px !important;
+        margin: 0 auto 4px !important;
     }
 
     .circular-cat-title {
-        font-size: 0.7rem !important;
+        font-size: 0.62rem !important;
         line-height: 1.2 !important;
+        margin-top: 4px !important;
+    }
+
+    /* Editorial Hero Section Mobile Overrides */
+    .editorial-hero-split {
+        padding: 28px 16px !important;
+        min-height: auto !important;
+        width: 100% !important;
+        overflow: hidden !important;
+    }
+
+    .hero-split-wrapper {
+        grid-template-columns: 1fr !important;
+        gap: 24px !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+
+    .hero-split-left {
+        align-items: center !important;
+        text-align: center !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+
+    .hero-brand-meta-clean {
+        align-items: center !important;
+        margin-bottom: 8px !important;
+    }
+
+    .hero-brand-title {
+        font-size: clamp(2rem, 8.5vw, 2.8rem) !important;
+        letter-spacing: 0.1em !important;
+        text-align: center !important;
+        margin: 4px 0 10px 0 !important;
+    }
+
+    .hero-brand-tagline {
+        font-size: 0.92rem !important;
+        letter-spacing: 0.08em !important;
+        text-align: center !important;
+        margin-bottom: 14px !important;
+    }
+
+    .hero-brand-tagline::after {
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+    }
+
+    .hero-brand-desc {
+        font-size: 0.86rem !important;
+        line-height: 1.55 !important;
+        text-align: center !important;
+        margin-bottom: 20px !important;
+        max-width: 100% !important;
+    }
+
+    .hero-actions {
+        justify-content: center !important;
+        width: 100% !important;
+    }
+
+    .hero-actions .btn-luxe {
+        width: 100% !important;
+        max-width: 280px !important;
+        justify-content: center !important;
+        text-align: center !important;
+    }
+
+    .hero-split-right {
+        width: 100% !important;
+    }
+
+    .showroom-card-frame {
+        width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 4 / 3 !important;
+        max-height: 280px !important;
+        min-height: auto !important;
+        border-radius: 16px !important;
+    }
+
+    .showroom-img {
+        border-radius: 16px !important;
     }
 
     /* Collections 2-Column Banner Grid Mobile */
