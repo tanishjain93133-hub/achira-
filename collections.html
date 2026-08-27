@@ -350,31 +350,56 @@
             gap: 24px;
         }
 
+        .card-image-wrap {
+            height: 380px;
+            position: relative;
+            overflow: hidden;
+            background: #faf8f5;
+        }
+
         @media (max-width: 1400px) {
             .products-grid-container {
                 grid-template-columns: repeat(3, 1fr);
             }
         }
 
-        @media (max-width: 1200px) {
-            .products-grid-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
         @media (max-width: 1024px) {
             .collection-layout {
                 grid-template-columns: 1fr;
+                gap: 24px;
+                padding: 0 16px;
             }
             .filter-sidebar {
                 position: static;
                 width: 100%;
             }
+            .products-grid-container {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 16px;
+            }
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
+            .collection-layout {
+                padding: 0 10px;
+            }
             .products-grid-container {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 10px 10px !important;
+            }
+            .card-image-wrap {
+                height: auto !important;
+                aspect-ratio: 3 / 4 !important;
+                max-height: 240px !important;
+            }
+            .collection-title-wrap h2 {
+                font-size: 1.9rem !important;
+            }
+        }
+        
+        @media (max-width: 375px) {
+            .products-grid-container {
+                gap: 8px 8px !important;
             }
         }
     </style>
@@ -897,7 +922,7 @@
 
                 const card = `
                     <div class="collection-card" style="animation: fadeIn 0.4s ease; cursor: pointer;" onclick="if(typeof openQuickView==='function'){openQuickView('${p.id}');}">
-                        <div class="card-image-wrap" style="height: 380px; position: relative; overflow: hidden; background: #faf8f5;">
+                        <div class="card-image-wrap">
                             <img src="${imgUrl}" alt="${p.name}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
                             <button class="wishlist-toggle" aria-label="Add to Wishlist" onclick="event.stopPropagation()">♥</button>
                             <span class="featured-badge" style="position: absolute; top: 12px; left: 12px; background: linear-gradient(135deg, #B88A44 0%, #E8D3A7 100%); color: #3C0008; font-size: 0.65rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; letter-spacing: 0.05em; text-transform: uppercase;">${p.availability || 'New Arrival'}</span>

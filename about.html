@@ -1120,6 +1120,41 @@
                 right: 20px;
             }
         }
+
+        @media (max-width: 480px) {
+            .about-hero-section {
+                padding: 100px 16px 50px;
+            }
+            .about-hero-headline {
+                font-size: 1.8rem;
+                line-height: 1.25;
+            }
+            .hero-badge-1960 {
+                font-size: 0.68rem;
+                padding: 5px 12px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 24px 16px;
+            }
+            .stat-item::after {
+                display: none !important;
+            }
+            .gallery-img-box {
+                height: 220px;
+            }
+            .founder-quote {
+                font-size: 1.05rem;
+            }
+            .founder-actions {
+                flex-direction: column;
+            }
+            .btn-founder-contact {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>

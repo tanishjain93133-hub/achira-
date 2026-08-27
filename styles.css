@@ -6346,4 +6346,667 @@ body::before {
     text-align: center;
 }
 
+/* ==========================================================================
+   MASTER FULL-WEBSITE RESPONSIVE & MOBILE-FRIENDLY ENGINE (320px - 1024px)
+   ========================================================================== */
+
+/* Universal Overflow & Layout Guard */
+html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+img, video, iframe, canvas, svg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Responsive Table Wrappers */
+.table-wrap, .admin-table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile Nav Drawer Backdrop */
+.nav-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    z-index: 2490;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.nav-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Mobile Filter Trigger Bar for Shop Pages */
+.mobile-filter-bar {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #FFFFFF;
+    border: 1px solid var(--color-border-light);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+.btn-mobile-filter-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--color-gold-gradient);
+    color: var(--color-black-text);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+/* --------------------------------------------------------------------------
+   BREAKPOINT: TABLET & COMPACT SCREENS (<= 1024px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+    .featured-layout,
+    .collection-layout,
+    .jewellery-layout {
+        grid-template-columns: 1fr !important;
+        gap: 28px !important;
+        padding: 0 20px !important;
+    }
+
+    .featured-sidebar,
+    .filter-sidebar {
+        position: static !important;
+        width: 100% !important;
+        top: auto !important;
+    }
+
+    .featured-grid-container,
+    .products-grid-container,
+    .jewellery-grid-container {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 16px !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   BREAKPOINT: MOBILE & HANDHELDS (<= 768px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    /* Announcement Bar */
+    .announcement-bar {
+        padding: 8px 12px !important;
+        font-size: 0.72rem !important;
+    }
+
+    .announcement-content {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px;
+        line-height: 1.35;
+        text-align: center;
+    }
+
+    /* Luxury Header */
+    .header-container {
+        padding: 10px 14px !important;
+        gap: 8px !important;
+    }
+
+    .mobile-toggle {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        background: rgba(200, 164, 93, 0.12);
+        border: 1px solid rgba(200, 164, 93, 0.3);
+        color: var(--color-black-text);
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .brand-logo {
+        gap: 6px !important;
+    }
+
+    .logo-mark {
+        font-size: 1.25rem !important;
+    }
+
+    .logo-title {
+        font-size: clamp(1.15rem, 4.8vw, 1.45rem) !important;
+        letter-spacing: 0.14em !important;
+    }
+
+    .logo-subtitle {
+        font-size: 0.44rem !important;
+        letter-spacing: 0.16em !important;
+        margin-top: 1px !important;
+    }
+
+    .header-actions {
+        gap: 6px !important;
+    }
+
+    .action-btn {
+        width: 36px !important;
+        height: 36px !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .action-btn svg {
+        width: 16px !important;
+        height: 16px !important;
+    }
+
+    .action-badge {
+        width: 16px !important;
+        height: 16px !important;
+        font-size: 0.6rem !important;
+        top: -3px !important;
+        right: -3px !important;
+    }
+
+    /* Mobile Sliding Nav Menu */
+    .nav-menu {
+        position: fixed !important;
+        top: 0 !important;
+        left: -100% !important;
+        width: 85% !important;
+        max-width: 320px !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        background: #FAF7F2 !important;
+        box-shadow: 15px 0 45px rgba(0, 0, 0, 0.35) !important;
+        padding: 24px 18px 40px !important;
+        transition: left 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        z-index: 2500 !important;
+        overflow-y: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .nav-menu.active {
+        left: 0 !important;
+    }
+
+    .nav-list {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        margin-top: 16px !important;
+        width: 100% !important;
+    }
+
+    .nav-item {
+        width: 100% !important;
+    }
+
+    .nav-link {
+        font-size: 0.92rem !important;
+        font-weight: 600 !important;
+        padding: 12px 14px !important;
+        border-radius: 8px !important;
+        border-bottom: 1px solid rgba(200, 164, 93, 0.12) !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+        color: var(--color-black-text) !important;
+    }
+
+    .nav-link.active, .nav-link:hover {
+        background: rgba(200, 164, 93, 0.14) !important;
+        color: var(--color-gold-dark) !important;
+    }
+
+    .nav-link::after {
+        display: none !important;
+    }
+
+    /* Mega Menu Dropdown in Mobile Drawer */
+    .mega-menu {
+        position: static !important;
+        transform: none !important;
+        width: 100% !important;
+        box-shadow: none !important;
+        padding: 10px 12px !important;
+        background: rgba(200, 164, 93, 0.06) !important;
+        border: 1px solid rgba(200, 164, 93, 0.2) !important;
+        border-radius: 8px !important;
+        margin-top: 6px !important;
+        display: none !important;
+    }
+
+    .has-megamenu.open .mega-menu,
+    .has-megamenu:hover .mega-menu {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .mega-menu-wrapper {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+
+    .mega-title {
+        font-size: 0.85rem !important;
+        margin-bottom: 8px !important;
+    }
+
+    .mega-links li a {
+        font-size: 0.82rem !important;
+        padding: 5px 0 !important;
+    }
+
+    .featured-card {
+        display: none !important;
+    }
+
+    /* Hero Section Mobile */
+    .premium-luxury-hero, .hero-section {
+        padding: 40px 14px 50px !important;
+        min-height: auto !important;
+    }
+
+    .hero-container {
+        grid-template-columns: 1fr !important;
+        gap: 28px !important;
+        text-align: center !important;
+    }
+
+    .hero-left, .hero-right {
+        padding: 0 !important;
+        align-items: center !important;
+        text-align: center !important;
+    }
+
+    .hero-brand-name {
+        font-size: clamp(2.2rem, 9vw, 3.2rem) !important;
+    }
+
+    .hero-headline {
+        font-size: clamp(1.4rem, 5.5vw, 2rem) !important;
+        line-height: 1.25 !important;
+    }
+
+    .hero-desc {
+        font-size: 0.92rem !important;
+        line-height: 1.6 !important;
+        max-width: 100% !important;
+        margin: 0 auto 24px !important;
+    }
+
+    .hero-buttons {
+        justify-content: center !important;
+        width: 100% !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 12px !important;
+    }
+
+    .hero-buttons a, .hero-buttons button {
+        width: 100% !important;
+        max-width: 320px !important;
+        justify-content: center !important;
+        text-align: center !important;
+        padding: 13px 24px !important;
+        font-size: 0.84rem !important;
+    }
+
+    .luxury-highlights {
+        justify-content: center !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        margin-top: 24px !important;
+    }
+
+    .model-image-frame {
+        max-height: 380px !important;
+        width: 100% !important;
+        max-width: 340px !important;
+        margin: 0 auto !important;
+        aspect-ratio: 4/5 !important;
+        border-radius: 24px !important;
+    }
+
+    /* Category Circular Carousel Mobile */
+    .circular-categories-section {
+        padding: 36px 0 24px !important;
+    }
+
+    .circular-categories-wrap {
+        display: flex !important;
+        gap: 12px !important;
+        overflow-x: auto !important;
+        padding: 10px 14px 16px !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+    }
+
+    .circular-categories-wrap::-webkit-scrollbar {
+        display: none !important;
+    }
+
+    .circular-cat-card {
+        flex: 0 0 82px !important;
+        text-align: center !important;
+    }
+
+    .circular-cat-img-box {
+        width: 76px !important;
+        height: 76px !important;
+        margin: 0 auto 6px !important;
+    }
+
+    .circular-cat-title {
+        font-size: 0.7rem !important;
+        line-height: 1.2 !important;
+    }
+
+    /* Collections 2-Column Banner Grid Mobile */
+    .collections-grid {
+        grid-template-columns: 1fr !important;
+        gap: 18px !important;
+    }
+
+    .collection-card-hero {
+        height: 240px !important;
+    }
+
+    /* PRODUCT GRIDS: SLEEK 2-COLUMN LUXURY MOBILE UX */
+    .featured-layout,
+    .collection-layout,
+    .jewellery-layout {
+        grid-template-columns: 1fr !important;
+        padding: 0 10px !important;
+        gap: 18px !important;
+    }
+
+    .featured-grid-container,
+    .products-grid-container,
+    .jewellery-grid-container {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px 10px !important;
+    }
+
+    .featured-product-card,
+    .collection-card {
+        border-radius: 10px !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04) !important;
+        overflow: hidden !important;
+    }
+
+    .featured-card-img-wrap,
+    .card-image-wrap {
+        height: auto !important;
+        aspect-ratio: 3 / 4 !important;
+        max-height: 240px !important;
+        position: relative !important;
+    }
+
+    .featured-card-img-wrap img,
+    .card-image-wrap img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        object-position: center top !important;
+    }
+
+    .featured-card-info,
+    .card-content {
+        padding: 10px 8px !important;
+    }
+
+    .featured-card-info .info-meta,
+    .card-content .card-cat {
+        font-size: 0.62rem !important;
+        letter-spacing: 0.08em !important;
+        margin-bottom: 4px !important;
+    }
+
+    .featured-card-info .info-title,
+    .card-content h4 {
+        font-size: 0.82rem !important;
+        line-height: 1.25 !important;
+        min-height: 34px !important;
+        margin-bottom: 6px !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+    }
+
+    .featured-card-info .info-price,
+    .card-price .price {
+        font-size: 0.88rem !important;
+        margin-bottom: 6px !important;
+    }
+
+    .featured-product-card .add-bag-pill-btn,
+    .card-content .add-cart-btn,
+    .btn-add-cart-solid {
+        padding: 7px 8px !important;
+        font-size: 0.7rem !important;
+        letter-spacing: 0.04em !important;
+        border-radius: 6px !important;
+        margin-top: 4px !important;
+        width: 100% !important;
+    }
+
+    .featured-card-badge,
+    .featured-badge {
+        font-size: 0.55rem !important;
+        padding: 2px 6px !important;
+        top: 6px !important;
+        left: 6px !important;
+        border-radius: 4px !important;
+    }
+
+    .wishlist-heart-btn,
+    .wishlist-toggle {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.85rem !important;
+        top: 6px !important;
+        right: 6px !important;
+    }
+
+    /* Product Count Bar */
+    .product-count-bar {
+        padding: 14px 12px !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        align-items: flex-start !important;
+    }
+
+    .sort-dropdown {
+        width: 100% !important;
+    }
+
+    .sort-dropdown select {
+        width: 100% !important;
+        padding: 10px 12px !important;
+    }
+
+    /* Mobile Filter Trigger Bar */
+    .mobile-filter-bar {
+        display: flex !important;
+    }
+
+    /* Sidebars on Mobile (collapsible accordion) */
+    .filter-sidebar,
+    .featured-sidebar {
+        padding: 18px 16px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04) !important;
+    }
+
+    .filter-header {
+        margin-bottom: 12px !important;
+    }
+
+    /* Modals & Slide-Over Drawers Mobile */
+    .cart-drawer {
+        width: 100% !important;
+        max-width: 100% !important;
+        right: -100% !important;
+    }
+
+    .cart-drawer.active {
+        right: 0 !important;
+    }
+
+    .drawer-header {
+        padding: 16px 18px !important;
+    }
+
+    .drawer-body {
+        padding: 16px !important;
+    }
+
+    .drawer-footer {
+        padding: 16px 18px !important;
+    }
+
+    .l-modal-content,
+    .quick-view-content,
+    .admin-modal-content {
+        width: 94% !important;
+        max-width: 94% !important;
+        padding: 20px 16px !important;
+        max-height: 90vh !important;
+        overflow-y: auto !important;
+    }
+
+    .qv-grid {
+        grid-template-columns: 1fr !important;
+        gap: 18px !important;
+    }
+
+    .qv-image-box {
+        height: 260px !important;
+    }
+
+    /* Footer Mobile */
+    .luxury-footer {
+        padding: 45px 16px 24px !important;
+    }
+
+    .footer-container {
+        grid-template-columns: 1fr !important;
+        gap: 30px !important;
+    }
+
+    .footer-col {
+        text-align: left !important;
+    }
+
+    .newsletter-form {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+
+    .newsletter-form input {
+        width: 100% !important;
+        padding: 12px 14px !important;
+    }
+
+    .newsletter-form button {
+        width: 100% !important;
+        padding: 12px !important;
+    }
+
+    .footer-bottom {
+        margin-top: 36px !important;
+        padding: 20px 12px 0 !important;
+        font-size: 0.74rem !important;
+    }
+
+    /* Toast Notification Mobile */
+    .toast-notification {
+        left: 16px !important;
+        right: 16px !important;
+        bottom: 20px !important;
+        text-align: center !important;
+        font-size: 0.82rem !important;
+        padding: 12px 18px !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   BREAKPOINT: EXTRA SMALL MOBILE SCREENS (320px - 375px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 375px) {
+    .header-container {
+        padding: 8px 10px !important;
+    }
+
+    .logo-title {
+        font-size: 1.15rem !important;
+        letter-spacing: 0.1em !important;
+    }
+
+    .action-btn {
+        width: 32px !important;
+        height: 32px !important;
+    }
+
+    .action-btn svg {
+        width: 14px !important;
+        height: 14px !important;
+    }
+
+    .featured-grid-container,
+    .products-grid-container,
+    .jewellery-grid-container {
+        gap: 8px 8px !important;
+    }
+
+    .featured-card-info .info-title,
+    .card-content h4 {
+        font-size: 0.76rem !important;
+        min-height: 30px !important;
+    }
+
+    .featured-card-info .info-price,
+    .card-price .price {
+        font-size: 0.82rem !important;
+    }
+
+    .featured-product-card .add-bag-pill-btn,
+    .card-content .add-cart-btn,
+    .btn-add-cart-solid {
+        font-size: 0.65rem !important;
+        padding: 6px 6px !important;
+    }
+}
+
+
 

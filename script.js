@@ -1302,7 +1302,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- Mobile Hamburger Menu Handler ---
+    const mobileBtn = document.getElementById('mobileMenuBtn');
+    const navMenu = document.getElementById('navMenu');
+    
+    // Create and inject nav backdrop if not already present
+    let navBackdrop = document.querySelector('.nav-backdrop');
+    if (!navBackdrop) {
+        navBackdrop = document.createElement('div');
+        navBackdrop.className = 'nav-backdrop';
+        document.body.appendChild(navBackdrop);
+    }
 
+    if (mobileBtn && navMenu) {
+        mobileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isActive = navMenu.classList.toggle('active');
+            if (navBackdrop) navBackdrop.classList.toggle('active', isActive);
+            document.body.style.overflow = isActive ? 'hidden' : '';
+        });
+
+        if (navBackdrop) {
+            navBackdrop.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+                navBackdrop.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        }
+
+        // Auto-close mobile menu when clicking nav links
+        navMenu.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    navMenu.classList.remove('active');
+                    if (navBackdrop) navBackdrop.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+    }
 
     // --- Render Products & Collections ---
     applyFeaturedFilters();
