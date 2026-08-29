@@ -514,7 +514,8 @@
 
         .store-main-img-wrap {
             position: relative;
-            height: 380px;
+            width: 100%;
+            aspect-ratio: 1024 / 731;
             overflow: hidden;
             background: #1A1817;
         }
@@ -523,12 +524,13 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            object-position: center;
+            object-position: top center;
+            display: block;
             transition: transform 0.8s ease;
         }
 
         .store-main-img-wrap:hover img {
-            transform: scale(1.04);
+            transform: scale(1.03);
         }
 
         .store-badge-overlay {
@@ -782,7 +784,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            object-position: center;
+            object-position: top center;
             transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
