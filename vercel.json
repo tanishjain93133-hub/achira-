@@ -1,6 +1,11 @@
 {
   "version": 2,
   "cleanUrls": true,
+  "functions": {
+    "api/*.js": {
+      "includeFiles": "admin-backend/**"
+    }
+  },
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap.js" },
     { "source": "/robots.txt", "destination": "/api/robots.js" },
