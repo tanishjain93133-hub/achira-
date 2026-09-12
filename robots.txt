@@ -1,0 +1,21 @@
+# https://achira-tau.vercel.app/robots.txt
+# Search engine crawling rules for ACHIRA storefront
+
+User-agent: *
+Allow: /
+Allow: /collections
+Allow: /jewellery
+Allow: /about
+Allow: /sitemap.xml
+
+# Disallow private, administrative, and internal API routes
+Disallow: /admin
+Disallow: /admin/
+Disallow: /admin2
+Disallow: /admin2/
+Disallow: /admin-backend/
+Disallow: /admin-frontend/
+Disallow: /api/
+
+# XML Sitemap
+Sitemap: https://achira-tau.vercel.app/sitemap.xml
