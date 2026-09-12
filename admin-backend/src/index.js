@@ -741,39 +741,41 @@ const checkoutHandler = async (req, res) => {
     // Persist to Disk File Database immediately
     saveFileDatabase();
 
-    // Synchronous Server-side Cloud Storage Sync
-    try {
-      const cloudGet = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-      let cloudData = { orders: [], users: [], enquiries: [], logs: [], notifications: [] };
-      if (cloudGet.ok) {
-        cloudData = await cloudGet.json();
-        if (!Array.isArray(cloudData.orders)) cloudData.orders = [];
-        if (!Array.isArray(cloudData.users)) cloudData.users = [];
-        if (!Array.isArray(cloudData.logs)) cloudData.logs = [];
-      }
-      if (!cloudData.orders.some(o => String(o.id) === String(orderId))) {
-        cloudData.orders.unshift(fullMemoryOrder);
-      }
-      if (custEmail && !cloudData.users.some(u => (u.email || '').toLowerCase() === custEmail)) {
-        cloudData.users.unshift({
-          id: Date.now(),
-          name: custName,
-          email: custEmail,
-          phone: custPhone,
-          address: custAddress,
-          ordersCount: 1,
-          totalSpent: grandTotal,
-          regDate: new Date().toISOString()
+    // Multi-Bin Cloud Storage Sync across all redundant bins
+    for (const binUrl of CLOUD_BINS) {
+      try {
+        const cloudGet = await fetch(`${binUrl}?t=${Date.now()}`);
+        let cloudData = { orders: [], users: [], enquiries: [], logs: [], notifications: [] };
+        if (cloudGet.ok) {
+          cloudData = await cloudGet.json();
+          if (!Array.isArray(cloudData.orders)) cloudData.orders = [];
+          if (!Array.isArray(cloudData.users)) cloudData.users = [];
+          if (!Array.isArray(cloudData.logs)) cloudData.logs = [];
+        }
+        if (!cloudData.orders.some(o => String(o.id) === String(orderId))) {
+          cloudData.orders.unshift(fullMemoryOrder);
+        }
+        if (custEmail && !cloudData.users.some(u => (u.email || '').toLowerCase() === custEmail)) {
+          cloudData.users.unshift({
+            id: Date.now(),
+            name: custName,
+            email: custEmail,
+            phone: custPhone,
+            address: custAddress,
+            ordersCount: 1,
+            totalSpent: grandTotal,
+            regDate: new Date().toISOString()
+          });
+        }
+        await fetch(binUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cloudData)
         });
+        console.log(`[CLOUD BIN SYNC SUCCESS] Order ${orderId} committed to ${binUrl}`);
+      } catch (e) {
+        console.warn('[CLOUD BIN SYNC NOTICE]', e.message);
       }
-      await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cloudData)
-      });
-      console.log(`[CLOUD BIN SYNC SUCCESS] Order ${orderId} committed to persistent cloud database.`);
-    } catch (e) {
-      console.warn('[CLOUD BIN SYNC NOTICE]', e.message);
     }
 
     console.log(`[ORDER CREATED] ID: ${orderId} | Customer: ${custEmail} (${custName}) | Total: ₹${grandTotal}`);
@@ -849,22 +851,24 @@ app.get('/api/user/orders', async (req, res) => {
       } catch (sErr) {}
     }
 
-    // 2. Check Cloud Bin
-    try {
-      const cRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-      if (cRes.ok) {
-        const cData = await cRes.json();
-        if (cData && Array.isArray(cData.orders)) {
-          cData.orders.forEach(co => {
-            if (co && co.id && (co.email || co.userEmail || '').toLowerCase().trim() === customerEmail) {
-              if (!customerOrders.some(o => String(o.id) === String(co.id))) {
-                customerOrders.push(co);
+    // 2. Check Multi-Bin Cloud Storage
+    for (const binUrl of CLOUD_BINS) {
+      try {
+        const cRes = await fetch(`${binUrl}?t=${Date.now()}`);
+        if (cRes.ok) {
+          const cData = await cRes.json();
+          if (cData && Array.isArray(cData.orders)) {
+            cData.orders.forEach(co => {
+              if (co && co.id && (co.email || co.userEmail || '').toLowerCase().trim() === customerEmail) {
+                if (!customerOrders.some(o => String(o.id) === String(co.id))) {
+                  customerOrders.push(co);
+                }
               }
-            }
-          });
+            });
+          }
         }
-      }
-    } catch (err) {}
+      } catch (err) {}
+    }
 
     // 3. Merge with memoryStore
     memoryStore.orders.forEach(mo => {
@@ -874,6 +878,26 @@ app.get('/api/user/orders', async (req, res) => {
         }
       }
     });
+
+    const parseDateHelper = (obj) => {
+      if (!obj) return 0;
+      if (obj.createdAt) {
+        const t = new Date(obj.createdAt).getTime();
+        if (!isNaN(t) && t > 0) return t;
+      }
+      if (obj.date && typeof obj.date === 'string') {
+        const p = obj.date.split('/');
+        if (p.length === 3) {
+          const dt = new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0])).getTime();
+          if (!isNaN(dt) && dt > 0) return dt;
+        }
+        const t2 = new Date(obj.date).getTime();
+        if (!isNaN(t2) && t2 > 0) return t2;
+      }
+      return 0;
+    };
+
+    customerOrders.sort((a, b) => parseDateHelper(b) - parseDateHelper(a));
 
     res.json({
       success: true,
@@ -938,15 +962,23 @@ const fetchAllAdminOrdersHandler = async (req, res) => {
       } catch (sErr) {}
     }
 
-    // 2. Query Cloud Storage Database Bin
+    // 2. Query Multi-Bin Cloud Storage Database
     let cloudOrders = [];
-    try {
-      const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-      if (cloudRes.ok) {
-        const cData = await cloudRes.json();
-        if (cData && Array.isArray(cData.orders)) cloudOrders = cData.orders;
-      }
-    } catch (e) {}
+    for (const binUrl of CLOUD_BINS) {
+      try {
+        const cloudRes = await fetch(`${binUrl}?t=${Date.now()}`);
+        if (cloudRes.ok) {
+          const cData = await cloudRes.json();
+          if (cData && Array.isArray(cData.orders)) {
+            cData.orders.forEach(co => {
+              if (co && co.id && !cloudOrders.some(o => String(o.id) === String(co.id))) {
+                cloudOrders.push(co);
+              }
+            });
+          }
+        }
+      } catch (e) {}
+    }
 
     // 3. Merge with memory store
     const orderMap = new Map();
@@ -959,10 +991,26 @@ const fetchAllAdminOrdersHandler = async (req, res) => {
       }
     });
 
+    const parseDateHelper = (obj) => {
+      if (!obj) return 0;
+      if (obj.createdAt) {
+        const t = new Date(obj.createdAt).getTime();
+        if (!isNaN(t) && t > 0) return t;
+      }
+      if (obj.date && typeof obj.date === 'string') {
+        const p = obj.date.split('/');
+        if (p.length === 3) {
+          const dt = new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0])).getTime();
+          if (!isNaN(dt) && dt > 0) return dt;
+        }
+        const t2 = new Date(obj.date).getTime();
+        if (!isNaN(t2) && t2 > 0) return t2;
+      }
+      return 0;
+    };
+
     const unifiedOrders = Array.from(orderMap.values()).sort((a, b) => {
-      const dateA = new Date(a.createdAt || a.date || 0).getTime();
-      const dateB = new Date(b.createdAt || b.date || 0).getTime();
-      return dateB - dateA;
+      return parseDateHelper(b) - parseDateHelper(a);
     });
 
     // Normalize format for Admin Dashboard

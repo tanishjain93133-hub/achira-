@@ -2340,6 +2340,29 @@ async function renderUserOrdersTable() {
         }
     });
 
+    function parseOrderTimestamp(o) {
+        if (!o) return 0;
+        if (o.createdAt) {
+            const t = new Date(o.createdAt).getTime();
+            if (!isNaN(t) && t > 0) return t;
+        }
+        if (o.date && typeof o.date === 'string') {
+            const parts = o.date.split('/');
+            if (parts.length === 3) {
+                const day = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1;
+                const year = parseInt(parts[2], 10);
+                const d = new Date(year, month, day);
+                if (!isNaN(d.getTime()) && d.getTime() > 0) return d.getTime();
+            }
+            const fallback = new Date(o.date).getTime();
+            if (!isNaN(fallback) && fallback > 0) return fallback;
+        }
+        return 0;
+    }
+
+    customerOrders.sort((a, b) => parseOrderTimestamp(b) - parseOrderTimestamp(a));
+
     if (customerOrders.length === 0) {
         listWrap.innerHTML = `
             <div style="text-align: center; padding: 40px 20px;">
