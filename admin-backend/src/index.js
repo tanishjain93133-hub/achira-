@@ -27,6 +27,16 @@ app.get('/admin2', (req, res) => {
   res.sendFile(path.join(staticRoot, 'admin.html'));
 });
 
+// Dedicated SEO routes
+app.get('/sitemap.xml', (req, res) => {
+  res.header('Content-Type', 'application/xml; charset=utf-8');
+  res.sendFile(path.join(staticRoot, 'sitemap.xml'));
+});
+app.get('/robots.txt', (req, res) => {
+  res.header('Content-Type', 'text/plain; charset=utf-8');
+  res.sendFile(path.join(staticRoot, 'robots.txt'));
+});
+
 // Supabase Direct REST/Database Client
 let supabase = null;
 try {
