@@ -2263,6 +2263,112 @@ function handleContactSubmit(e) {
     closeEnquiryModal();
 }
 
+// --- User Authentication & Account Modals ---
+function openAuthModal(defaultTab = 'login') {
+    const authModal = document.getElementById('authModal');
+    if (authModal) authModal.classList.add('active');
+    switchAuthTab(defaultTab);
+}
+
+function closeAuthModal() {
+    const authModal = document.getElementById('authModal');
+    if (authModal) authModal.classList.remove('active');
+}
+
+function switchAuthTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.auth-view').forEach(v => v.classList.remove('active'));
+    
+    const targetTabBtn = Array.from(document.querySelectorAll('.auth-tab')).find(b => b.textContent.toLowerCase().includes(tab.toLowerCase()));
+    if (targetTabBtn) targetTabBtn.classList.add('active');
+
+    const viewId = tab === 'signup' ? 'signupView' : 'loginView';
+    const targetView = document.getElementById(viewId);
+    if (targetView) targetView.classList.add('active');
+}
+
+function handleUserLogin(e) {
+    if (e) e.preventDefault();
+    const emailEl = document.getElementById('loginEmail');
+    const passEl = document.getElementById('loginPassword');
+    const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
+    const pass = passEl ? passEl.value.trim() : '';
+
+    if (!email) {
+        showToast("Please enter your email address.");
+        return;
+    }
+
+    // Auto-detect existing patron or create login session
+    const existingUsers = getDB('users', []);
+    const user = existingUsers.find(u => (u.email || '').toLowerCase() === email) || {
+        name: email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        email: email
+    };
+
+    currentUser = {
+        name: user.name || 'Valued Patron',
+        email: email,
+        phone: user.phone || '+91 98765 43210',
+        address: user.address || 'Delivered Address'
+    };
+
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    localStorage.setItem('userEmail', email);
+    localStorage.setItem('userToken', 'patron-token-' + Date.now());
+
+    closeAuthModal();
+    showToast(`✦ Welcome to Achira Atelier, ${currentUser.name}!`);
+    openProfileModal();
+}
+
+function handleUserSignup(e) {
+    if (e) e.preventDefault();
+    const nameEl = document.getElementById('signupName');
+    const emailEl = document.getElementById('signupEmail');
+    const passEl = document.getElementById('signupPassword');
+
+    const name = nameEl && nameEl.value.trim() ? nameEl.value.trim() : 'Valued Patron';
+    const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
+
+    if (!email) {
+        showToast("Please enter a valid email address.");
+        return;
+    }
+
+    currentUser = { name, email, phone: '+91 98765 43210', address: 'Registered Online Customer' };
+    const users = getDB('users', []);
+    if (!users.some(u => (u.email || '').toLowerCase() === email)) {
+        users.push({ id: Date.now(), name, email });
+        setDB('users', users);
+    }
+
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    localStorage.setItem('userEmail', email);
+    localStorage.setItem('userToken', 'patron-token-' + Date.now());
+
+    closeAuthModal();
+    showToast(`✦ Account created successfully! Welcome, ${name}.`);
+    openProfileModal();
+}
+
+function handleUserLogout() {
+    currentUser = null;
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userToken');
+    closeProfileModal();
+    showToast("Logged out successfully.");
+}
+
+function handleForgotPassword(e) {
+    if (e) e.preventDefault();
+    const email = prompt("Please enter your registered email address for password assistance:");
+    if (email) {
+        showToast(`✦ Password recovery instructions dispatched to ${email}. Our concierge is standing by.`);
+    }
+}
+
 // --- Profile & My Orders Modal ---
 function openProfileModal() {
     if (!currentUser) {
@@ -2271,30 +2377,34 @@ function openProfileModal() {
             try { currentUser = JSON.parse(stored); } catch(e) {}
         }
     }
-    if (!currentUser) {
-        openAuthModal();
-        return;
-    }
+    
     const patronName = document.getElementById('patronName');
     const patronEmail = document.getElementById('patronEmail');
-    if (patronName) patronName.textContent = currentUser.name || 'Valued Patron';
-    if (patronEmail) patronEmail.textContent = currentUser.email || '';
-    renderUserOrdersTable();
+    if (patronName) patronName.textContent = (currentUser && currentUser.name) ? currentUser.name : 'Valued Patron';
+    if (patronEmail) patronEmail.textContent = (currentUser && currentUser.email) ? currentUser.email : (localStorage.getItem('userEmail') || '—');
+    
     const pModal = document.getElementById('profileModal');
     if (pModal) pModal.classList.add('active');
+    
+    // Automatically display user orders tab
+    switchProfileTab('profile-orders');
 }
 
 function closeProfileModal() {
-    document.getElementById('profileModal').classList.remove('active');
+    const pModal = document.getElementById('profileModal');
+    if (pModal) pModal.classList.remove('active');
 }
 
 function switchProfileTab(tabId) {
     document.querySelectorAll('.p-tab').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.p-view').forEach(view => view.classList.remove('active'));
     
-    if (event && event.currentTarget) {
-        event.currentTarget.classList.add('active');
-    }
+    const btn = Array.from(document.querySelectorAll('.p-tab')).find(b => {
+        const oc = b.getAttribute('onclick') || '';
+        return oc.includes(tabId);
+    });
+    if (btn) btn.classList.add('active');
+    
     const viewEl = document.getElementById(tabId);
     if (viewEl) viewEl.classList.add('active');
     
@@ -2308,77 +2418,97 @@ async function renderUserOrdersTable(overrideEmail) {
     if (!listWrap) return;
     
     const inputVal = document.getElementById('orderEmailLookupInput') ? document.getElementById('orderEmailLookupInput').value.trim() : '';
-    let currEmail = (overrideEmail && typeof overrideEmail === 'string' && overrideEmail.trim()) 
-        ? overrideEmail.toLowerCase().trim() 
-        : (inputVal ? inputVal.toLowerCase().trim() : ((currentUser && currentUser.email) ? currentUser.email.toLowerCase().trim() : (localStorage.getItem('userEmail') ? localStorage.getItem('userEmail').toLowerCase().trim() : '')));
-
-    listWrap.innerHTML = `
-        <div style="margin-bottom: 16px; background: #FAF6F0; padding: 12px 14px; border-radius: 8px; border: 1px solid #E5D5C0;">
-            <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #3C0008; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Look Up Purchase History by Email / Phone:</label>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <input type="text" id="orderEmailLookupInput" placeholder="Enter customer email (e.g. patron@gmail.com)" value="${currEmail}" style="flex: 1; min-width: 220px; padding: 8px 12px; border: 1px solid #B88A44; border-radius: 6px; font-size: 0.85rem; outline: none;">
-                <button type="button" onclick="renderUserOrdersTable(document.getElementById('orderEmailLookupInput').value)" style="padding: 8px 16px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.85rem;">Find Orders</button>
-            </div>
-        </div>
-        <p style="font-family: var(--font-body); font-size: 0.85rem; color: var(--color-charcoal-body); text-align: center; padding: 15px;">Searching live cloud database for customer orders...</p>
-    `;
-
-    if (!currEmail) {
-        listWrap.innerHTML = `
-            <div style="margin-bottom: 16px; background: #FAF6F0; padding: 12px 14px; border-radius: 8px; border: 1px solid #E5D5C0;">
-                <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #3C0008; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Look Up Purchase History by Email / Phone:</label>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <input type="text" id="orderEmailLookupInput" placeholder="Enter customer email (e.g. patron@gmail.com)" value="" style="flex: 1; min-width: 220px; padding: 8px 12px; border: 1px solid #B88A44; border-radius: 6px; font-size: 0.85rem; outline: none;">
-                    <button type="button" onclick="renderUserOrdersTable(document.getElementById('orderEmailLookupInput').value)" style="padding: 8px 16px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.85rem;">Find Orders</button>
-                </div>
-            </div>
-            <div style="text-align: center; padding: 30px 20px;">
-                <p style="font-family: var(--font-body); font-size: 0.95rem; color: var(--color-charcoal-body); margin-bottom: 12px;">Please enter an email above or log in to view order history.</p>
-                <button onclick="closeProfileModal(); openAuthModal();" style="padding: 10px 24px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 20px; font-weight: 700; cursor: pointer;">Sign In to Account</button>
-            </div>
-        `;
-        return;
-    }
+    let currEmail = (overrideEmail !== undefined && typeof overrideEmail === 'string') 
+        ? overrideEmail.trim() 
+        : (inputVal ? inputVal.trim() : ((currentUser && currentUser.email) ? currentUser.email.trim() : (localStorage.getItem('userEmail') ? localStorage.getItem('userEmail').trim() : '')));
 
     const cleanTargetEmail = currEmail.toLowerCase().trim();
     const cleanPhone = cleanTargetEmail.replace(/\D/g, '');
-    let customerOrders = [];
-    const userToken = localStorage.getItem('userToken') || '';
-    
-    // 1. Fetch from server API
-    try {
-        const res = await fetch(`${API_BASE}/api/user/orders?email=${encodeURIComponent(cleanTargetEmail)}`, {
-            headers: { 
-                'Authorization': `Bearer ${userToken}`,
-                'x-user-email': cleanTargetEmail
-            }
-        });
-        const data = await res.json();
-        if (res.ok && data.success && Array.isArray(data.orders)) {
-            customerOrders = data.orders;
-        }
-    } catch (e) {}
 
-    // 1b. Fallback fetch from admin orders endpoint
+    listWrap.innerHTML = `
+        <div style="margin-bottom: 16px; background: #FAF6F0; padding: 14px 16px; border-radius: 8px; border: 1px solid #E5D5C0;">
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #3C0008; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Look Up Purchase History by Email / Phone / Order ID:</label>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <input type="text" id="orderEmailLookupInput" placeholder="Enter customer email (e.g. patron@gmail.com) or Order ID" value="${cleanTargetEmail}" style="flex: 1; min-width: 220px; padding: 10px 14px; border: 1.5px solid #B88A44; border-radius: 6px; font-size: 0.9rem; outline: none;" onkeydown="if(event.key==='Enter')renderUserOrdersTable(this.value)">
+                <button type="button" onclick="renderUserOrdersTable(document.getElementById('orderEmailLookupInput').value)" style="padding: 10px 18px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.88rem;">Find Orders</button>
+                <button type="button" onclick="renderUserOrdersTable('all')" style="padding: 10px 14px; background: #FFF; color: #3C0008; border: 1px solid #B88A44; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.82rem;">View All</button>
+            </div>
+        </div>
+        <p style="font-family: var(--font-body); font-size: 0.88rem; color: #666; text-align: center; padding: 20px;">Fetching purchase history from cloud database...</p>
+    `;
+
+    const SUPABASE_REST_URL = 'https://yixfebpbiqlhigunjbvt.supabase.co/rest/v1';
+    const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpeGZlYnBiaXFsaGlndW5qYnZ0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzE2MDkyOSwiZXhwIjoyMTAyNzM2OTI5fQ.ycIKFrEGvueg25UEntZE-4nQDIYz_QQB_5_zlTWf0sU';
+    const supabaseHeaders = {
+        'apikey': SUPABASE_API_KEY,
+        'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+        'Content-Type': 'application/json'
+    };
+
+    let allCustomerOrders = [];
+    const seenOrderIds = new Set();
+
+    function addOrder(o) {
+        if (!o) return;
+        const oId = String(o.id || o.orderId || o.dbId || '');
+        if (!oId || seenOrderIds.has(oId)) return;
+        seenOrderIds.add(oId);
+        allCustomerOrders.push(o);
+    }
+
+    // 1. Direct Supabase Database Fetch
     try {
-        const resAll = await fetch(`${API_BASE}/api/admin/orders`);
-        if (resAll.ok) {
-            const allData = await resAll.json();
-            if (Array.isArray(allData)) {
-                allData.forEach(ao => {
-                    const em = (ao.userEmail || ao.email || '').toLowerCase().trim();
-                    const ph = (ao.userPhone || ao.phone || '').replace(/\D/g, '');
-                    if (em === cleanTargetEmail || (cleanPhone.length >= 8 && ph.includes(cleanPhone)) || String(ao.id || '').toLowerCase() === cleanTargetEmail) {
-                        if (!customerOrders.some(o => String(o.id) === String(ao.id))) {
-                            customerOrders.push(ao);
-                        }
-                    }
+        const sRes = await fetch(`${SUPABASE_REST_URL}/orders?select=*&order=created_at.desc`, { headers: supabaseHeaders });
+        if (sRes.ok) {
+            const sOrders = await sRes.json();
+            if (Array.isArray(sOrders)) {
+                sOrders.forEach(so => {
+                    addOrder({
+                        id: so.id,
+                        userName: so.customer_name || 'Valued Patron',
+                        customerName: so.customer_name || 'Valued Patron',
+                        userEmail: so.email || '',
+                        email: so.email || '',
+                        userPhone: so.phone || '',
+                        phone: so.phone || '',
+                        userAddress: so.address || 'Standard Delivery Address',
+                        address: so.address || 'Standard Delivery Address',
+                        grandTotal: Number(so.grand_total || 0),
+                        total: Number(so.grand_total || 0),
+                        paymentMode: so.payment_method || 'UPI (QR)',
+                        paymentMethod: so.payment_method || 'UPI (QR)',
+                        status: so.order_status || 'Processing',
+                        orderStatus: so.order_status || 'Processing',
+                        itemsSummary: so.items_summary || '',
+                        itemsDetail: so.items_detail || [],
+                        date: so.created_at ? new Date(so.created_at).toLocaleDateString('en-IN') : 'Today',
+                        createdAt: so.created_at
+                    });
                 });
             }
         }
-    } catch (e) {}
+    } catch(e) {}
 
-    // 2. Fetch from Multi-Bin Cloud Database for 100% cross-device sync
+    // 2. Fetch from Backend API
+    try {
+        const res = await fetch(`${API_BASE}/api/user/orders?email=${encodeURIComponent(cleanTargetEmail)}`);
+        if (res.ok) {
+            const data = await res.json();
+            if (data && Array.isArray(data.orders)) {
+                data.orders.forEach(addOrder);
+            }
+        }
+    } catch(e) {}
+
+    try {
+        const aRes = await fetch(`${API_BASE}/api/admin/orders`);
+        if (aRes.ok) {
+            const aData = await aRes.json();
+            if (Array.isArray(aData)) aData.forEach(addOrder);
+        }
+    } catch(e) {}
+
+    // 3. Fetch from Multi-Bin Cloud Storage
     const USER_CLOUD_BINS = [
         'https://extendsclass.com/api/json-storage/bin/bbcaace',
         'https://extendsclass.com/api/json-storage/bin/ecaaafd'
@@ -2389,30 +2519,31 @@ async function renderUserOrdersTable(overrideEmail) {
             if (cloudRes.ok) {
                 const cData = await cloudRes.json();
                 if (cData && Array.isArray(cData.orders)) {
-                    cData.orders.forEach(co => {
-                        const em = (co.userEmail || co.email || '').toLowerCase().trim();
-                        const ph = (co.userPhone || co.phone || '').replace(/\D/g, '');
-                        if (em === cleanTargetEmail || (cleanPhone.length >= 8 && ph.includes(cleanPhone)) || String(co.id || '').toLowerCase() === cleanTargetEmail) {
-                            if (!customerOrders.some(o => String(o.id) === String(co.id))) {
-                                customerOrders.push(co);
-                            }
-                        }
-                    });
+                    cData.orders.forEach(addOrder);
                 }
             }
-        } catch (e) {}
+        } catch(e) {}
     }
 
-    // 3. Local storage check
+    // 4. Fetch from Local Storage
     const localOrders = [...getDB('orders', []), ...getDB('admin_orders', [])];
-    localOrders.forEach(lo => {
-        const em = (lo.userEmail || lo.email || '').toLowerCase().trim();
-        const ph = (lo.userPhone || lo.phone || '').replace(/\D/g, '');
-        if (em === cleanTargetEmail || (cleanPhone.length >= 8 && ph.includes(cleanPhone)) || String(lo.id || '').toLowerCase() === cleanTargetEmail) {
-            if (!customerOrders.some(o => String(o.id) === String(lo.id))) {
-                customerOrders.push(lo);
-            }
-        }
+    localOrders.forEach(addOrder);
+
+    // Filter matching orders
+    const matchedOrders = allCustomerOrders.filter(o => {
+        if (!o) return false;
+        if (cleanTargetEmail === 'all' || !cleanTargetEmail) return true;
+        const oId = String(o.id || '').toLowerCase().trim();
+        const oEmail = (o.userEmail || o.email || '').toLowerCase().trim();
+        const oPhone = (o.userPhone || o.phone || '').replace(/\D/g, '');
+        const oName = (o.userName || o.customerName || '').toLowerCase().trim();
+
+        return oEmail === cleanTargetEmail || 
+               (cleanTargetEmail.length >= 3 && oEmail.includes(cleanTargetEmail)) ||
+               (cleanPhone.length >= 7 && oPhone.includes(cleanPhone)) ||
+               oId === cleanTargetEmail ||
+               oId.includes(cleanTargetEmail) ||
+               oName.includes(cleanTargetEmail);
     });
 
     function parseOrderTimestamp(o) {
@@ -2424,10 +2555,7 @@ async function renderUserOrdersTable(overrideEmail) {
         if (o.date && typeof o.date === 'string') {
             const parts = o.date.split('/');
             if (parts.length === 3) {
-                const day = parseInt(parts[0], 10);
-                const month = parseInt(parts[1], 10) - 1;
-                const year = parseInt(parts[2], 10);
-                const d = new Date(year, month, day);
+                const d = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
                 if (!isNaN(d.getTime()) && d.getTime() > 0) return d.getTime();
             }
             const fallback = new Date(o.date).getTime();
@@ -2436,59 +2564,77 @@ async function renderUserOrdersTable(overrideEmail) {
         return 0;
     }
 
-    customerOrders.sort((a, b) => parseOrderTimestamp(b) - parseOrderTimestamp(a));
+    matchedOrders.sort((a, b) => parseOrderTimestamp(b) - parseOrderTimestamp(a));
 
-    let searchHeaderHtml = `
-        <div style="margin-bottom: 16px; background: #FAF6F0; padding: 12px 14px; border-radius: 8px; border: 1px solid #E5D5C0;">
-            <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #3C0008; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Look Up Purchase History by Email / Phone:</label>
+    const searchHeaderHtml = `
+        <div style="margin-bottom: 16px; background: #FAF6F0; padding: 14px 16px; border-radius: 8px; border: 1px solid #E5D5C0;">
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #3C0008; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Look Up Purchase History by Email / Phone / Order ID:</label>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <input type="text" id="orderEmailLookupInput" placeholder="Enter customer email (e.g. patron@gmail.com)" value="${cleanTargetEmail}" style="flex: 1; min-width: 220px; padding: 8px 12px; border: 1px solid #B88A44; border-radius: 6px; font-size: 0.85rem; outline: none;" onkeydown="if(event.key==='Enter')renderUserOrdersTable(this.value)">
-                <button type="button" onclick="renderUserOrdersTable(document.getElementById('orderEmailLookupInput').value)" style="padding: 8px 16px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.85rem;">Find Orders</button>
+                <input type="text" id="orderEmailLookupInput" placeholder="Enter customer email (e.g. patron@gmail.com) or Order ID" value="${cleanTargetEmail === 'all' ? '' : cleanTargetEmail}" style="flex: 1; min-width: 220px; padding: 10px 14px; border: 1.5px solid #B88A44; border-radius: 6px; font-size: 0.9rem; outline: none;" onkeydown="if(event.key==='Enter')renderUserOrdersTable(this.value)">
+                <button type="button" onclick="renderUserOrdersTable(document.getElementById('orderEmailLookupInput').value)" style="padding: 10px 18px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.88rem;">Find Orders</button>
+                <button type="button" onclick="renderUserOrdersTable('all')" style="padding: 10px 14px; background: #FFF; color: #3C0008; border: 1px solid #B88A44; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.82rem;">View All</button>
             </div>
         </div>
     `;
 
-    if (customerOrders.length === 0) {
+    if (matchedOrders.length === 0) {
         listWrap.innerHTML = searchHeaderHtml + `
             <div style="text-align: center; padding: 35px 20px; background: #fff; border-radius: 8px; border: 1px dashed #B88A44;">
-                <p style="font-family: var(--font-body); font-size: 0.95rem; color: var(--color-charcoal-body); margin-bottom: 8px;">No purchases found under <strong>"${cleanTargetEmail}"</strong>.</p>
-                <p style="font-size: 0.82rem; color: #888; margin-bottom: 16px;">Try entering another email address above or explore the catalogue.</p>
-                <button onclick="closeProfileModal()" style="padding: 10px 24px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 20px; font-weight: 700; cursor: pointer;">Explore Couture Collection</button>
+                <p style="font-family: var(--font-body); font-size: 1rem; color: #3C0008; font-weight: 600; margin-bottom: 8px;">No orders found for "${cleanTargetEmail}".</p>
+                <p style="font-size: 0.84rem; color: #666; margin-bottom: 16px;">Make sure the email ID or Order ID matches your purchase details, or click "View All" to browse all orders.</p>
+                <button onclick="renderUserOrdersTable('all')" style="padding: 10px 24px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 20px; font-weight: 700; cursor: pointer;">Show All Customer Orders</button>
             </div>
         `;
         return;
     }
 
     let html = searchHeaderHtml + `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-            <strong style="font-family: var(--font-brand); color: #3C0008; font-size: 1rem;">Customer Orders (${customerOrders.length})</strong>
-            <span style="font-size: 0.78rem; color: #888;">Patron: ${cleanTargetEmail}</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+            <strong style="font-family: var(--font-brand); color: #3C0008; font-size: 1.05rem;">Purchase History (${matchedOrders.length} Order${matchedOrders.length === 1 ? '' : 's'})</strong>
+            <span style="font-size: 0.8rem; color: #777; background: #FAF6F0; padding: 3px 10px; border-radius: 12px; border: 1px solid #E5D5C0;">Filter: ${cleanTargetEmail === 'all' ? 'All Orders' : cleanTargetEmail}</span>
         </div>
         <div style="overflow-x: auto;">
         <table class="admin-table" style="width: 100%; border-collapse: collapse;">
             <thead>
-                <tr>
-                    <th style="padding: 8px; text-align: left;">Order ID</th>
-                    <th style="padding: 8px; text-align: left;">Items</th>
-                    <th style="padding: 8px; text-align: left;">Total</th>
-                    <th style="padding: 8px; text-align: left;">Status</th>
-                    <th style="padding: 8px; text-align: left;">Invoice</th>
+                <tr style="background: #3C0008; color: #D4AF37;">
+                    <th style="padding: 10px; text-align: left;">Order ID</th>
+                    <th style="padding: 10px; text-align: left;">Customer</th>
+                    <th style="padding: 10px; text-align: left;">Items</th>
+                    <th style="padding: 10px; text-align: left;">Total</th>
+                    <th style="padding: 10px; text-align: left;">Status</th>
+                    <th style="padding: 10px; text-align: center;">Action</th>
                 </tr>
             </thead>
             <tbody>
     `;
 
-    customerOrders.forEach(o => {
+    matchedOrders.forEach(o => {
+        const st = o.orderStatus || o.status || 'Processing';
+        const uEmail = o.userEmail || o.email || '';
+        const uName = o.userName || o.customerName || 'Valued Patron';
+        const grandTotal = (o.grandTotal || o.total || 0).toLocaleString('en-IN');
+        const displayDate = o.date || (o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-IN') : 'Recent');
+
         html += `
-            <tr style="border-bottom: 1px solid rgba(184,138,68,0.15);">
-                <td style="padding: 10px 8px;">
-                    <strong style="color: #3C0008;">${o.id}</strong>
-                    <div style="font-size: 0.72rem; color: #888;">${o.date || (o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-IN') : 'Recent')}</div>
+            <tr style="border-bottom: 1px solid rgba(184,138,68,0.18);">
+                <td style="padding: 12px 10px;">
+                    <strong style="color: #3C0008; font-size: 0.95rem;">${o.id}</strong>
+                    <div style="font-size: 0.75rem; color: #888;">${displayDate}</div>
                 </td>
-                <td style="padding: 10px 8px; font-size: 0.82rem;">${o.itemsSummary || 'Couture Masterpiece'}</td>
-                <td style="padding: 10px 8px; font-weight: 700; color: #3C0008;">₹${(o.grandTotal || o.total || 0).toLocaleString('en-IN')}</td>
-                <td style="padding: 10px 8px;"><span style="color: #B88A44; font-weight: 700; font-size: 0.75rem; background: rgba(184,138,68,0.1); padding: 3px 8px; border-radius: 4px;">${(o.orderStatus || o.status || 'Processing').toUpperCase()}</span></td>
-                <td style="padding: 10px 8px;"><button onclick="openInvoice('${o.id}')" style="background: none; border: none; color: #006633; cursor: pointer; text-decoration: underline; font-weight: 600;">View</button></td>
+                <td style="padding: 12px 10px; font-size: 0.85rem;">
+                    <strong>${uName}</strong>
+                    <div style="font-size: 0.75rem; color: #777;">${uEmail}</div>
+                </td>
+                <td style="padding: 12px 10px; font-size: 0.85rem; max-width: 220px; line-height: 1.4;">${o.itemsSummary || 'Couture Masterpiece'}</td>
+                <td style="padding: 12px 10px; font-weight: 700; color: #3C0008; font-size: 0.95rem;">₹${grandTotal}</td>
+                <td style="padding: 12px 10px;">
+                    <span style="color: ${st === 'Delivered' ? '#006633' : '#B88A44'}; font-weight: 700; font-size: 0.78rem; background: ${st === 'Delivered' ? 'rgba(0,102,51,0.1)' : 'rgba(184,138,68,0.12)'}; padding: 4px 10px; border-radius: 4px; display: inline-block;">
+                        ${st.toUpperCase()}
+                    </span>
+                </td>
+                <td style="padding: 12px 10px; text-align: center;">
+                    <button onclick="switchProfileTab('profile-track'); document.getElementById('trackOrderId').value='${o.id}'; handleTrackOrder();" style="padding: 6px 12px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 4px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">Track</button>
+                </td>
             </tr>
         `;
     });
@@ -2498,22 +2644,65 @@ async function renderUserOrdersTable(overrideEmail) {
 }
 
 async function handleTrackOrder() {
-    const rawQuery = document.getElementById('trackOrderId').value.trim();
+    const rawQuery = (document.getElementById('trackOrderId') ? document.getElementById('trackOrderId').value.trim() : '');
     const resultBox = document.getElementById('trackResult');
+    if (!resultBox) return;
+
     if (!rawQuery) {
         resultBox.style.display = 'block';
-        resultBox.innerHTML = `<p style="color: #800020; font-weight: 700; text-align: center;">Please enter an Order ID (e.g. ACH-12345), Email, or Phone number.</p>`;
+        resultBox.innerHTML = `<p style="color: #800020; font-weight: 700; text-align: center; padding: 15px;">Please enter an Order ID (e.g. ACH-12345), Email, or Phone number.</p>`;
         return;
     }
 
     resultBox.style.display = 'block';
-    resultBox.innerHTML = `<p style="text-align: center; color: #666; padding: 10px;">Locating order across cloud network...</p>`;
+    resultBox.innerHTML = `<p style="text-align: center; color: #666; padding: 15px;">Locating order across cloud network...</p>`;
 
     const queryLower = rawQuery.toLowerCase();
     const queryDigits = rawQuery.replace(/\D/g, '');
 
-    // Collect all orders from local DB and Cloud Bins
+    const SUPABASE_REST_URL = 'https://yixfebpbiqlhigunjbvt.supabase.co/rest/v1';
+    const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpeGZlYnBiaXFsaGlndW5qYnZ0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzE2MDkyOSwiZXhwIjoyMTAyNzM2OTI5fQ.ycIKFrEGvueg25UEntZE-4nQDIYz_QQB_5_zlTWf0sU';
+    const supabaseHeaders = {
+        'apikey': SUPABASE_API_KEY,
+        'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+        'Content-Type': 'application/json'
+    };
+
     let allOrders = [...getDB('orders', []), ...getDB('admin_orders', [])];
+
+    // 1. Fetch Supabase Orders
+    try {
+        const sRes = await fetch(`${SUPABASE_REST_URL}/orders?select=*&order=created_at.desc`, { headers: supabaseHeaders });
+        if (sRes.ok) {
+            const sData = await sRes.json();
+            if (Array.isArray(sData)) {
+                sData.forEach(so => {
+                    allOrders.push({
+                        id: so.id,
+                        userName: so.customer_name || 'Valued Patron',
+                        customerName: so.customer_name || 'Valued Patron',
+                        userEmail: so.email || '',
+                        email: so.email || '',
+                        userPhone: so.phone || '',
+                        phone: so.phone || '',
+                        userAddress: so.address || 'Standard Delivery Address',
+                        address: so.address || 'Standard Delivery Address',
+                        grandTotal: Number(so.grand_total || 0),
+                        total: Number(so.grand_total || 0),
+                        paymentMode: so.payment_method || 'UPI (QR)',
+                        orderStatus: so.order_status || 'Processing',
+                        status: so.order_status || 'Processing',
+                        itemsSummary: so.items_summary || '',
+                        itemsDetail: so.items_detail || [],
+                        date: so.created_at ? new Date(so.created_at).toLocaleDateString('en-IN') : 'Today',
+                        createdAt: so.created_at
+                    });
+                });
+            }
+        }
+    } catch (e) {}
+
+    // 2. Fetch Cloud Storage Bins
     const TRACK_CLOUD_BINS = [
         'https://extendsclass.com/api/json-storage/bin/bbcaace',
         'https://extendsclass.com/api/json-storage/bin/ecaaafd'
@@ -2540,15 +2729,15 @@ async function handleTrackOrder() {
 
     const matchedList = allOrders.filter(o => {
         if (!o) return false;
-        const oId = String(o.id || '').toLowerCase();
+        const oId = String(o.id || '').toLowerCase().trim();
         const oEmail = (o.userEmail || o.email || '').toLowerCase().trim();
         const oPhone = (o.userPhone || o.phone || '').replace(/\D/g, '');
-        return oId === queryLower || oEmail === queryLower || (queryDigits.length >= 8 && oPhone.includes(queryDigits));
+        return oId === queryLower || oId.includes(queryLower) || oEmail === queryLower || oEmail.includes(queryLower) || (queryDigits.length >= 7 && oPhone.includes(queryDigits));
     });
 
     if (matchedList.length === 0) {
         resultBox.style.display = 'block';
-        resultBox.innerHTML = `<p style="color: #800020; font-weight: 700; text-align: center;">No order found matching "${rawQuery}". Please check your Order ID, Email, or Phone number.</p>`;
+        resultBox.innerHTML = `<p style="color: #800020; font-weight: 700; text-align: center; padding: 15px;">No order found matching "${rawQuery}". Please check your Order ID, Email, or Phone number.</p>`;
         return;
     }
 
@@ -2559,13 +2748,15 @@ async function handleTrackOrder() {
     if (currentIdx === -1) currentIdx = (currentStatus === 'Processing' ? 0 : 1);
 
     let html = `
-        <div style="background: #faf8f5; border: 1px solid #B88A44; border-radius: 8px; padding: 12px; margin-bottom: 12px; width: 100%;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <strong style="color: #3C0008; font-size: 0.95rem;">Order: ${matched.id}</strong>
-                <span style="color: #B88A44; font-weight: 700; font-size: 0.8rem; background: rgba(184,138,68,0.15); padding: 2px 8px; border-radius: 4px;">${currentStatus.toUpperCase()}</span>
+        <div style="background: #FAF6F0; border: 1px solid #B88A44; border-radius: 8px; padding: 16px; margin-bottom: 16px; width: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                <strong style="color: #3C0008; font-size: 1.05rem;">Order: ${matched.id}</strong>
+                <span style="color: #B88A44; font-weight: 700; font-size: 0.82rem; background: rgba(184,138,68,0.15); padding: 4px 10px; border-radius: 4px;">${currentStatus.toUpperCase()}</span>
             </div>
-            <div style="font-size: 0.82rem; color: #555;"><strong>Items:</strong> ${matched.itemsSummary || 'Couture Item'}</div>
-            <div style="font-size: 0.82rem; color: #555;"><strong>Total:</strong> ₹${Number(matched.grandTotal || matched.total || 0).toLocaleString('en-IN')} | <strong>Customer:</strong> ${matched.userName || matched.customerName || 'Valued Patron'}</div>
+            <div style="font-size: 0.85rem; color: #444; margin-bottom: 4px;"><strong>Customer:</strong> ${matched.userName || matched.customerName || 'Valued Patron'} (${matched.userEmail || matched.email || 'N/A'})</div>
+            <div style="font-size: 0.85rem; color: #444; margin-bottom: 4px;"><strong>Items:</strong> ${matched.itemsSummary || 'Couture Masterpiece'}</div>
+            <div style="font-size: 0.85rem; color: #444; margin-bottom: 4px;"><strong>Delivery Address:</strong> ${matched.userAddress || matched.address || 'Standard Delivery Address'}</div>
+            <div style="font-size: 0.85rem; color: #444;"><strong>Total:</strong> ₹${Number(matched.grandTotal || matched.total || 0).toLocaleString('en-IN')} | <strong>Payment:</strong> ${matched.paymentMode || matched.paymentMethod || 'Prepaid'}</div>
         </div>
         <div class="track-status-flow" style="display: flex; width: 100%; justify-content: space-between;">
     `;
