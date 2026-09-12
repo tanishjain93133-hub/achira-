@@ -14,6 +14,9 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "ACHIRA Atelier - Admin Dashboard Portal",
   description: "Secure operational control center for ACHIRA Couture and Fine Jewellery.",
+  verification: {
+    google: "1hKWsXo7ZKaImeqdFkFIxd0thwMMOgFAMdaQuPOcM5I",
+  },
 };
 
 export default function RootLayout({ children }) {
