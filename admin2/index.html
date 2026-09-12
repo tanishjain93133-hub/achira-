@@ -983,16 +983,16 @@
         }
 
         // List of legacy hardcoded mock test IDs & fake names to filter out
-        const FAKE_MOCK_ORDER_IDS = ['ACH-TEST-999', 'ACH-TEST', 'ACH-56', 'ACH-55', 'ACH-54', 'ACH-53', 'ACH-52', 'ACH-51', '56', '55', '54', '53', '52', '51'];
+        const FAKE_MOCK_ORDER_IDS = ['ACH-TEST-999', 'ACH-TEST'];
 
         function isFakeRecord(o) {
             if (!o) return true;
-            const id = String(o.id || o.orderId || o.dbId || '').toUpperCase();
-            const name = String(o.userName || o.customerName || o.name || o.customer || '').toLowerCase();
-            const email = String(o.userEmail || o.email || '').toLowerCase();
-            if (id.includes('TEST') || id.includes('MOCK') || FAKE_MOCK_ORDER_IDS.some(f => id === f || id.includes(f))) return true;
-            if (name.includes('kavita') || name.includes('kavin') || name.includes('priya roy') || name.includes('mock user') || name.includes('test customer')) return true;
-            if (email.includes('kavita') || email.includes('kavin') || email.includes('test@') || email.includes('priya.roy')) return true;
+            const id = String(o.id || o.orderId || o.dbId || '').toUpperCase().trim();
+            const name = String(o.userName || o.customerName || o.name || o.customer || '').toLowerCase().trim();
+            const email = String(o.userEmail || o.email || '').toLowerCase().trim();
+            if (id === 'ACH-TEST-999' || id === 'ACH-TEST') return true;
+            if (name === 'kavita mehta' || name === 'kavin mehta' || name === 'priya roy') return true;
+            if (email === 'kavita.mehta@example.com' || email === 'priya.roy@example.com') return true;
             return false;
         }
 
@@ -1039,22 +1039,38 @@
             }
         });
 
-        // Instant Real-Time Cross-Tab Listener for Live Orders
+        // Instant Real-Time Cross-Tab Listener for Live Orders & Enquiries
         try {
             if (typeof BroadcastChannel !== 'undefined') {
                 const channel = new BroadcastChannel('achira_store_channel');
                 channel.onmessage = (event) => {
-                    if (event.data && event.data.type === 'NEW_ORDER') {
+                    if (event.data && (event.data.type === 'NEW_ORDER' || event.data.type === 'NEW_ENQUIRY')) {
+                        fetchLiveData();
+                    }
+                };
+                const globalChannel = new BroadcastChannel('ACHIRA_GLOBAL_DATA_BUS');
+                globalChannel.onmessage = (event) => {
+                    if (event.data && (event.data.type === 'NEW_ORDER' || event.data.type === 'NEW_ENQUIRY' || event.data.type === 'SYNC_ALL')) {
                         fetchLiveData();
                     }
                 };
             }
-            window.addEventListener('storage', (e) => {
-                if (e.key === 'achira_order_event' || e.key === 'orders' || e.key === 'admin_orders') {
-                    fetchLiveData();
-                }
-            });
-        } catch (e) {}
+        } catch(e) {}
+
+        window.addEventListener('storage', (e) => {
+            if (!e.key || ['orders', 'admin_orders', 'enquiries', 'admin_enquiries', 'admin_customers', 'users'].includes(e.key)) {
+                fetchLiveData();
+            }
+        });
+
+        // POLLING INTERVAL: Fast 4-second refresh for 100% instant order & query syncing
+        setInterval(() => {
+            const token = localStorage.getItem('adminToken');
+            const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+            if (token || isLoggedIn) {
+                fetchLiveData();
+            }
+        }, 4000);
 
         async function handleLogin(e) {
             if (e) e.preventDefault();
@@ -1321,7 +1337,7 @@
             customers = Array.from(custMap.values()).filter(c => !isFakeRecord(c));
             setDB('admin_customers', customers);
 
-            // 4. Fetch Enquiries (Real queries only)
+            // 4. Fetch Enquiries (Real queries from Backend API + Supabase DB + Cloud Bins + Local Storage)
             let fetchedEnquiries = [];
             try {
                 const res = await fetch(`${API_BASE}/api/admin/contact`, { headers });
@@ -1331,15 +1347,40 @@
                 }
             } catch (e) {}
 
+            let supabaseEnquiries = [];
+            try {
+                const sEnqRes = await fetch(`${SUPABASE_REST_URL}/enquiries?select=*&order=created_at.desc`, { headers: supabaseHeaders });
+                if (sEnqRes.ok) {
+                    const sEnqData = await sEnqRes.json();
+                    if (Array.isArray(sEnqData)) {
+                        supabaseEnquiries = sEnqData.map(se => ({
+                            id: se.id,
+                            name: se.name || 'Valued Patron',
+                            email: se.email || '',
+                            phone: se.phone || se.contact || '',
+                            contact: se.phone || se.contact || '',
+                            subject: se.subject || 'Atelier Enquiry',
+                            message: se.message || '',
+                            date: se.date || (se.created_at ? new Date(se.created_at).toLocaleDateString('en-IN') : 'Today'),
+                            createdAt: se.created_at
+                        }));
+                    }
+                }
+            } catch (e) {}
+
+            const localEnquiries = getDB('enquiries', []);
+            const localAdminEnquiries = getDB('admin_enquiries', []);
+
             const enqMap = new Map();
-            [...fetchedEnquiries, ...cloudEnquiries].forEach(e => {
+            [...fetchedEnquiries, ...supabaseEnquiries, ...cloudEnquiries, ...localEnquiries, ...localAdminEnquiries].forEach(e => {
                 if (!e || isFakeRecord(e)) return;
-                const key = String(e.id || (e.email + '_' + e.message));
+                const key = String(e.id || (e.email + '_' + (e.message || e.subject || '')));
                 if (!enqMap.has(key)) enqMap.set(key, e);
             });
             enquiries = Array.from(enqMap.values()).filter(e => !isFakeRecord(e));
             enquiries.sort((a, b) => parseOrderTimestamp(b) - parseOrderTimestamp(a));
             setDB('enquiries', enquiries);
+            setDB('admin_enquiries', enquiries);
 
             // 5. Fetch Coupons
             try {

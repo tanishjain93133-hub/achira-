@@ -1851,6 +1851,38 @@
                 localStorage.setItem('admin_enquiries', JSON.stringify(enqs));
             } catch(err) {}
 
+            // Instant Cross-Tab BroadcastChannel
+            try {
+                const bc = new BroadcastChannel('ACHIRA_GLOBAL_DATA_BUS');
+                bc.postMessage({ type: 'NEW_ENQUIRY', payload: newEnquiry });
+            } catch(e) {}
+
+            // Direct Supabase Database Insert
+            const SUPABASE_REST_URL = 'https://yixfebpbiqlhigunjbvt.supabase.co/rest/v1';
+            const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpeGZlYnBiaXFsaGlndW5qYnZ0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzE2MDkyOSwiZXhwIjoyMTAyNzM2OTI5fQ.ycIKFrEGvueg25UEntZE-4nQDIYz_QQB_5_zlTWf0sU';
+            try {
+                fetch(`${SUPABASE_REST_URL}/enquiries`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_API_KEY,
+                        'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'resolution=merge-duplicates'
+                    },
+                    body: JSON.stringify({
+                        id: newEnquiry.id,
+                        name: newEnquiry.name,
+                        email: newEnquiry.email,
+                        phone: newEnquiry.phone,
+                        contact: newEnquiry.contact,
+                        subject: newEnquiry.subject,
+                        message: newEnquiry.message,
+                        date: newEnquiry.date,
+                        created_at: newEnquiry.createdAt
+                    })
+                }).catch(() => {});
+            } catch(e) {}
+
             // Send to backend API
             try {
                 fetch('/api/user/contact', {

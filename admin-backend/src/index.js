@@ -980,16 +980,16 @@ const fetchAllAdminOrdersHandler = async (req, res) => {
       } catch (e) {}
     }
 
-    // 3. Merge with memory store and filter out any fake/test records
-    const FAKE_MOCK_ORDER_IDS = ['ACH-TEST-999', 'ACH-TEST', 'ACH-56', 'ACH-55', 'ACH-54', 'ACH-53', 'ACH-52', 'ACH-51', '56', '55', '54', '53', '52', '51'];
+    // 3. Merge with memory store and filter out only legacy hardcoded mock test records
+    const FAKE_MOCK_ORDER_IDS = ['ACH-TEST-999', 'ACH-TEST'];
     const isFakeRecord = (o) => {
       if (!o) return true;
-      const id = String(o.id || o.orderId || o.dbId || '').toUpperCase();
-      const name = String(o.userName || o.customerName || o.name || o.customer || (o.user ? o.user.name : '')).toLowerCase();
-      const email = String(o.userEmail || o.email || (o.user ? o.user.email : '')).toLowerCase();
-      if (id.includes('TEST') || id.includes('MOCK') || FAKE_MOCK_ORDER_IDS.some(f => id === f || id.includes(f))) return true;
-      if (name.includes('kavita') || name.includes('kavin') || name.includes('priya roy') || name.includes('mock user') || name.includes('test customer')) return true;
-      if (email.includes('kavita') || email.includes('kavin') || email.includes('test@') || email.includes('priya.roy')) return true;
+      const id = String(o.id || o.orderId || o.dbId || '').toUpperCase().trim();
+      const name = String(o.userName || o.customerName || o.name || o.customer || (o.user ? o.user.name : '')).toLowerCase().trim();
+      const email = String(o.userEmail || o.email || (o.user ? o.user.email : '')).toLowerCase().trim();
+      if (id === 'ACH-TEST-999' || id === 'ACH-TEST') return true;
+      if (name === 'kavita mehta' || name === 'kavin mehta' || name === 'priya roy') return true;
+      if (email === 'kavita.mehta@example.com' || email === 'priya.roy@example.com') return true;
       return false;
     };
 
@@ -1310,6 +1310,11 @@ const contactSubmitHandler = async (req, res) => {
   memoryStore.enquiries.unshift(enqData);
   saveFileDatabase();
 
+  // Persist to Supabase if available
+  if (supabase) {
+    supabase.insertSupabaseEnquiry(enqData).catch(() => {});
+  }
+
   // Multi-bin cloud sync
   for (const binUrl of CLOUD_BINS) {
     try {
@@ -1353,19 +1358,26 @@ const fetchEnquiriesHandler = async (req, res) => {
       } catch (e) {}
     }
 
+    let supabaseEnquiries = [];
+    if (supabase) {
+      try {
+        supabaseEnquiries = await supabase.getSupabaseEnquiries();
+      } catch (e) {}
+    }
+
     const isFakeEnquiry = (e) => {
       if (!e) return true;
-      const id = String(e.id || '').toUpperCase();
-      const name = String(e.name || '').toLowerCase();
-      const email = String(e.email || '').toLowerCase();
-      if (id.includes('TEST') || id.includes('MOCK')) return true;
-      if (name.includes('kavita') || name.includes('kavin') || name.includes('priya roy') || name.includes('test user')) return true;
-      if (email.includes('kavita') || email.includes('kavin') || email.includes('test@') || email.includes('priya.roy')) return true;
+      const id = String(e.id || '').toUpperCase().trim();
+      const name = String(e.name || '').toLowerCase().trim();
+      const email = String(e.email || '').toLowerCase().trim();
+      if (id === 'ACH-TEST-999' || id === 'ACH-TEST') return true;
+      if (name === 'kavita mehta' || name === 'kavin mehta' || name === 'priya roy') return true;
+      if (email === 'kavita.mehta@example.com' || email === 'priya.roy@example.com') return true;
       return false;
     };
 
     const enqMap = new Map();
-    [...cloudEnquiries, ...memoryStore.enquiries].forEach(e => {
+    [...supabaseEnquiries, ...cloudEnquiries, ...memoryStore.enquiries].forEach(e => {
       if (e && e.id && !isFakeEnquiry(e)) {
         const key = String(e.id);
         if (!enqMap.has(key)) enqMap.set(key, e);

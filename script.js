@@ -2159,6 +2159,9 @@ function handleContactSubmit(e) {
         return;
     }
 
+    const SUPABASE_REST_URL = 'https://yixfebpbiqlhigunjbvt.supabase.co/rest/v1';
+    const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpeGZlYnBiaXFsaGlndW5qYnZ0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzE2MDkyOSwiZXhwIjoyMTAyNzM2OTI5fQ.ycIKFrEGvueg25UEntZE-4nQDIYz_QQB_5_zlTWf0sU';
+
     const newEnquiry = {
         id: 'EQ-' + Math.floor(1000 + Math.random() * 9000),
         name: name,
@@ -2171,11 +2174,41 @@ function handleContactSubmit(e) {
         createdAt: new Date().toISOString()
     };
 
+    // 1. Instant Local Storage Persistence
     const list = getDB('enquiries');
     list.unshift(newEnquiry);
     setDB('enquiries', list);
     setDB('admin_enquiries', list);
 
+    // 2. Instant Cross-Tab BroadcastChannel & Storage Event
+    try {
+        const bc = new BroadcastChannel('ACHIRA_GLOBAL_DATA_BUS');
+        bc.postMessage({ type: 'NEW_ENQUIRY', payload: newEnquiry });
+    } catch(e) {}
+
+    // 3. Direct Supabase Database Insert
+    fetch(`${SUPABASE_REST_URL}/enquiries`, {
+        method: 'POST',
+        headers: {
+            'apikey': SUPABASE_API_KEY,
+            'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({
+            id: newEnquiry.id,
+            name: newEnquiry.name,
+            email: newEnquiry.email,
+            phone: newEnquiry.phone,
+            contact: newEnquiry.contact,
+            subject: newEnquiry.subject,
+            message: newEnquiry.message,
+            date: newEnquiry.date,
+            created_at: newEnquiry.createdAt
+        })
+    }).catch(() => {});
+
+    // 4. Send to Serverless Backend API
     fetch(`${API_BASE}/api/user/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2197,7 +2230,7 @@ function handleContactSubmit(e) {
     })
     .catch(() => {});
 
-    // Direct multi-device cloud sync backup for enquiries on Vercel
+    // 5. Direct multi-device cloud sync backup for enquiries on Vercel
     const ENQUIRY_CLOUD_BINS = [
         'https://extendsclass.com/api/json-storage/bin/bbcaace',
         'https://extendsclass.com/api/json-storage/bin/ecaaafd'
