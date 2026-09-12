@@ -529,32 +529,37 @@
 
         <!-- OVERVIEW TAB -->
         <div id="tab-overview" class="tab-content">
-            <div class="stats-grid">
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
                 <div class="stat-card">
                     <div class="label">Total Revenue</div>
-                    <div class="value" id="statRevenue">₹4,85,000</div>
+                    <div class="value" id="statRevenue">₹0</div>
                     <span style="color: var(--success); font-size: 0.75rem; font-weight: 600;">↑ Live sales updated</span>
                 </div>
                 <div class="stat-card">
                     <div class="label">Total Orders</div>
-                    <div class="value" id="statOrders">142</div>
+                    <div class="value" id="statOrders">0</div>
                     <span style="color: var(--success); font-size: 0.75rem; font-weight: 600;">↑ All orders counted</span>
                 </div>
                 <div class="stat-card">
+                    <div class="label">Customer Enquiries</div>
+                    <div class="value" id="statEnquiries">0</div>
+                    <span style="color: var(--info); font-size: 0.75rem; font-weight: 600;">📩 Live Patron Queries</span>
+                </div>
+                <div class="stat-card">
                     <div class="label">Active Products</div>
-                    <div class="value" id="statProducts">18</div>
+                    <div class="value" id="statProducts">147</div>
                     <span style="color: var(--info); font-size: 0.75rem; font-weight: 600;">Couture Catalogue</span>
                 </div>
                 <div class="stat-card">
                     <div class="label">Registered Customers</div>
-                    <div class="value" id="statCustomers">98</div>
+                    <div class="value" id="statCustomers">0</div>
                     <span style="color: var(--gold); font-size: 0.75rem; font-weight: 600;">★ Active Patrons</span>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Recent Orders</h3>
+                    <h3 class="card-title">Recent Customer Orders</h3>
                     <button class="btn-gold" style="width: auto; padding: 8px 16px;" onclick="switchTab('orders', document.querySelectorAll('.menu-item')[2])">View All Orders</button>
                 </div>
                 <div class="table-responsive">
@@ -570,6 +575,30 @@
                             </tr>
                         </thead>
                         <tbody id="recentOrdersBody">
+                            <!-- Filled dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 24px;">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Customer Queries &amp; Messages</h3>
+                    <button class="btn-gold" style="width: auto; padding: 8px 16px;" onclick="switchTab('enquiries', document.querySelectorAll('.menu-item')[5])">View All Enquiries</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Query ID</th>
+                                <th>Customer Name</th>
+                                <th>Contact &amp; Email</th>
+                                <th>Subject</th>
+                                <th>Message</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentEnquiriesOverviewBody">
                             <!-- Filled dynamically -->
                         </tbody>
                     </table>
@@ -1633,6 +1662,9 @@
             const ordEl = document.getElementById('statOrders');
             if (ordEl) ordEl.textContent = uniqueOrders.length;
 
+            const enqStatEl = document.getElementById('statEnquiries');
+            if (enqStatEl) enqStatEl.textContent = enquiries.length;
+
             const prodStatEl = document.getElementById('statProducts');
             if (prodStatEl) prodStatEl.textContent = products.length;
 
@@ -1689,6 +1721,25 @@
                             <td><strong style="color: var(--gold);">₹${(o.grandTotal || o.total || 0).toLocaleString('en-IN')}</strong></td>
                             <td><span class="badge ${(o.status || o.orderStatus) === 'Delivered' ? 'badge-success' : ((o.status || o.orderStatus) === 'Cancelled' ? 'badge-danger' : 'badge-warning')}">${o.status || o.orderStatus || 'Processing'}</span></td>
                             <td><span style="font-size: 0.78rem; color: var(--text-muted);">${o.date || 'Today'}</span></td>
+                        </tr>
+                    `).join('');
+                }
+            }
+
+            // Render Overview Recent Enquiries Table (6 columns)
+            const recentEnqBody = document.getElementById('recentEnquiriesOverviewBody');
+            if (recentEnqBody) {
+                if (enquiries.length === 0) {
+                    recentEnqBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 25px;">No customer enquiries received yet. Queries submitted via the website will appear here in real-time.</td></tr>`;
+                } else {
+                    recentEnqBody.innerHTML = enquiries.slice(0, 8).map((eq, idx) => `
+                        <tr style="cursor: pointer;" onclick="switchTab('enquiries', document.querySelectorAll('.menu-item')[5])">
+                            <td><strong style="color: var(--gold);">${eq.id || 'EQ-' + (1001 + idx)}</strong></td>
+                            <td><strong>${eq.name || 'Valued Patron'}</strong></td>
+                            <td><a href="mailto:${eq.email || ''}" style="color: var(--primary); text-decoration: none; font-weight: 500;">${eq.email || 'N/A'}</a><br><span style="font-size: 0.75rem; color: var(--text-muted);">${eq.phone || eq.contact || ''}</span></td>
+                            <td><span class="badge badge-info">${eq.subject || 'Atelier Enquiry'}</span></td>
+                            <td style="max-width: 250px; font-size: 0.82rem; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${eq.message || 'Customer consultation inquiry'}</td>
+                            <td><span style="font-size: 0.78rem; color: var(--text-muted);">${eq.date || 'Recent'}</span></td>
                         </tr>
                     `).join('');
                 }
