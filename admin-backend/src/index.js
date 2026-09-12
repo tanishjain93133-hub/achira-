@@ -1220,19 +1220,24 @@ app.put('/api/admin/settings', authenticateToken, requireAdmin, async (req, res)
 
 // --- ENQUIRIES & CONTACT ---
 
-app.post('/api/user/contact', async (req, res) => {
-  const { name, email, phone, subject, message } = req.body;
+// --- ENQUIRIES & CONTACT ---
+
+const contactSubmitHandler = async (req, res) => {
+  const { name, email, phone, subject, message } = req.body || {};
   if (!name || !email || !message) {
     return res.status(400).json({ success: false, error: 'Name, email and message are required.' });
   }
 
   const enqData = {
-    name,
-    email: email.toLowerCase().trim(),
-    phone: phone || '',
-    subject: subject || 'General Enquiry',
-    message,
+    id: 'EQ-' + Math.floor(1000 + Math.random() * 9000),
+    name: (name || '').trim(),
+    email: (email || '').toLowerCase().trim(),
+    phone: phone || '+91 98765 43210',
+    contact: phone || '+91 98765 43210',
+    subject: subject || 'General Atelier Enquiry',
+    message: (message || '').trim(),
     date: new Date().toLocaleDateString('en-IN'),
+    createdAt: new Date().toISOString(),
     status: 'Unread'
   };
 
@@ -1240,27 +1245,112 @@ app.post('/api/user/contact', async (req, res) => {
     if (isDbConnected && prisma) {
       await prisma.enquiry.create({ data: enqData }).catch(() => {});
     }
-    memoryStore.enquiries.unshift({ id: memoryStore.enquiries.length + 1, ...enqData });
-    res.json({ success: true, message: 'Your enquiry has been received.' });
-  } catch (error) {
-    res.json({ success: true, message: 'Your enquiry has been received.' });
-  }
-});
+  } catch (e) {}
 
-app.get('/api/admin/contact', authenticateToken, requireAdmin, async (req, res) => {
+  memoryStore.enquiries.unshift(enqData);
+  saveFileDatabase();
+
+  // Multi-bin cloud sync
+  for (const binUrl of CLOUD_BINS) {
+    try {
+      const getRes = await fetch(`${binUrl}?t=${Date.now()}`);
+      if (getRes.ok) {
+        const cloudData = await getRes.json();
+        if (cloudData && typeof cloudData === 'object') {
+          if (!Array.isArray(cloudData.enquiries)) cloudData.enquiries = [];
+          if (!cloudData.enquiries.some(e => String(e.id) === String(enqData.id))) {
+            cloudData.enquiries.unshift(enqData);
+          }
+          await fetch(binUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cloudData)
+          });
+        }
+      }
+    } catch (err) {}
+  }
+
+  res.status(201).json({ success: true, message: 'Your enquiry has been received.', enquiry: enqData });
+};
+
+app.post('/api/user/contact', contactSubmitHandler);
+app.post('/api/contact', contactSubmitHandler);
+app.post('/api/enquiries', contactSubmitHandler);
+
+const fetchEnquiriesHandler = async (req, res) => {
   try {
-    let enquiries = [];
-    if (isDbConnected && prisma) {
+    let cloudEnquiries = [];
+    for (const binUrl of CLOUD_BINS) {
       try {
-        enquiries = await prisma.enquiry.findMany({ orderBy: { id: 'desc' } });
+        const cRes = await fetch(`${binUrl}?t=${Date.now()}`);
+        if (cRes.ok) {
+          const cData = await cRes.json();
+          if (cData && Array.isArray(cData.enquiries)) {
+            cloudEnquiries.push(...cData.enquiries);
+          }
+        }
       } catch (e) {}
     }
-    if (!enquiries || enquiries.length === 0) enquiries = memoryStore.enquiries;
-    res.json(enquiries);
+
+    const enqMap = new Map();
+    [...cloudEnquiries, ...memoryStore.enquiries].forEach(e => {
+      if (e && e.id) {
+        const key = String(e.id);
+        if (!enqMap.has(key)) enqMap.set(key, e);
+      }
+    });
+
+    const unifiedEnquiries = Array.from(enqMap.values()).sort((a, b) => {
+      const dA = new Date(a.createdAt || a.date || 0).getTime();
+      const dB = new Date(b.createdAt || b.date || 0).getTime();
+      return dB - dA;
+    });
+
+    res.json(unifiedEnquiries);
   } catch (error) {
     res.json(memoryStore.enquiries);
   }
-});
+};
+
+app.get('/api/admin/contact', authenticateToken, requireAdmin, fetchEnquiriesHandler);
+app.get('/api/admin/enquiries', authenticateToken, requireAdmin, fetchEnquiriesHandler);
+app.get('/api/admin2/enquiries', authenticateToken, requireAdmin, fetchEnquiriesHandler);
+
+const deleteEnquiryHandler = async (req, res) => {
+  const id = req.params.id;
+  try {
+    if (isDbConnected && prisma) {
+      await prisma.enquiry.delete({ where: { id } }).catch(() => {});
+    }
+    memoryStore.enquiries = memoryStore.enquiries.filter(e => String(e.id) !== String(id) && e.name !== id);
+    saveFileDatabase();
+
+    for (const binUrl of CLOUD_BINS) {
+      try {
+        const cRes = await fetch(`${binUrl}?t=${Date.now()}`);
+        if (cRes.ok) {
+          const cData = await cRes.json();
+          if (cData && Array.isArray(cData.enquiries)) {
+            cData.enquiries = cData.enquiries.filter(e => String(e.id) !== String(id) && e.name !== id);
+            await fetch(binUrl, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(cData)
+            });
+          }
+        }
+      } catch (e) {}
+    }
+
+    res.json({ success: true, message: 'Enquiry deleted successfully.' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to delete enquiry.' });
+  }
+};
+
+app.delete('/api/admin/contact/:id', authenticateToken, requireAdmin, deleteEnquiryHandler);
+app.delete('/api/admin/enquiries/:id', authenticateToken, requireAdmin, deleteEnquiryHandler);
 
 // --- AUDIT LOGS ---
 

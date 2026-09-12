@@ -1335,25 +1335,27 @@
                 });
             } catch (e) {}
 
-            // Update in Cloud Store
-            try {
-                const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-                if (cloudRes.ok) {
-                    const cloudData = await cloudRes.json();
-                    if (cloudData && Array.isArray(cloudData.orders)) {
-                        const cOrder = cloudData.orders.find(o => String(o.id) === String(orderId) || String(o.dbId) === String(orderId));
-                        if (cOrder) {
-                            cOrder.status = newStatus;
-                            cOrder.orderStatus = newStatus;
-                            await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
-                                method: 'PUT',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(cloudData)
-                            });
+            // Update across both Cloud Bins
+            for (const binUrl of ADMIN_CLOUD_BINS) {
+                try {
+                    const cloudRes = await fetch(`${binUrl}?t=${Date.now()}`);
+                    if (cloudRes.ok) {
+                        const cloudData = await cloudRes.json();
+                        if (cloudData && Array.isArray(cloudData.orders)) {
+                            const cOrder = cloudData.orders.find(o => String(o.id) === String(orderId) || String(o.dbId) === String(orderId));
+                            if (cOrder) {
+                                cOrder.status = newStatus;
+                                cOrder.orderStatus = newStatus;
+                                await fetch(binUrl, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(cloudData)
+                                });
+                            }
                         }
                     }
-                }
-            } catch (e) {}
+                } catch (e) {}
+            }
 
             renderAllData();
         }
@@ -1372,20 +1374,22 @@
                 });
             } catch (e) {}
 
-            try {
-                const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-                if (cloudRes.ok) {
-                    const cloudData = await cloudRes.json();
-                    if (cloudData && Array.isArray(cloudData.orders)) {
-                        cloudData.orders = cloudData.orders.filter(o => String(o.id) !== String(orderId) && String(o.dbId) !== String(orderId));
-                        await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(cloudData)
-                        });
+            for (const binUrl of ADMIN_CLOUD_BINS) {
+                try {
+                    const cloudRes = await fetch(`${binUrl}?t=${Date.now()}`);
+                    if (cloudRes.ok) {
+                        const cloudData = await cloudRes.json();
+                        if (cloudData && Array.isArray(cloudData.orders)) {
+                            cloudData.orders = cloudData.orders.filter(o => String(o.id) !== String(orderId) && String(o.dbId) !== String(orderId));
+                            await fetch(binUrl, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(cloudData)
+                            });
+                        }
                     }
-                }
-            } catch (e) {}
+                } catch (e) {}
+            }
 
             renderAllData();
         }
@@ -1403,18 +1407,20 @@
                 });
             } catch (e) {}
 
-            try {
-                const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-                if (cloudRes.ok) {
-                    const cloudData = await cloudRes.json();
-                    cloudData.orders = [];
-                    await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(cloudData)
-                    });
-                }
-            } catch (e) {}
+            for (const binUrl of ADMIN_CLOUD_BINS) {
+                try {
+                    const cloudRes = await fetch(`${binUrl}?t=${Date.now()}`);
+                    if (cloudRes.ok) {
+                        const cloudData = await cloudRes.json();
+                        cloudData.orders = [];
+                        await fetch(binUrl, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(cloudData)
+                        });
+                    }
+                } catch (e) {}
+            }
 
             fetchLiveData();
             alert('✦ All old test orders cleared! Your admin panel is now ready to receive real live customer orders.');
@@ -1533,8 +1539,35 @@
         }
 
         async function deleteEnquiry(id) {
-            enquiries = enquiries.filter(e => e.id !== id && e.name !== id);
+            if (!confirm('Are you sure you want to delete this enquiry?')) return;
+            enquiries = enquiries.filter(e => String(e.id) !== String(id) && e.name !== id);
             setDB('enquiries', enquiries);
+            setDB('admin_enquiries', enquiries);
+
+            try {
+                await fetch(`${API_BASE}/api/admin/enquiries/${id}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeader()
+                });
+            } catch (err) {}
+
+            for (const binUrl of ADMIN_CLOUD_BINS) {
+                try {
+                    const cRes = await fetch(`${binUrl}?t=${Date.now()}`);
+                    if (cRes.ok) {
+                        const cData = await cRes.json();
+                        if (cData && Array.isArray(cData.enquiries)) {
+                            cData.enquiries = cData.enquiries.filter(e => String(e.id) !== String(id) && e.name !== id);
+                            await fetch(binUrl, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(cData)
+                            });
+                        }
+                    }
+                } catch (e) {}
+            }
+
             renderAllData();
         }
 

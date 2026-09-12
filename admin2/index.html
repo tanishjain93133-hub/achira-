@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="products_data.js"></script>
     <style>
         :root {
             --primary: #3C0008;
@@ -572,7 +573,11 @@
                             <!-- Filled dynamically -->
                         </tbody>
                     </table>
-            <!-- PRODUCTS TAB -->
+                </div>
+            </div>
+        </div>
+
+        <!-- PRODUCTS TAB -->
         <div id="tab-products" class="tab-content" style="display: none;">
             <div class="card">
                 <div class="card-header" style="flex-wrap: wrap; gap: 12px;">
@@ -901,23 +906,36 @@
     </div>
 
     <script>
+        const cleanCatalogData = (typeof ACHIRA_PRODUCTS_DATA !== 'undefined' && Array.isArray(ACHIRA_PRODUCTS_DATA))
+            ? ACHIRA_PRODUCTS_DATA
+            : [];
+
         let defaultProducts = [
-            { id: 101, name: "Noor-e-Kashmir Midnight Black Embroidered Anarkali Set", category: "Anarkali", price: 3999, availability: "New Arrival", image: "anarkali1.jpg" },
-            { id: 102, name: "Zaffran Kesariya Mustard Yoke Embroidered Anarkali Suit", category: "Anarkali", price: 4499, availability: "Best Seller", image: "anarkali2.jpg" },
-            { id: 201, name: "Mayura Mustard & Teal Blue Embroidered Kurta Pant Set", category: "Kurta Sets", price: 3450, availability: "New Arrival", image: "kurtaset1.jpg" },
-            { id: 202, name: "Parijaat Lime Green V-Neck Motif Embroidered Kurta Set", category: "Kurta Sets", price: 3850, availability: "Best Seller", image: "kurtaset2.jpg" },
-            { id: 301, name: "Concentric Circular Halo Diamond Studs", category: "Jewellery", price: 45000, availability: "New Arrival", image: "jewellery1.jpg" },
-            { id: 303, name: "Concentric Oval Double Halo Diamond Studs", category: "Jewellery", price: 52000, availability: "Best Seller", image: "jewellery3.jpg" },
-            { id: 401, name: "Aura Wave Diamond Cluster Ring", category: "Jewellery", price: 48500, availability: "New Arrival", image: "ring1.jpg" }
+            ...cleanCatalogData,
+            { id: 101, numericId: 101, name: "Noor-e-Kashmir Midnight Black Embroidered Anarkali Set", category: "Anarkali", price: 3999, stock: 25, availability: "New Arrival", image: "anarkali1.jpg" },
+            { id: 102, numericId: 102, name: "Zaffran Kesariya Mustard Yoke Embroidered Anarkali Suit", category: "Anarkali", price: 4499, stock: 20, availability: "Best Seller", image: "anarkali2.jpg" },
+            { id: 201, numericId: 201, name: "Mayura Mustard & Teal Blue Embroidered Kurta Pant Set", category: "Kurta Sets", price: 3450, stock: 18, availability: "New Arrival", image: "kurtaset1.jpg" },
+            { id: 202, numericId: 202, name: "Parijaat Lime Green V-Neck Motif Embroidered Kurta Set", category: "Kurta Sets", price: 3850, stock: 15, availability: "Best Seller", image: "kurtaset2.jpg" },
+            { id: 301, numericId: 301, name: "Concentric Circular Halo Diamond Studs", category: "Jewellery", price: null, stock: 10, availability: "New Arrival", image: "jewellery1.jpg" },
+            { id: 303, numericId: 303, name: "Concentric Oval Double Halo Diamond Studs", category: "Jewellery", price: null, stock: 8, availability: "Best Seller", image: "jewellery3.jpg" },
+            { id: 401, numericId: 401, name: "Aura Wave Diamond Cluster Ring", category: "Jewellery", price: null, stock: 12, availability: "New Arrival", image: "ring1.jpg" }
         ];
 
         let defaultOrders = [];
-        let defaultCustomers = [];
-        let defaultCoupons = [
-            { code: "ROYAL10", discount: "10% OFF", expiry: "2026-12-31", status: "Active" },
-            { code: "FESTIVE20", discount: "20% OFF", expiry: "2026-10-30", status: "Active" }
+        let defaultCustomers = [
+            { id: 'CUST-101', name: 'Princess Ananya Rao', email: 'ananya.rao@achira.com', phone: '+91 98765 43210', address: '74 Heritage Boulevard, Malabar Hill, Mumbai - 400006', ordersCount: 2, totalSpent: 9438, status: 'Active' },
+            { id: 'CUST-102', name: 'Riya Sen Sharma', email: 'riya.sen@couture.in', phone: '+91 98201 55432', address: 'Flat 12B, Ocean View Towers, Worli, Mumbai - 400018', ordersCount: 1, totalSpent: 4719, status: 'Active' },
+            { id: 'CUST-103', name: 'Meera Singhania', email: 'meera.s@singhania.org', phone: '+91 99887 76655', address: '45 Amrapali Marg, Civil Lines, Jaipur - 302006', ordersCount: 1, totalSpent: 4499, status: 'Active' }
         ];
-        let defaultEnquiries = [];
+        let defaultCoupons = [
+            { code: "ROYAL10", discount: 10, expiry: "2026-12-31", status: "Active" },
+            { code: "FESTIVE20", discount: 20, expiry: "2026-10-30", status: "Active" },
+            { code: "LUXE15", discount: 15, expiry: "2026-12-31", status: "Active" },
+            { code: "ACHIRA1960", discount: 20, expiry: "2026-12-31", status: "Active" }
+        ];
+        let defaultEnquiries = [
+            { id: 'EQ-1001', name: 'Devika Kapadia', email: 'devika.k@gmail.com', contact: '+91 98210 44321', subject: 'Bridal Couture Consultation', message: 'Looking for custom bridal fitting for December wedding reception in Udaipur.', date: 'Today' }
+        ];
         let defaultLogs = [];
 
         function getDB(table, defaultVal = []) {
@@ -938,8 +956,8 @@
         // List of legacy hardcoded mock test IDs to filter out
         const FAKE_MOCK_ORDER_IDS = ['ACH-56', 'ACH-55', 'ACH-54', 'ACH-53', 'ACH-52', 'ACH-51', '56', '55', '54', '53', '52', '51'];
 
-        let products = getDB('admin_products', defaultProducts).filter(p => p && p.image && !p.image.includes('unsplash.com') && ![1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13].includes(p.id));
-        if (products.length === 0) products = defaultProducts;
+        let storedProducts = getDB('admin_products', []);
+        let products = storedProducts.length >= 10 ? storedProducts : defaultProducts;
         let orders = getDB('admin_orders', defaultOrders).filter(o => o && !FAKE_MOCK_ORDER_IDS.includes(String(o.id)) && !FAKE_MOCK_ORDER_IDS.includes(String(o.dbId)));
         let customers = getDB('admin_customers', defaultCustomers);
         let coupons = getDB('admin_coupons', defaultCoupons);
@@ -1108,16 +1126,34 @@
             let cloudUsers = [];
             let cloudLogs = [];
             let cloudEnquiries = [];
-            try {
-                const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-                if (cloudRes.ok) {
-                    const cloudData = await cloudRes.json();
-                    if (cloudData && Array.isArray(cloudData.orders)) cloudOrders = cloudData.orders;
-                    if (cloudData && Array.isArray(cloudData.users)) cloudUsers = cloudData.users;
-                    if (cloudData && Array.isArray(cloudData.logs)) cloudLogs = cloudData.logs;
-                    if (cloudData && Array.isArray(cloudData.enquiries)) cloudEnquiries = cloudData.enquiries;
-                }
-            } catch (err) {}
+            const ADMIN_CLOUD_BINS = [
+                'https://extendsclass.com/api/json-storage/bin/bbcaace',
+                'https://extendsclass.com/api/json-storage/bin/ecaaafd'
+            ];
+            for (const binUrl of ADMIN_CLOUD_BINS) {
+                try {
+                    const cloudRes = await fetch(`${binUrl}?t=${Date.now()}`);
+                    if (cloudRes.ok) {
+                        const cloudData = await cloudRes.json();
+                        if (cloudData && Array.isArray(cloudData.orders)) {
+                            cloudData.orders.forEach(co => {
+                                if (co && co.id && !cloudOrders.some(o => String(o.id) === String(co.id))) {
+                                    cloudOrders.push(co);
+                                }
+                            });
+                        }
+                        if (cloudData && Array.isArray(cloudData.users)) {
+                            cloudData.users.forEach(cu => {
+                                if (cu && cu.email && !cloudUsers.some(u => u.email === cu.email)) {
+                                    cloudUsers.push(cu);
+                                }
+                            });
+                        }
+                        if (cloudData && Array.isArray(cloudData.logs)) cloudLogs.push(...cloudData.logs);
+                        if (cloudData && Array.isArray(cloudData.enquiries)) cloudEnquiries.push(...cloudData.enquiries);
+                    }
+                } catch (err) {}
+            }
 
             const localAdminOrders = getDB('admin_orders', []);
             const localStoreOrders = getDB('orders', []);
@@ -1299,25 +1335,27 @@
                 });
             } catch (e) {}
 
-            // Update in Cloud Store
-            try {
-                const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-                if (cloudRes.ok) {
-                    const cloudData = await cloudRes.json();
-                    if (cloudData && Array.isArray(cloudData.orders)) {
-                        const cOrder = cloudData.orders.find(o => String(o.id) === String(orderId) || String(o.dbId) === String(orderId));
-                        if (cOrder) {
-                            cOrder.status = newStatus;
-                            cOrder.orderStatus = newStatus;
-                            await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
-                                method: 'PUT',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(cloudData)
-                            });
+            // Update across both Cloud Bins
+            for (const binUrl of ADMIN_CLOUD_BINS) {
+                try {
+                    const cloudRes = await fetch(`${binUrl}?t=${Date.now()}`);
+                    if (cloudRes.ok) {
+                        const cloudData = await cloudRes.json();
+                        if (cloudData && Array.isArray(cloudData.orders)) {
+                            const cOrder = cloudData.orders.find(o => String(o.id) === String(orderId) || String(o.dbId) === String(orderId));
+                            if (cOrder) {
+                                cOrder.status = newStatus;
+                                cOrder.orderStatus = newStatus;
+                                await fetch(binUrl, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(cloudData)
+                                });
+                            }
                         }
                     }
-                }
-            } catch (e) {}
+                } catch (e) {}
+            }
 
             renderAllData();
         }
@@ -1336,20 +1374,22 @@
                 });
             } catch (e) {}
 
-            try {
-                const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-                if (cloudRes.ok) {
-                    const cloudData = await cloudRes.json();
-                    if (cloudData && Array.isArray(cloudData.orders)) {
-                        cloudData.orders = cloudData.orders.filter(o => String(o.id) !== String(orderId) && String(o.dbId) !== String(orderId));
-                        await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(cloudData)
-                        });
+            for (const binUrl of ADMIN_CLOUD_BINS) {
+                try {
+                    const cloudRes = await fetch(`${binUrl}?t=${Date.now()}`);
+                    if (cloudRes.ok) {
+                        const cloudData = await cloudRes.json();
+                        if (cloudData && Array.isArray(cloudData.orders)) {
+                            cloudData.orders = cloudData.orders.filter(o => String(o.id) !== String(orderId) && String(o.dbId) !== String(orderId));
+                            await fetch(binUrl, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(cloudData)
+                            });
+                        }
                     }
-                }
-            } catch (e) {}
+                } catch (e) {}
+            }
 
             renderAllData();
         }
@@ -1367,18 +1407,20 @@
                 });
             } catch (e) {}
 
-            try {
-                const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-                if (cloudRes.ok) {
-                    const cloudData = await cloudRes.json();
-                    cloudData.orders = [];
-                    await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(cloudData)
-                    });
-                }
-            } catch (e) {}
+            for (const binUrl of ADMIN_CLOUD_BINS) {
+                try {
+                    const cloudRes = await fetch(`${binUrl}?t=${Date.now()}`);
+                    if (cloudRes.ok) {
+                        const cloudData = await cloudRes.json();
+                        cloudData.orders = [];
+                        await fetch(binUrl, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(cloudData)
+                        });
+                    }
+                } catch (e) {}
+            }
 
             fetchLiveData();
             alert('✦ All old test orders cleared! Your admin panel is now ready to receive real live customer orders.');
@@ -1497,8 +1539,35 @@
         }
 
         async function deleteEnquiry(id) {
-            enquiries = enquiries.filter(e => e.id !== id && e.name !== id);
+            if (!confirm('Are you sure you want to delete this enquiry?')) return;
+            enquiries = enquiries.filter(e => String(e.id) !== String(id) && e.name !== id);
             setDB('enquiries', enquiries);
+            setDB('admin_enquiries', enquiries);
+
+            try {
+                await fetch(`${API_BASE}/api/admin/enquiries/${id}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeader()
+                });
+            } catch (err) {}
+
+            for (const binUrl of ADMIN_CLOUD_BINS) {
+                try {
+                    const cRes = await fetch(`${binUrl}?t=${Date.now()}`);
+                    if (cRes.ok) {
+                        const cData = await cRes.json();
+                        if (cData && Array.isArray(cData.enquiries)) {
+                            cData.enquiries = cData.enquiries.filter(e => String(e.id) !== String(id) && e.name !== id);
+                            await fetch(binUrl, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(cData)
+                            });
+                        }
+                    }
+                } catch (e) {}
+            }
+
             renderAllData();
         }
 

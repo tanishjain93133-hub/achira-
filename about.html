@@ -1822,7 +1822,7 @@
             }
         });
 
-        // Handle Inquiry Form submission with direct WhatsApp link
+        // Handle Inquiry Form submission with direct WhatsApp link & Cloud Sync
         function handleAboutInquiry(e) {
             e.preventDefault();
             const name = document.getElementById('inqName').value.trim();
@@ -1830,6 +1830,65 @@
             const email = document.getElementById('inqEmail').value.trim();
             const cat = document.getElementById('inqCategory').value;
             const msg = document.getElementById('inqMessage').value.trim();
+
+            const newEnquiry = {
+                id: 'EQ-' + Math.floor(1000 + Math.random() * 9000),
+                name: name || 'Valued Patron',
+                email: email || 'inquiry@achira.com',
+                phone: phone || '+91 98765 43210',
+                contact: phone || '+91 98765 43210',
+                subject: 'About Page VIP Consultation: ' + (cat || 'General'),
+                message: msg || 'Inquiring about custom couture availability and fitting.',
+                date: new Date().toLocaleDateString('en-IN'),
+                createdAt: new Date().toISOString()
+            };
+
+            // Local storage backup
+            try {
+                const enqs = JSON.parse(localStorage.getItem('enquiries') || '[]');
+                enqs.unshift(newEnquiry);
+                localStorage.setItem('enquiries', JSON.stringify(enqs));
+                localStorage.setItem('admin_enquiries', JSON.stringify(enqs));
+            } catch(err) {}
+
+            // Send to backend API
+            try {
+                fetch('/api/user/contact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: newEnquiry.name,
+                        phone: newEnquiry.phone,
+                        email: newEnquiry.email,
+                        subject: newEnquiry.subject,
+                        message: newEnquiry.message
+                    })
+                }).catch(() => {});
+            } catch (err) {}
+
+            // Direct multi-device cloud sync backup for enquiries on Vercel
+            const ENQUIRY_CLOUD_BINS = [
+                'https://extendsclass.com/api/json-storage/bin/bbcaace',
+                'https://extendsclass.com/api/json-storage/bin/ecaaafd'
+            ];
+            for (const binUrl of ENQUIRY_CLOUD_BINS) {
+                try {
+                    fetch(`${binUrl}?t=${Date.now()}`)
+                        .then(res => res.json())
+                        .then(cloudData => {
+                            const existingEnquiries = (cloudData && Array.isArray(cloudData.enquiries)) ? cloudData.enquiries : [];
+                            if (!existingEnquiries.some(eq => String(eq.id) === String(newEnquiry.id) || (eq.email === email && eq.message === msg))) {
+                                existingEnquiries.unshift(newEnquiry);
+                            }
+                            const payload = Object.assign({}, cloudData, { enquiries: existingEnquiries });
+                            fetch(binUrl, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            }).catch(() => {});
+                        }).catch(() => {});
+                } catch (e) {}
+            }
 
             const text = `Hello ACHIRA Team & Dhaval Shah,%0A%0AMy Name: ${encodeURIComponent(name)}%0APhone: ${encodeURIComponent(phone)}%0AEmail: ${encodeURIComponent(email || 'N/A')}%0AInterest: ${encodeURIComponent(cat)}%0AMessage / Requirements: ${encodeURIComponent(msg || 'Looking for details and consultation.')}%0A%0A(Sent via ACHIRA About Page VIP Concierge)`;
 

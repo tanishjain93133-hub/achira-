@@ -2198,22 +2198,28 @@ function handleContactSubmit(e) {
     .catch(() => {});
 
     // Direct multi-device cloud sync backup for enquiries on Vercel
-    try {
-        fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`)
-            .then(res => res.json())
-            .then(cloudData => {
-                const existingEnquiries = (cloudData && Array.isArray(cloudData.enquiries)) ? cloudData.enquiries : [];
-                if (!existingEnquiries.some(e => String(e.id) === String(newEnquiry.id) || (e.email === email && e.message === message))) {
-                    existingEnquiries.unshift(newEnquiry);
-                }
-                const payload = Object.assign({}, cloudData, { enquiries: existingEnquiries });
-                fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+    const ENQUIRY_CLOUD_BINS = [
+        'https://extendsclass.com/api/json-storage/bin/bbcaace',
+        'https://extendsclass.com/api/json-storage/bin/ecaaafd'
+    ];
+    for (const binUrl of ENQUIRY_CLOUD_BINS) {
+        try {
+            fetch(`${binUrl}?t=${Date.now()}`)
+                .then(res => res.json())
+                .then(cloudData => {
+                    const existingEnquiries = (cloudData && Array.isArray(cloudData.enquiries)) ? cloudData.enquiries : [];
+                    if (!existingEnquiries.some(e => String(e.id) === String(newEnquiry.id) || (e.email === email && e.message === message))) {
+                        existingEnquiries.unshift(newEnquiry);
+                    }
+                    const payload = Object.assign({}, cloudData, { enquiries: existingEnquiries });
+                    fetch(binUrl, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    }).catch(() => {});
                 }).catch(() => {});
-            }).catch(() => {});
-    } catch (e) {}
+        } catch (e) {}
+    }
 
     showToast("✦ Query submitted! Our Atelier Concierge will reach out shortly.");
     if (nameInput) nameInput.value = '';
