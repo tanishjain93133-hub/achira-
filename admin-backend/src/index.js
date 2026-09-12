@@ -980,10 +980,22 @@ const fetchAllAdminOrdersHandler = async (req, res) => {
       } catch (e) {}
     }
 
-    // 3. Merge with memory store
+    // 3. Merge with memory store and filter out any fake/test records
+    const FAKE_MOCK_ORDER_IDS = ['ACH-TEST-999', 'ACH-TEST', 'ACH-56', 'ACH-55', 'ACH-54', 'ACH-53', 'ACH-52', 'ACH-51', '56', '55', '54', '53', '52', '51'];
+    const isFakeRecord = (o) => {
+      if (!o) return true;
+      const id = String(o.id || o.orderId || o.dbId || '').toUpperCase();
+      const name = String(o.userName || o.customerName || o.name || o.customer || (o.user ? o.user.name : '')).toLowerCase();
+      const email = String(o.userEmail || o.email || (o.user ? o.user.email : '')).toLowerCase();
+      if (id.includes('TEST') || id.includes('MOCK') || FAKE_MOCK_ORDER_IDS.some(f => id === f || id.includes(f))) return true;
+      if (name.includes('kavita') || name.includes('kavin') || name.includes('priya roy') || name.includes('mock user') || name.includes('test customer')) return true;
+      if (email.includes('kavita') || email.includes('kavin') || email.includes('test@') || email.includes('priya.roy')) return true;
+      return false;
+    };
+
     const orderMap = new Map();
     [...allOrders, ...supabaseOrders, ...cloudOrders, ...memoryStore.orders].forEach(o => {
-      if (o && o.id) {
+      if (o && o.id && !isFakeRecord(o)) {
         const idStr = String(o.id);
         if (!orderMap.has(idStr)) {
           orderMap.set(idStr, o);
@@ -1341,23 +1353,50 @@ const fetchEnquiriesHandler = async (req, res) => {
       } catch (e) {}
     }
 
+    const isFakeEnquiry = (e) => {
+      if (!e) return true;
+      const id = String(e.id || '').toUpperCase();
+      const name = String(e.name || '').toLowerCase();
+      const email = String(e.email || '').toLowerCase();
+      if (id.includes('TEST') || id.includes('MOCK')) return true;
+      if (name.includes('kavita') || name.includes('kavin') || name.includes('priya roy') || name.includes('test user')) return true;
+      if (email.includes('kavita') || email.includes('kavin') || email.includes('test@') || email.includes('priya.roy')) return true;
+      return false;
+    };
+
     const enqMap = new Map();
     [...cloudEnquiries, ...memoryStore.enquiries].forEach(e => {
-      if (e && e.id) {
+      if (e && e.id && !isFakeEnquiry(e)) {
         const key = String(e.id);
         if (!enqMap.has(key)) enqMap.set(key, e);
       }
     });
 
+    const parseDateHelper = (obj) => {
+      if (!obj) return 0;
+      if (obj.createdAt) {
+        const t = new Date(obj.createdAt).getTime();
+        if (!isNaN(t) && t > 0) return t;
+      }
+      if (obj.date && typeof obj.date === 'string') {
+        const p = obj.date.split('/');
+        if (p.length === 3) {
+          const dt = new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0])).getTime();
+          if (!isNaN(dt) && dt > 0) return dt;
+        }
+        const t2 = new Date(obj.date).getTime();
+        if (!isNaN(t2) && t2 > 0) return t2;
+      }
+      return 0;
+    };
+
     const unifiedEnquiries = Array.from(enqMap.values()).sort((a, b) => {
-      const dA = new Date(a.createdAt || a.date || 0).getTime();
-      const dB = new Date(b.createdAt || b.date || 0).getTime();
-      return dB - dA;
+      return parseDateHelper(b) - parseDateHelper(a);
     });
 
     res.json(unifiedEnquiries);
   } catch (error) {
-    res.json(memoryStore.enquiries);
+    res.json(memoryStore.enquiries.filter(e => !isFakeEnquiry(e)));
   }
 };
 
