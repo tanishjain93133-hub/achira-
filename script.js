@@ -2270,35 +2270,54 @@ function switchProfileTab(tabId) {
     }
 }
 
-async function renderUserOrdersTable() {
+async function renderUserOrdersTable(overrideEmail) {
     const listWrap = document.getElementById('userOrdersList');
     if (!listWrap) return;
     
-    listWrap.innerHTML = `<p style="font-family: var(--font-body); font-size: 0.85rem; color: var(--color-charcoal-body);">Loading your personal purchase history...</p>`;
+    const inputVal = document.getElementById('orderEmailLookupInput') ? document.getElementById('orderEmailLookupInput').value.trim() : '';
+    let currEmail = (overrideEmail && typeof overrideEmail === 'string' && overrideEmail.trim()) 
+        ? overrideEmail.toLowerCase().trim() 
+        : (inputVal ? inputVal.toLowerCase().trim() : ((currentUser && currentUser.email) ? currentUser.email.toLowerCase().trim() : (localStorage.getItem('userEmail') ? localStorage.getItem('userEmail').toLowerCase().trim() : '')));
 
-    const currEmail = (currentUser && currentUser.email) 
-        ? currentUser.email.toLowerCase().trim() 
-        : (localStorage.getItem('userEmail') ? localStorage.getItem('userEmail').toLowerCase().trim() : '');
+    listWrap.innerHTML = `
+        <div style="margin-bottom: 16px; background: #FAF6F0; padding: 12px 14px; border-radius: 8px; border: 1px solid #E5D5C0;">
+            <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #3C0008; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Look Up Purchase History by Email / Phone:</label>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <input type="text" id="orderEmailLookupInput" placeholder="Enter customer email (e.g. patron@gmail.com)" value="${currEmail}" style="flex: 1; min-width: 220px; padding: 8px 12px; border: 1px solid #B88A44; border-radius: 6px; font-size: 0.85rem; outline: none;">
+                <button type="button" onclick="renderUserOrdersTable(document.getElementById('orderEmailLookupInput').value)" style="padding: 8px 16px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.85rem;">Find Orders</button>
+            </div>
+        </div>
+        <p style="font-family: var(--font-body); font-size: 0.85rem; color: var(--color-charcoal-body); text-align: center; padding: 15px;">Searching live cloud database for customer orders...</p>
+    `;
 
     if (!currEmail) {
         listWrap.innerHTML = `
+            <div style="margin-bottom: 16px; background: #FAF6F0; padding: 12px 14px; border-radius: 8px; border: 1px solid #E5D5C0;">
+                <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #3C0008; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Look Up Purchase History by Email / Phone:</label>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <input type="text" id="orderEmailLookupInput" placeholder="Enter customer email (e.g. patron@gmail.com)" value="" style="flex: 1; min-width: 220px; padding: 8px 12px; border: 1px solid #B88A44; border-radius: 6px; font-size: 0.85rem; outline: none;">
+                    <button type="button" onclick="renderUserOrdersTable(document.getElementById('orderEmailLookupInput').value)" style="padding: 8px 16px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.85rem;">Find Orders</button>
+                </div>
+            </div>
             <div style="text-align: center; padding: 30px 20px;">
-                <p style="font-family: var(--font-body); font-size: 0.95rem; color: var(--color-charcoal-body); margin-bottom: 12px;">Please log in with your email or Google account to view your purchase history.</p>
+                <p style="font-family: var(--font-body); font-size: 0.95rem; color: var(--color-charcoal-body); margin-bottom: 12px;">Please enter an email above or log in to view order history.</p>
                 <button onclick="closeProfileModal(); openAuthModal();" style="padding: 10px 24px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 20px; font-weight: 700; cursor: pointer;">Sign In to Account</button>
             </div>
         `;
         return;
     }
 
+    const cleanTargetEmail = currEmail.toLowerCase().trim();
+    const cleanPhone = cleanTargetEmail.replace(/\D/g, '');
     let customerOrders = [];
     const userToken = localStorage.getItem('userToken') || '';
     
-    // 1. Fetch from server API with JWT token & email parameter
+    // 1. Fetch from server API
     try {
-        const res = await fetch(`${API_BASE}/api/user/orders?email=${encodeURIComponent(currEmail)}`, {
+        const res = await fetch(`${API_BASE}/api/user/orders?email=${encodeURIComponent(cleanTargetEmail)}`, {
             headers: { 
                 'Authorization': `Bearer ${userToken}`,
-                'x-user-email': currEmail
+                'x-user-email': cleanTargetEmail
             }
         });
         const data = await res.json();
@@ -2307,7 +2326,26 @@ async function renderUserOrdersTable() {
         }
     } catch (e) {}
 
-    // 2. Fetch from Multi-Bin Cloud Database for multi-device sync
+    // 1b. Fallback fetch from admin orders endpoint
+    try {
+        const resAll = await fetch(`${API_BASE}/api/admin/orders`);
+        if (resAll.ok) {
+            const allData = await resAll.json();
+            if (Array.isArray(allData)) {
+                allData.forEach(ao => {
+                    const em = (ao.userEmail || ao.email || '').toLowerCase().trim();
+                    const ph = (ao.userPhone || ao.phone || '').replace(/\D/g, '');
+                    if (em === cleanTargetEmail || (cleanPhone.length >= 8 && ph.includes(cleanPhone)) || String(ao.id || '').toLowerCase() === cleanTargetEmail) {
+                        if (!customerOrders.some(o => String(o.id) === String(ao.id))) {
+                            customerOrders.push(ao);
+                        }
+                    }
+                });
+            }
+        }
+    } catch (e) {}
+
+    // 2. Fetch from Multi-Bin Cloud Database for 100% cross-device sync
     const USER_CLOUD_BINS = [
         'https://extendsclass.com/api/json-storage/bin/bbcaace',
         'https://extendsclass.com/api/json-storage/bin/ecaaafd'
@@ -2319,7 +2357,9 @@ async function renderUserOrdersTable() {
                 const cData = await cloudRes.json();
                 if (cData && Array.isArray(cData.orders)) {
                     cData.orders.forEach(co => {
-                        if (co && co.id && (co.userEmail || co.email || '').toLowerCase().trim() === currEmail) {
+                        const em = (co.userEmail || co.email || '').toLowerCase().trim();
+                        const ph = (co.userPhone || co.phone || '').replace(/\D/g, '');
+                        if (em === cleanTargetEmail || (cleanPhone.length >= 8 && ph.includes(cleanPhone)) || String(co.id || '').toLowerCase() === cleanTargetEmail) {
                             if (!customerOrders.some(o => String(o.id) === String(co.id))) {
                                 customerOrders.push(co);
                             }
@@ -2330,10 +2370,12 @@ async function renderUserOrdersTable() {
         } catch (e) {}
     }
 
-    // 3. Local fallback strictly filtered for current customer's email
-    const localOrders = getDB('orders', []);
+    // 3. Local storage check
+    const localOrders = [...getDB('orders', []), ...getDB('admin_orders', [])];
     localOrders.forEach(lo => {
-        if (lo && lo.id && (lo.userEmail || lo.email || '').toLowerCase().trim() === currEmail) {
+        const em = (lo.userEmail || lo.email || '').toLowerCase().trim();
+        const ph = (lo.userPhone || lo.phone || '').replace(/\D/g, '');
+        if (em === cleanTargetEmail || (cleanPhone.length >= 8 && ph.includes(cleanPhone)) || String(lo.id || '').toLowerCase() === cleanTargetEmail) {
             if (!customerOrders.some(o => String(o.id) === String(lo.id))) {
                 customerOrders.push(lo);
             }
@@ -2363,20 +2405,31 @@ async function renderUserOrdersTable() {
 
     customerOrders.sort((a, b) => parseOrderTimestamp(b) - parseOrderTimestamp(a));
 
+    let searchHeaderHtml = `
+        <div style="margin-bottom: 16px; background: #FAF6F0; padding: 12px 14px; border-radius: 8px; border: 1px solid #E5D5C0;">
+            <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #3C0008; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Look Up Purchase History by Email / Phone:</label>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <input type="text" id="orderEmailLookupInput" placeholder="Enter customer email (e.g. patron@gmail.com)" value="${cleanTargetEmail}" style="flex: 1; min-width: 220px; padding: 8px 12px; border: 1px solid #B88A44; border-radius: 6px; font-size: 0.85rem; outline: none;" onkeydown="if(event.key==='Enter')renderUserOrdersTable(this.value)">
+                <button type="button" onclick="renderUserOrdersTable(document.getElementById('orderEmailLookupInput').value)" style="padding: 8px 16px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.85rem;">Find Orders</button>
+            </div>
+        </div>
+    `;
+
     if (customerOrders.length === 0) {
-        listWrap.innerHTML = `
-            <div style="text-align: center; padding: 40px 20px;">
-                <p style="font-family: var(--font-body); font-size: 0.95rem; color: var(--color-charcoal-body); margin-bottom: 12px;">You have not placed any orders yet with <strong>${currEmail}</strong>.</p>
+        listWrap.innerHTML = searchHeaderHtml + `
+            <div style="text-align: center; padding: 35px 20px; background: #fff; border-radius: 8px; border: 1px dashed #B88A44;">
+                <p style="font-family: var(--font-body); font-size: 0.95rem; color: var(--color-charcoal-body); margin-bottom: 8px;">No purchases found under <strong>"${cleanTargetEmail}"</strong>.</p>
+                <p style="font-size: 0.82rem; color: #888; margin-bottom: 16px;">Try entering another email address above or explore the catalogue.</p>
                 <button onclick="closeProfileModal()" style="padding: 10px 24px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 20px; font-weight: 700; cursor: pointer;">Explore Couture Collection</button>
             </div>
         `;
         return;
     }
 
-    let html = `
+    let html = searchHeaderHtml + `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-            <strong style="font-family: var(--font-brand); color: #3C0008; font-size: 1rem;">My Order History (${customerOrders.length})</strong>
-            <span style="font-size: 0.78rem; color: #888;">Patron: ${currEmail}</span>
+            <strong style="font-family: var(--font-brand); color: #3C0008; font-size: 1rem;">Customer Orders (${customerOrders.length})</strong>
+            <span style="font-size: 0.78rem; color: #888;">Patron: ${cleanTargetEmail}</span>
         </div>
         <div style="overflow-x: auto;">
         <table class="admin-table" style="width: 100%; border-collapse: collapse;">
@@ -2411,21 +2464,79 @@ async function renderUserOrdersTable() {
     listWrap.innerHTML = html;
 }
 
-function handleTrackOrder() {
-    const orderId = document.getElementById('trackOrderId').value.trim();
-    const matched = getDB('orders').find(o => o.id === orderId);
-    
+async function handleTrackOrder() {
+    const rawQuery = document.getElementById('trackOrderId').value.trim();
     const resultBox = document.getElementById('trackResult');
-    if (!matched) {
+    if (!rawQuery) {
         resultBox.style.display = 'block';
-        resultBox.innerHTML = `<p style="color: #800020; font-weight: 700; text-align: center;">Order ID not found. Verify ID (e.g. ACH-12345)</p>`;
+        resultBox.innerHTML = `<p style="color: #800020; font-weight: 700; text-align: center;">Please enter an Order ID (e.g. ACH-12345), Email, or Phone number.</p>`;
         return;
     }
 
+    resultBox.style.display = 'block';
+    resultBox.innerHTML = `<p style="text-align: center; color: #666; padding: 10px;">Locating order across cloud network...</p>`;
+
+    const queryLower = rawQuery.toLowerCase();
+    const queryDigits = rawQuery.replace(/\D/g, '');
+
+    // Collect all orders from local DB and Cloud Bins
+    let allOrders = [...getDB('orders', []), ...getDB('admin_orders', [])];
+    const TRACK_CLOUD_BINS = [
+        'https://extendsclass.com/api/json-storage/bin/bbcaace',
+        'https://extendsclass.com/api/json-storage/bin/ecaaafd'
+    ];
+    for (const binUrl of TRACK_CLOUD_BINS) {
+        try {
+            const cRes = await fetch(`${binUrl}?t=${Date.now()}`);
+            if (cRes.ok) {
+                const cData = await cRes.json();
+                if (cData && Array.isArray(cData.orders)) {
+                    allOrders.push(...cData.orders);
+                }
+            }
+        } catch (e) {}
+    }
+
+    try {
+        const aRes = await fetch(`${API_BASE}/api/admin/orders`);
+        if (aRes.ok) {
+            const aData = await aRes.json();
+            if (Array.isArray(aData)) allOrders.push(...aData);
+        }
+    } catch (e) {}
+
+    const matchedList = allOrders.filter(o => {
+        if (!o) return false;
+        const oId = String(o.id || '').toLowerCase();
+        const oEmail = (o.userEmail || o.email || '').toLowerCase().trim();
+        const oPhone = (o.userPhone || o.phone || '').replace(/\D/g, '');
+        return oId === queryLower || oEmail === queryLower || (queryDigits.length >= 8 && oPhone.includes(queryDigits));
+    });
+
+    if (matchedList.length === 0) {
+        resultBox.style.display = 'block';
+        resultBox.innerHTML = `<p style="color: #800020; font-weight: 700; text-align: center;">No order found matching "${rawQuery}". Please check your Order ID, Email, or Phone number.</p>`;
+        return;
+    }
+
+    const matched = matchedList[0];
     const statuses = ['Pending', 'Confirmed', 'Packed', 'Shipped', 'Delivered'];
-    const currentIdx = statuses.indexOf(matched.status);
-    
-    let html = '';
+    const currentStatus = matched.orderStatus || matched.status || 'Processing';
+    let currentIdx = statuses.indexOf(currentStatus);
+    if (currentIdx === -1) currentIdx = (currentStatus === 'Processing' ? 0 : 1);
+
+    let html = `
+        <div style="background: #faf8f5; border: 1px solid #B88A44; border-radius: 8px; padding: 12px; margin-bottom: 12px; width: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <strong style="color: #3C0008; font-size: 0.95rem;">Order: ${matched.id}</strong>
+                <span style="color: #B88A44; font-weight: 700; font-size: 0.8rem; background: rgba(184,138,68,0.15); padding: 2px 8px; border-radius: 4px;">${currentStatus.toUpperCase()}</span>
+            </div>
+            <div style="font-size: 0.82rem; color: #555;"><strong>Items:</strong> ${matched.itemsSummary || 'Couture Item'}</div>
+            <div style="font-size: 0.82rem; color: #555;"><strong>Total:</strong> ₹${Number(matched.grandTotal || matched.total || 0).toLocaleString('en-IN')} | <strong>Customer:</strong> ${matched.userName || matched.customerName || 'Valued Patron'}</div>
+        </div>
+        <div class="track-status-flow" style="display: flex; width: 100%; justify-content: space-between;">
+    `;
+
     statuses.forEach((st, idx) => {
         let stateClass = '';
         if (idx <= currentIdx) stateClass = 'active';
@@ -2439,7 +2550,8 @@ function handleTrackOrder() {
         `;
     });
 
-    resultBox.style.display = 'flex';
+    html += `</div>`;
+    resultBox.style.display = 'block';
     resultBox.innerHTML = html;
 }
 
