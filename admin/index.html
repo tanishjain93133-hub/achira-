@@ -1126,16 +1126,34 @@
             let cloudUsers = [];
             let cloudLogs = [];
             let cloudEnquiries = [];
-            try {
-                const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-                if (cloudRes.ok) {
-                    const cloudData = await cloudRes.json();
-                    if (cloudData && Array.isArray(cloudData.orders)) cloudOrders = cloudData.orders;
-                    if (cloudData && Array.isArray(cloudData.users)) cloudUsers = cloudData.users;
-                    if (cloudData && Array.isArray(cloudData.logs)) cloudLogs = cloudData.logs;
-                    if (cloudData && Array.isArray(cloudData.enquiries)) cloudEnquiries = cloudData.enquiries;
-                }
-            } catch (err) {}
+            const ADMIN_CLOUD_BINS = [
+                'https://extendsclass.com/api/json-storage/bin/bbcaace',
+                'https://extendsclass.com/api/json-storage/bin/ecaaafd'
+            ];
+            for (const binUrl of ADMIN_CLOUD_BINS) {
+                try {
+                    const cloudRes = await fetch(`${binUrl}?t=${Date.now()}`);
+                    if (cloudRes.ok) {
+                        const cloudData = await cloudRes.json();
+                        if (cloudData && Array.isArray(cloudData.orders)) {
+                            cloudData.orders.forEach(co => {
+                                if (co && co.id && !cloudOrders.some(o => String(o.id) === String(co.id))) {
+                                    cloudOrders.push(co);
+                                }
+                            });
+                        }
+                        if (cloudData && Array.isArray(cloudData.users)) {
+                            cloudData.users.forEach(cu => {
+                                if (cu && cu.email && !cloudUsers.some(u => u.email === cu.email)) {
+                                    cloudUsers.push(cu);
+                                }
+                            });
+                        }
+                        if (cloudData && Array.isArray(cloudData.logs)) cloudLogs.push(...cloudData.logs);
+                        if (cloudData && Array.isArray(cloudData.enquiries)) cloudEnquiries.push(...cloudData.enquiries);
+                    }
+                } catch (err) {}
+            }
 
             const localAdminOrders = getDB('admin_orders', []);
             const localStoreOrders = getDB('orders', []);

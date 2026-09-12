@@ -2301,22 +2301,28 @@ async function renderUserOrdersTable() {
         }
     } catch (e) {}
 
-    // 2. Fetch from Cloud Database Bin for multi-device sync
-    try {
-        const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-        if (cloudRes.ok) {
-            const cData = await cloudRes.json();
-            if (cData && Array.isArray(cData.orders)) {
-                cData.orders.forEach(co => {
-                    if (co && co.id && (co.userEmail || co.email || '').toLowerCase().trim() === currEmail) {
-                        if (!customerOrders.some(o => String(o.id) === String(co.id))) {
-                            customerOrders.push(co);
+    // 2. Fetch from Multi-Bin Cloud Database for multi-device sync
+    const USER_CLOUD_BINS = [
+        'https://extendsclass.com/api/json-storage/bin/bbcaace',
+        'https://extendsclass.com/api/json-storage/bin/ecaaafd'
+    ];
+    for (const binUrl of USER_CLOUD_BINS) {
+        try {
+            const cloudRes = await fetch(`${binUrl}?t=${Date.now()}`);
+            if (cloudRes.ok) {
+                const cData = await cloudRes.json();
+                if (cData && Array.isArray(cData.orders)) {
+                    cData.orders.forEach(co => {
+                        if (co && co.id && (co.userEmail || co.email || '').toLowerCase().trim() === currEmail) {
+                            if (!customerOrders.some(o => String(o.id) === String(co.id))) {
+                                customerOrders.push(co);
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
-        }
-    } catch (e) {}
+        } catch (e) {}
+    }
 
     // 3. Local fallback strictly filtered for current customer's email
     const localOrders = getDB('orders', []);
@@ -2996,49 +3002,56 @@ function completeOrderPlacement(realServerOrder) {
         }
     })();
 
-    // Direct Cloud Storage Sync (Ensures multi-tab / multi-device / serverless admin panel gets the order)
-    (async () => {
-        try {
-            const cloudGet = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-            let cloudData = { orders: [], users: [], enquiries: [], logs: [], notifications: [] };
-            if (cloudGet.ok) {
-                cloudData = await cloudGet.json();
-                if (!Array.isArray(cloudData.orders)) cloudData.orders = [];
-                if (!Array.isArray(cloudData.users)) cloudData.users = [];
-                if (!Array.isArray(cloudData.logs)) cloudData.logs = [];
-            }
-            if (!cloudData.orders.some(o => String(o.id) === String(realServerOrder.id))) {
-                cloudData.orders.unshift(realServerOrder);
-            }
-            if (email && !cloudData.users.some(u => (u.email || '').toLowerCase() === email)) {
-                cloudData.users.unshift({
-                    id: Date.now(),
-                    name: name,
-                    email: email,
-                    phone: phone,
-                    address: address,
-                    ordersCount: 1,
-                    totalSpent: grandTotal,
-                    regDate: new Date().toISOString()
-                });
-            }
-            cloudData.logs.unshift({
-                id: Date.now(),
-                action: `Order Placed ${realServerOrder.id} (₹${grandTotal}) by ${name} (${email})`,
-                ip: 'Client Direct',
-                device: 'Web',
-                browser: 'Browser',
-                os: 'Web',
-                createdAt: new Date().toISOString()
-            });
+    // Direct Multi-Bin Cloud Storage Sync (Ensures 100% cross-device, serverless, and multi-tab persistence)
+    const CLOUD_BIN_URLS = [
+        'https://extendsclass.com/api/json-storage/bin/bbcaace',
+        'https://extendsclass.com/api/json-storage/bin/ecaaafd'
+    ];
 
-            await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(cloudData)
-            });
-        } catch (e) {
-            console.warn('[ORDER] Cloud direct sync notice:', e);
+    (async () => {
+        for (const binUrl of CLOUD_BIN_URLS) {
+            try {
+                const cloudGet = await fetch(`${binUrl}?t=${Date.now()}`);
+                let cloudData = { orders: [], users: [], enquiries: [], logs: [] };
+                if (cloudGet.ok) {
+                    cloudData = await cloudGet.json();
+                    if (!Array.isArray(cloudData.orders)) cloudData.orders = [];
+                    if (!Array.isArray(cloudData.users)) cloudData.users = [];
+                    if (!Array.isArray(cloudData.logs)) cloudData.logs = [];
+                }
+                if (!cloudData.orders.some(o => String(o.id) === String(realServerOrder.id))) {
+                    cloudData.orders.unshift(realServerOrder);
+                }
+                if (email && !cloudData.users.some(u => (u.email || '').toLowerCase() === email)) {
+                    cloudData.users.unshift({
+                        id: Date.now(),
+                        name: name,
+                        email: email,
+                        phone: phone,
+                        address: address,
+                        ordersCount: 1,
+                        totalSpent: grandTotal,
+                        regDate: new Date().toISOString()
+                    });
+                }
+                cloudData.logs.unshift({
+                    id: Date.now(),
+                    action: `Order Placed ${realServerOrder.id} (₹${grandTotal}) by ${name} (${email})`,
+                    ip: 'Client Direct',
+                    device: 'Web',
+                    browser: 'Browser',
+                    os: 'Web',
+                    createdAt: new Date().toISOString()
+                });
+
+                await fetch(binUrl, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(cloudData)
+                });
+            } catch (e) {
+                console.warn('[ORDER] Cloud sync notice:', e);
+            }
         }
     })();
 

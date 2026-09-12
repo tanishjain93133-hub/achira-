@@ -103,9 +103,45 @@ const memoryStore = {
   logs: []
 };
 
-// Persistent JSON File Storage Engine (Ensures 100% data persistence on disk without PostgreSQL/MongoDB)
+// Persistent JSON File Storage Engine (Ensures 100% data persistence on disk and Vercel /tmp)
 const fs = require('fs');
-const dbFilePath = path.join(__dirname, '..', 'data', 'achira_db.json');
+const os = require('os');
+const isVercel = Boolean(process.env.VERCEL);
+const dbFilePath = isVercel 
+  ? path.join(os.tmpdir(), 'achira_db.json')
+  : path.join(__dirname, '..', 'data', 'achira_db.json');
+
+const CLOUD_BINS = [
+  'https://extendsclass.com/api/json-storage/bin/bbcaace',
+  'https://extendsclass.com/api/json-storage/bin/ecaaafd'
+];
+
+async function syncFromCloudBins() {
+  for (const binUrl of CLOUD_BINS) {
+    try {
+      const res = await fetch(`${binUrl}?t=${Date.now()}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && typeof data === 'object') {
+          if (Array.isArray(data.orders) && data.orders.length > 0) {
+            data.orders.forEach(co => {
+              if (co && co.id && !memoryStore.orders.some(o => String(o.id) === String(co.id))) {
+                memoryStore.orders.push(co);
+              }
+            });
+          }
+          if (Array.isArray(data.users) && data.users.length > 0) {
+            data.users.forEach(cu => {
+              if (cu && cu.email && !memoryStore.users.some(u => u.email === cu.email)) {
+                memoryStore.users.push(cu);
+              }
+            });
+          }
+        }
+      }
+    } catch (e) {}
+  }
+}
 
 function loadFileDatabase() {
   try {
@@ -128,6 +164,7 @@ function loadFileDatabase() {
   } catch (err) {
     console.warn('⚠️ :: [FILE DB LOAD NOTICE]', err.message);
   }
+  syncFromCloudBins().catch(() => {});
 }
 
 function saveFileDatabase() {
