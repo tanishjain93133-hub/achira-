@@ -983,17 +983,52 @@
         }
 
         // List of legacy hardcoded mock test IDs & fake names to filter out
-        const FAKE_MOCK_ORDER_IDS = ['ACH-TEST-999', 'ACH-TEST'];
-
         function isFakeRecord(o) {
             if (!o) return true;
             const id = String(o.id || o.orderId || o.dbId || '').toUpperCase().trim();
-            const name = String(o.userName || o.customerName || o.name || o.customer || '').toLowerCase().trim();
-            const email = String(o.userEmail || o.email || '').toLowerCase().trim();
-            if (id === 'ACH-TEST-999' || id === 'ACH-TEST') return true;
-            if (name === 'kavita mehta' || name === 'kavin mehta' || name === 'priya roy') return true;
-            if (email === 'kavita.mehta@example.com' || email === 'priya.roy@example.com') return true;
+            const name = String(o.userName || o.customerName || o.name || o.customer || (o.user ? o.user.name : '')).toLowerCase().trim();
+            const email = String(o.userEmail || o.email || (o.user ? o.user.email : '')).toLowerCase().trim();
+            if (id === 'ACH-TEST-999' || id === 'ACH-TEST' || id === 'ACH-REAL-TEST-1' || id === 'ACH-ORD-563640' || id === 'ENQ-REAL-TEST-1' || id === 'EQ-9231') return true;
+            if (name === 'kavita mehta' || name === 'kavin mehta' || name === 'priya roy' || name === 'rahul sharma' || name.includes('dhaval shah (patron)') || name === 'ananya singhania') return true;
+            if (email === 'kavita.mehta@example.com' || email === 'priya.roy@example.com' || email === 'rahul.sharma@gmail.com' || email === 'dhaval.shah@couturepatron.com' || email === 'ananya.singhania@luxury.in') return true;
             return false;
+        }
+
+        function formatItemsSummary(o) {
+            if (!o) return 'Couture Item';
+            if (typeof o.itemsSummary === 'string' && o.itemsSummary.trim() && !o.itemsSummary.includes('[object')) {
+                return o.itemsSummary;
+            }
+            const items = o.itemsDetail || o.items;
+            if (Array.isArray(items) && items.length > 0) {
+                return items.map(it => {
+                    if (typeof it === 'string') return it;
+                    if (it && typeof it === 'object') {
+                        const name = it.name || it.title || 'Product';
+                        const qty = it.qty || it.quantity || 1;
+                        const size = it.size ? ` (${it.size})` : '';
+                        return `${name}${size} x${qty}`;
+                    }
+                    return 'Couture Item';
+                }).join(', ');
+            }
+            return 'Couture Product';
+        }
+
+        function formatOrderDate(o) {
+            if (!o) return 'Today';
+            if (o.date && typeof o.date === 'string' && o.date.includes('/')) return o.date;
+            if (o.createdAt) {
+                try {
+                    return new Date(o.createdAt).toLocaleDateString('en-IN');
+                } catch (e) {}
+            }
+            if (o.date) {
+                try {
+                    return new Date(o.date).toLocaleDateString('en-IN');
+                } catch (e) {}
+            }
+            return 'Today';
         }
 
         let storedProducts = getDB('admin_products', []);
@@ -1113,54 +1148,6 @@
             localStorage.removeItem('adminToken');
             const loginOverlay = document.getElementById('loginOverlay');
             if (loginOverlay) loginOverlay.style.display = 'flex';
-        }
-
-        const isFakeRecord = (o) => {
-            if (!o) return true;
-            const id = String(o.id || o.orderId || o.dbId || '').toUpperCase().trim();
-            const name = String(o.userName || o.customerName || o.name || o.customer || (o.user ? o.user.name : '')).toLowerCase().trim();
-            const email = String(o.userEmail || o.email || (o.user ? o.user.email : '')).toLowerCase().trim();
-            if (id === 'ACH-TEST-999' || id === 'ACH-TEST' || id === 'ACH-REAL-TEST-1' || id === 'ACH-ORD-563640' || id === 'ENQ-REAL-TEST-1' || id === 'EQ-9231') return true;
-            if (name === 'kavita mehta' || name === 'kavin mehta' || name === 'priya roy' || name === 'rahul sharma' || name.includes('dhaval shah (patron)') || name === 'ananya singhania') return true;
-            if (email === 'kavita.mehta@example.com' || email === 'priya.roy@example.com' || email === 'rahul.sharma@gmail.com' || email === 'dhaval.shah@couturepatron.com' || email === 'ananya.singhania@luxury.in') return true;
-            return false;
-        };
-
-        function formatItemsSummary(o) {
-            if (!o) return 'Couture Item';
-            if (typeof o.itemsSummary === 'string' && o.itemsSummary.trim() && !o.itemsSummary.includes('[object')) {
-                return o.itemsSummary;
-            }
-            const items = o.itemsDetail || o.items;
-            if (Array.isArray(items) && items.length > 0) {
-                return items.map(it => {
-                    if (typeof it === 'string') return it;
-                    if (it && typeof it === 'object') {
-                        const name = it.name || it.title || 'Product';
-                        const qty = it.qty || it.quantity || 1;
-                        const size = it.size ? ` (${it.size})` : '';
-                        return `${name}${size} x${qty}`;
-                    }
-                    return 'Couture Item';
-                }).join(', ');
-            }
-            return 'Couture Product';
-        }
-
-        function formatOrderDate(o) {
-            if (!o) return 'Today';
-            if (o.date && typeof o.date === 'string' && o.date.includes('/')) return o.date;
-            if (o.createdAt) {
-                try {
-                    return new Date(o.createdAt).toLocaleDateString('en-IN');
-                } catch (e) {}
-            }
-            if (o.date) {
-                try {
-                    return new Date(o.date).toLocaleDateString('en-IN');
-                } catch (e) {}
-            }
-            return 'Today';
         }
 
         async function fetchLiveData() {
