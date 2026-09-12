@@ -1900,9 +1900,11 @@
 
             // Direct multi-device cloud sync backup for enquiries on Vercel
             const ENQUIRY_CLOUD_BINS = [
-                'https://extendsclass.com/api/json-storage/bin/bbcaace',
-                'https://extendsclass.com/api/json-storage/bin/ecaaafd'
+                'https://extendsclass.com/api/json-storage/bin/ebbbfeb',
+                'https://extendsclass.com/api/json-storage/bin/cfddaaf',
+                'https://extendsclass.com/api/json-storage/bin/cfbfcbf'
             ];
+            const CLOUD_SEC_KEY = 'achira_luxury_secret_2026';
             for (const binUrl of ENQUIRY_CLOUD_BINS) {
                 try {
                     fetch(`${binUrl}?t=${Date.now()}`)
@@ -1915,7 +1917,10 @@
                             const payload = Object.assign({}, cloudData, { enquiries: existingEnquiries });
                             fetch(binUrl, {
                                 method: 'PUT',
-                                headers: { 'Content-Type': 'application/json' },
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Security-key': CLOUD_SEC_KEY
+                                },
                                 body: JSON.stringify(payload)
                             }).catch(() => {});
                         }).catch(() => {});

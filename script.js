@@ -1928,34 +1928,46 @@ function handleUserLogin(e) {
     });
 }
 
+const STORE_CLOUD_BINS = [
+    'https://extendsclass.com/api/json-storage/bin/ebbbfeb',
+    'https://extendsclass.com/api/json-storage/bin/cfddaaf',
+    'https://extendsclass.com/api/json-storage/bin/cfbfcbf'
+];
+const STORE_CLOUD_SEC_KEY = 'achira_luxury_secret_2026';
+
 function syncUserToCloudStorage(userObj) {
     if (!userObj || !userObj.email) return;
-    try {
-        fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`)
-            .then(res => res.json())
-            .then(cloudData => {
-                const existing = (cloudData && Array.isArray(cloudData.users)) ? cloudData.users : [];
-                const idx = existing.findIndex(u => (u.email || '').toLowerCase() === userObj.email.toLowerCase());
-                if (idx !== -1) {
-                    existing[idx] = { ...existing[idx], ...userObj };
-                } else {
-                    existing.unshift(userObj);
-                }
-                const logs = (cloudData && Array.isArray(cloudData.logs)) ? cloudData.logs : [];
-                logs.unshift({
-                    id: Date.now(),
-                    action: `Customer Registered (${userObj.name || userObj.email})`,
-                    ip: 'Web',
-                    device: 'Online Storefront',
-                    createdAt: new Date().toISOString()
-                });
-                return fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ...(cloudData || {}), users: existing, logs: logs.slice(0, 50) })
-                });
-            }).catch(() => {});
-    } catch (e) {}
+    for (const binUrl of STORE_CLOUD_BINS) {
+        try {
+            fetch(`${binUrl}?t=${Date.now()}`)
+                .then(res => res.json())
+                .then(cloudData => {
+                    const existing = (cloudData && Array.isArray(cloudData.users)) ? cloudData.users : [];
+                    const idx = existing.findIndex(u => (u.email || '').toLowerCase() === userObj.email.toLowerCase());
+                    if (idx !== -1) {
+                        existing[idx] = { ...existing[idx], ...userObj };
+                    } else {
+                        existing.unshift(userObj);
+                    }
+                    const logs = (cloudData && Array.isArray(cloudData.logs)) ? cloudData.logs : [];
+                    logs.unshift({
+                        id: Date.now(),
+                        action: `Customer Registered (${userObj.name || userObj.email})`,
+                        ip: 'Web',
+                        device: 'Online Storefront',
+                        createdAt: new Date().toISOString()
+                    });
+                    return fetch(binUrl, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Security-key': STORE_CLOUD_SEC_KEY
+                        },
+                        body: JSON.stringify({ ...(cloudData || {}), users: existing, logs: logs.slice(0, 50) })
+                    });
+                }).catch(() => {});
+        } catch (e) {}
+    }
 }
 
 function performLocalLogin(email, pass) {
@@ -2231,11 +2243,7 @@ function handleContactSubmit(e) {
     .catch(() => {});
 
     // 5. Direct multi-device cloud sync backup for enquiries on Vercel
-    const ENQUIRY_CLOUD_BINS = [
-        'https://extendsclass.com/api/json-storage/bin/bbcaace',
-        'https://extendsclass.com/api/json-storage/bin/ecaaafd'
-    ];
-    for (const binUrl of ENQUIRY_CLOUD_BINS) {
+    for (const binUrl of STORE_CLOUD_BINS) {
         try {
             fetch(`${binUrl}?t=${Date.now()}`)
                 .then(res => res.json())
@@ -2247,7 +2255,10 @@ function handleContactSubmit(e) {
                     const payload = Object.assign({}, cloudData, { enquiries: existingEnquiries });
                     fetch(binUrl, {
                         method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Security-key': STORE_CLOUD_SEC_KEY
+                        },
                         body: JSON.stringify(payload)
                     }).catch(() => {});
                 }).catch(() => {});
@@ -2509,11 +2520,7 @@ async function renderUserOrdersTable(overrideEmail) {
     } catch(e) {}
 
     // 3. Fetch from Multi-Bin Cloud Storage
-    const USER_CLOUD_BINS = [
-        'https://extendsclass.com/api/json-storage/bin/bbcaace',
-        'https://extendsclass.com/api/json-storage/bin/ecaaafd'
-    ];
-    for (const binUrl of USER_CLOUD_BINS) {
+    for (const binUrl of STORE_CLOUD_BINS) {
         try {
             const cloudRes = await fetch(`${binUrl}?t=${Date.now()}`);
             if (cloudRes.ok) {
@@ -2703,11 +2710,7 @@ async function handleTrackOrder() {
     } catch (e) {}
 
     // 2. Fetch Cloud Storage Bins
-    const TRACK_CLOUD_BINS = [
-        'https://extendsclass.com/api/json-storage/bin/bbcaace',
-        'https://extendsclass.com/api/json-storage/bin/ecaaafd'
-    ];
-    for (const binUrl of TRACK_CLOUD_BINS) {
+    for (const binUrl of STORE_CLOUD_BINS) {
         try {
             const cRes = await fetch(`${binUrl}?t=${Date.now()}`);
             if (cRes.ok) {
@@ -3368,13 +3371,8 @@ function completeOrderPlacement(realServerOrder) {
     })();
 
     // Direct Multi-Bin Cloud Storage Sync (Ensures 100% cross-device, serverless, and multi-tab persistence)
-    const CLOUD_BIN_URLS = [
-        'https://extendsclass.com/api/json-storage/bin/bbcaace',
-        'https://extendsclass.com/api/json-storage/bin/ecaaafd'
-    ];
-
     (async () => {
-        for (const binUrl of CLOUD_BIN_URLS) {
+        for (const binUrl of STORE_CLOUD_BINS) {
             try {
                 const cloudGet = await fetch(`${binUrl}?t=${Date.now()}`);
                 let cloudData = { orders: [], users: [], enquiries: [], logs: [] };
@@ -3411,9 +3409,13 @@ function completeOrderPlacement(realServerOrder) {
 
                 await fetch(binUrl, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Security-key': STORE_CLOUD_SEC_KEY
+                    },
                     body: JSON.stringify(cloudData)
                 });
+                console.log(`[ORDER CLOUD SUCCESS] Order ${realServerOrder.id} synced to ${binUrl}`);
             } catch (e) {
                 console.warn('[ORDER] Cloud sync notice:', e);
             }
@@ -3868,12 +3870,18 @@ async function renderAdminOrdersTable() {
         if (res.ok && Array.isArray(data)) ordersList = data;
     } catch (e) { console.error(e); }
 
-    if (ordersList.length === 0) {
+    for (const binUrl of STORE_CLOUD_BINS) {
         try {
-            const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+            const cloudRes = await fetch(`${binUrl}?t=${Date.now()}`);
             if (cloudRes.ok) {
                 const cloudData = await cloudRes.json();
-                if (cloudData && Array.isArray(cloudData.orders)) ordersList = cloudData.orders;
+                if (cloudData && Array.isArray(cloudData.orders)) {
+                    cloudData.orders.forEach(co => {
+                        if (co && co.id && !ordersList.some(o => String(o.id) === String(co.id))) {
+                            ordersList.push(co);
+                        }
+                    });
+                }
             }
         } catch (err) {}
     }
@@ -3975,14 +3983,16 @@ async function renderAdminCustomersTable() {
 
     let cloudUsers = [];
     let cloudOrders = [];
-    try {
-        const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
-        if (cloudRes.ok) {
-            const cloudData = await cloudRes.json();
-            if (cloudData && Array.isArray(cloudData.users)) cloudUsers = cloudData.users;
-            if (cloudData && Array.isArray(cloudData.orders)) cloudOrders = cloudData.orders;
-        }
-    } catch (err) {}
+    for (const binUrl of STORE_CLOUD_BINS) {
+        try {
+            const cloudRes = await fetch(`${binUrl}?t=${Date.now()}`);
+            if (cloudRes.ok) {
+                const cloudData = await cloudRes.json();
+                if (cloudData && Array.isArray(cloudData.users)) cloudUsers.push(...cloudData.users);
+                if (cloudData && Array.isArray(cloudData.orders)) cloudOrders.push(...cloudData.orders);
+            }
+        } catch (err) {}
+    }
 
     const localCustomers = getDB('admin_customers');
     const localUsers = getDB('users');

@@ -112,9 +112,11 @@ const dbFilePath = isVercel
   : path.join(__dirname, '..', 'data', 'achira_db.json');
 
 const CLOUD_BINS = [
-  'https://extendsclass.com/api/json-storage/bin/bbcaace',
-  'https://extendsclass.com/api/json-storage/bin/ecaaafd'
+  'https://extendsclass.com/api/json-storage/bin/ebbbfeb',
+  'https://extendsclass.com/api/json-storage/bin/cfddaaf',
+  'https://extendsclass.com/api/json-storage/bin/cfbfcbf'
 ];
+const CLOUD_SEC_KEY = 'achira_luxury_secret_2026';
 
 async function syncFromCloudBins() {
   for (const binUrl of CLOUD_BINS) {
@@ -137,9 +139,46 @@ async function syncFromCloudBins() {
               }
             });
           }
+          if (Array.isArray(data.enquiries) && data.enquiries.length > 0) {
+            data.enquiries.forEach(ce => {
+              if (ce && ce.id && !memoryStore.enquiries.some(e => String(e.id) === String(ce.id))) {
+                memoryStore.enquiries.push(ce);
+              }
+            });
+          }
         }
       }
     } catch (e) {}
+  }
+}
+
+async function saveToCloudBins(payload) {
+  for (const binUrl of CLOUD_BINS) {
+    try {
+      const res = await fetch(`${binUrl}?t=${Date.now()}`);
+      let existing = { orders: [], users: [], enquiries: [], logs: [] };
+      if (res.ok) {
+        existing = await res.json();
+      }
+      const merged = {
+        ...existing,
+        ...payload,
+        orders: payload.orders || existing.orders || [],
+        enquiries: payload.enquiries || existing.enquiries || [],
+        users: payload.users || existing.users || [],
+        logs: payload.logs || existing.logs || []
+      };
+      await fetch(binUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Security-key': CLOUD_SEC_KEY
+        },
+        body: JSON.stringify(merged)
+      });
+    } catch (e) {
+      console.warn('[CLOUD BIN SAVE NOTICE]', e.message);
+    }
   }
 }
 
@@ -769,7 +808,10 @@ const checkoutHandler = async (req, res) => {
         }
         await fetch(binUrl, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Security-key': CLOUD_SEC_KEY
+          },
           body: JSON.stringify(cloudData)
         });
         console.log(`[CLOUD BIN SYNC SUCCESS] Order ${orderId} committed to ${binUrl}`);
@@ -1089,6 +1131,7 @@ const updateOrderStatusHandler = async (req, res) => {
     }
 
     saveFileDatabase();
+    saveToCloudBins({ orders: memoryStore.orders });
     res.json({ success: true, message: `Order ${orderId} updated successfully.` });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to update order status.' });
@@ -1110,6 +1153,7 @@ app.delete('/api/admin/orders/:id', authenticateToken, requireAdmin, async (req,
 
     memoryStore.orders = memoryStore.orders.filter(o => String(o.id) !== String(orderId) && String(o.id).replace(/^ACH-/, '') !== String(orderId));
     saveFileDatabase();
+    saveToCloudBins({ orders: memoryStore.orders });
     console.log(`[ORDER DELETED] ID: ${orderId}`);
     res.json({ success: true, message: `Order ${orderId} deleted permanently.` });
   } catch (error) {
@@ -1126,6 +1170,7 @@ app.delete('/api/admin/orders', authenticateToken, requireAdmin, async (req, res
     }
     memoryStore.orders = [];
     saveFileDatabase();
+    saveToCloudBins({ orders: [] });
     console.log('[ALL ORDERS CLEARED]');
     res.json({ success: true, message: 'All orders cleared successfully.' });
   } catch (error) {
@@ -1328,7 +1373,10 @@ const contactSubmitHandler = async (req, res) => {
           }
           await fetch(binUrl, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Security-key': CLOUD_SEC_KEY
+            },
             body: JSON.stringify(cloudData)
           });
         }
@@ -1434,7 +1482,10 @@ const deleteEnquiryHandler = async (req, res) => {
             cData.enquiries = cData.enquiries.filter(e => String(e.id) !== String(id) && e.name !== id);
             await fetch(binUrl, {
               method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
+              headers: {
+                'Content-Type': 'application/json',
+                'Security-key': CLOUD_SEC_KEY
+              },
               body: JSON.stringify(cData)
             });
           }

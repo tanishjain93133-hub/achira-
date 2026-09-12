@@ -1183,9 +1183,11 @@
             let cloudLogs = [];
             let cloudEnquiries = [];
             const ADMIN_CLOUD_BINS = [
-                'https://extendsclass.com/api/json-storage/bin/bbcaace',
-                'https://extendsclass.com/api/json-storage/bin/ecaaafd'
+                'https://extendsclass.com/api/json-storage/bin/ebbbfeb',
+                'https://extendsclass.com/api/json-storage/bin/cfddaaf',
+                'https://extendsclass.com/api/json-storage/bin/cfbfcbf'
             ];
+            const ADMIN_CLOUD_SEC_KEY = 'achira_luxury_secret_2026';
             for (const binUrl of ADMIN_CLOUD_BINS) {
                 try {
                     const cloudRes = await fetch(`${binUrl}?t=${Date.now()}`);
@@ -1225,7 +1227,10 @@
                         if (needCloudClean) {
                             fetch(binUrl, {
                                 method: 'PUT',
-                                headers: { 'Content-Type': 'application/json' },
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Security-key': ADMIN_CLOUD_SEC_KEY
+                                },
                                 body: JSON.stringify(cloudData)
                             }).catch(() => {});
                         }
@@ -1454,7 +1459,7 @@
                 });
             } catch (e) {}
 
-            // Update across both Cloud Bins
+            // Update across all Cloud Bins
             for (const binUrl of ADMIN_CLOUD_BINS) {
                 try {
                     const cloudRes = await fetch(`${binUrl}?t=${Date.now()}`);
@@ -1467,7 +1472,10 @@
                                 cOrder.orderStatus = newStatus;
                                 await fetch(binUrl, {
                                     method: 'PUT',
-                                    headers: { 'Content-Type': 'application/json' },
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Security-key': ADMIN_CLOUD_SEC_KEY
+                                    },
                                     body: JSON.stringify(cloudData)
                                 });
                             }
@@ -1502,7 +1510,10 @@
                             cloudData.orders = cloudData.orders.filter(o => String(o.id) !== String(orderId) && String(o.dbId) !== String(orderId));
                             await fetch(binUrl, {
                                 method: 'PUT',
-                                headers: { 'Content-Type': 'application/json' },
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Security-key': ADMIN_CLOUD_SEC_KEY
+                                },
                                 body: JSON.stringify(cloudData)
                             });
                         }
@@ -1534,7 +1545,10 @@
                         cloudData.orders = [];
                         await fetch(binUrl, {
                             method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Security-key': ADMIN_CLOUD_SEC_KEY
+                            },
                             body: JSON.stringify(cloudData)
                         });
                     }
@@ -1679,7 +1693,10 @@
                             cData.enquiries = cData.enquiries.filter(e => String(e.id) !== String(id) && e.name !== id);
                             await fetch(binUrl, {
                                 method: 'PUT',
-                                headers: { 'Content-Type': 'application/json' },
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Security-key': ADMIN_CLOUD_SEC_KEY
+                                },
                                 body: JSON.stringify(cData)
                             });
                         }
