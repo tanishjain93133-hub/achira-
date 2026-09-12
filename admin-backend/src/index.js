@@ -1023,15 +1023,14 @@ const fetchAllAdminOrdersHandler = async (req, res) => {
     }
 
     // 3. Merge with memory store and filter out only legacy hardcoded mock test records
-    const FAKE_MOCK_ORDER_IDS = ['ACH-TEST-999', 'ACH-TEST'];
     const isFakeRecord = (o) => {
       if (!o) return true;
       const id = String(o.id || o.orderId || o.dbId || '').toUpperCase().trim();
       const name = String(o.userName || o.customerName || o.name || o.customer || (o.user ? o.user.name : '')).toLowerCase().trim();
       const email = String(o.userEmail || o.email || (o.user ? o.user.email : '')).toLowerCase().trim();
-      if (id === 'ACH-TEST-999' || id === 'ACH-TEST') return true;
-      if (name === 'kavita mehta' || name === 'kavin mehta' || name === 'priya roy') return true;
-      if (email === 'kavita.mehta@example.com' || email === 'priya.roy@example.com') return true;
+      if (id === 'ACH-TEST-999' || id === 'ACH-TEST' || id === 'ACH-REAL-TEST-1' || id === 'ACH-ORD-563640' || id === 'ENQ-REAL-TEST-1' || id === 'EQ-9231') return true;
+      if (name === 'kavita mehta' || name === 'kavin mehta' || name === 'priya roy' || name === 'rahul sharma' || name.includes('dhaval shah (patron)') || name === 'ananya singhania') return true;
+      if (email === 'kavita.mehta@example.com' || email === 'priya.roy@example.com' || email === 'rahul.sharma@gmail.com' || email === 'dhaval.shah@couturepatron.com' || email === 'ananya.singhania@luxury.in') return true;
       return false;
     };
 
