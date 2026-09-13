@@ -1169,6 +1169,28 @@ const API_BASE = (typeof window !== 'undefined' && (window.location.hostname ===
   ? (window.location.port === '5001' ? '' : (window.location.port === '5000' ? '' : 'http://localhost:5001'))
   : '';
 
+// Universal fetch interceptor for Vercel serverless routing
+(function() {
+    if (typeof window === 'undefined' || typeof window.fetch !== 'function') return;
+    const _origFetch = window.fetch;
+    window.fetch = function(resource, init) {
+        try {
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+            if (!isLocal) {
+                let urlStr = typeof resource === 'string' ? resource : (resource && resource.url ? resource.url : '');
+                if (urlStr && urlStr.startsWith('/api/') && !urlStr.startsWith('/api/index.js') && !urlStr.startsWith('/api/robots.js') && !urlStr.startsWith('/api/sitemap.js')) {
+                    const newUrl = '/api/index.js?path=' + encodeURIComponent(urlStr);
+                    if (typeof resource === 'object' && resource instanceof Request) {
+                        return _origFetch(new Request(newUrl, resource), init);
+                    }
+                    return _origFetch(newUrl, init);
+                }
+            }
+        } catch(e) {}
+        return _origFetch(resource, init);
+    };
+})();
+
 // Global active session state
 let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
 let currentAdmin = JSON.parse(localStorage.getItem('currentAdmin')) || null;
