@@ -177,7 +177,24 @@ export default function AdminDashboard() {
 
   const fetchOrders = async () => {
     console.log('[ADMIN DEBUG] Fetching all orders...');
-    const FAKE_MOCK_ORDER_IDS = ['ACH-56', 'ACH-55', 'ACH-54', 'ACH-53', 'ACH-52', 'ACH-51', '56', '55', '54', '53', '52', '51'];
+    const isFakeRecord = (o) => {
+      if (!o) return true;
+      const id = String(o.id || o.orderId || o.dbId || '').toUpperCase().trim();
+      const name = String(o.userName || o.customerName || o.name || o.customer || (o.user ? o.user.name : '')).toLowerCase().trim();
+      const email = String(o.userEmail || o.email || (o.user ? o.user.email : '')).toLowerCase().trim();
+      
+      const fakeIds = ['ACH-ALPHA-101', 'ACH-BETA-202', 'ACH-TEST-1', 'ACH-ORD-563640', 'ENQ-REAL-TEST-1', 'EQ-9231', 'EQ-1001', 'ACH-56', 'ACH-55', 'ACH-54', 'ACH-53', 'ACH-52', 'ACH-51', '56', '55', '54', '53', '52', '51'];
+      if (fakeIds.includes(id)) return true;
+      
+      const fakeNames = ['customer alpha', 'customer beta', 'customer test', 'kavita mehta', 'kavin mehta', 'priya roy', 'rahul sharma', 'ananya singhania', 'princess ananya rao', 'riya sen', 'meera singhania', 'devika kapadia', 'dhaval shah'];
+      if (fakeNames.includes(name)) return true;
+      
+      const fakeEmails = ['customer_a@achira-test.com', 'customer_b@achira-test.com', 'alpha@test.com', 'beta@test.com', 'demo@example.com', 'test@example.com', 'couturepatron@couturepatron.com', 'princess.ananya@luxury.in', 'riya.sen@example.com', 'meera.singhania@singhania.org', 'devika.kapadia@example.com', 'kavita.mehta@example.com', 'kavin.mehta@example.com', 'priya.roy@example.com', 'rahul.sharma@example.com', 'dhaval.shah@example.com'];
+      if (fakeEmails.includes(email)) return true;
+      
+      return false;
+    };
+
     let orderList = [];
     try {
       const res = await fetch(`${API_BASE}/api/admin/orders`, {
@@ -188,7 +205,7 @@ export default function AdminDashboard() {
         if (ct.includes('application/json')) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
-            orderList = data.filter(o => o && !FAKE_MOCK_ORDER_IDS.includes(String(o.id)) && !FAKE_MOCK_ORDER_IDS.includes(String(o.dbId)));
+            orderList = data.filter(o => o && !isFakeRecord(o));
           }
         }
       }
@@ -196,11 +213,11 @@ export default function AdminDashboard() {
 
     let cloudOrders = [];
     try {
-      const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+      const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/ebbbfeb?t=${Date.now()}`);
       if (cloudRes.ok) {
         const cloudData = await cloudRes.json();
         if (cloudData && Array.isArray(cloudData.orders)) {
-          cloudOrders = cloudData.orders.filter(o => o && !FAKE_MOCK_ORDER_IDS.includes(String(o.id)) && !FAKE_MOCK_ORDER_IDS.includes(String(o.dbId)));
+          cloudOrders = cloudData.orders.filter(o => o && !isFakeRecord(o));
         }
       }
     } catch (err) {}
@@ -210,6 +227,7 @@ export default function AdminDashboard() {
       const rawLocal = localStorage.getItem('orders') || localStorage.getItem('admin_orders') || '[]';
       localOrders = JSON.parse(rawLocal);
       if (!Array.isArray(localOrders)) localOrders = [];
+      localOrders = localOrders.filter(o => o && !isFakeRecord(o));
     } catch (e) {}
 
     // Merge and deduplicate
@@ -217,7 +235,7 @@ export default function AdminDashboard() {
     [...orderList, ...cloudOrders, ...localOrders].forEach(o => {
       if (o && o.id) {
         const idStr = String(o.id);
-        if (!FAKE_MOCK_ORDER_IDS.includes(idStr) && !orderMap.has(idStr)) {
+        if (!isFakeRecord(o) && !orderMap.has(idStr)) {
           orderMap.set(idStr, o);
         }
       }
@@ -233,6 +251,24 @@ export default function AdminDashboard() {
   };
 
   const fetchCustomers = async () => {
+    const isFake = (item) => {
+      if (!item) return true;
+      const id = String(item.id || item.orderId || item.dbId || '').toUpperCase().trim();
+      const name = String(item.name || item.customerName || item.userName || item.customer || '').toLowerCase().trim();
+      const email = String(item.email || item.userEmail || '').toLowerCase().trim();
+      
+      const fakeIds = ['ACH-ALPHA-101', 'ACH-BETA-202', 'ACH-TEST-1', 'ACH-ORD-563640', 'ENQ-REAL-TEST-1', 'EQ-9231', 'EQ-1001', 'ACH-56', 'ACH-55', 'ACH-54', 'ACH-53', 'ACH-52', 'ACH-51', '56', '55', '54', '53', '52', '51'];
+      if (fakeIds.includes(id)) return true;
+      
+      const fakeNames = ['customer alpha', 'customer beta', 'customer test', 'kavita mehta', 'kavin mehta', 'priya roy', 'rahul sharma', 'ananya singhania', 'princess ananya rao', 'riya sen', 'meera singhania', 'devika kapadia', 'dhaval shah'];
+      if (fakeNames.includes(name)) return true;
+      
+      const fakeEmails = ['customer_a@achira-test.com', 'customer_b@achira-test.com', 'alpha@test.com', 'beta@test.com', 'demo@example.com', 'test@example.com', 'couturepatron@couturepatron.com', 'princess.ananya@luxury.in', 'riya.sen@example.com', 'meera.singhania@singhania.org', 'devika.kapadia@example.com', 'kavita.mehta@example.com', 'kavin.mehta@example.com', 'priya.roy@example.com', 'rahul.sharma@example.com', 'dhaval.shah@example.com'];
+      if (fakeEmails.includes(email)) return true;
+      
+      return false;
+    };
+
     let customerList = [];
     try {
       const res = await fetch(`${API_BASE}/api/admin/customers`, {
@@ -240,44 +276,48 @@ export default function AdminDashboard() {
       });
       const data = await res.json();
       if (res.ok && Array.isArray(data)) {
-        customerList = data;
+        customerList = data.filter(c => !isFake(c));
       }
     } catch (e) { console.error(e); }
 
     let cloudUsers = [];
     let cloudOrders = [];
     try {
-      const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/bbcaace?t=${Date.now()}`);
+      const cloudRes = await fetch(`https://extendsclass.com/api/json-storage/bin/ebbbfeb?t=${Date.now()}`);
       if (cloudRes.ok) {
         const cloudData = await cloudRes.json();
-        if (cloudData && Array.isArray(cloudData.users)) cloudUsers = cloudData.users;
-        if (cloudData && Array.isArray(cloudData.orders)) cloudOrders = cloudData.orders;
+        if (cloudData && Array.isArray(cloudData.users)) cloudUsers = cloudData.users.filter(u => !isFake(u));
+        if (cloudData && Array.isArray(cloudData.orders)) cloudOrders = cloudData.orders.filter(o => !isFake(o));
       }
     } catch (err) {}
 
     const custMap = new Map();
     customerList.forEach(c => {
-      const em = (c.email || '').toLowerCase().trim();
-      if (em) custMap.set(em, c);
-    });
-
-    cloudUsers.forEach(u => {
-      const em = (u.email || '').toLowerCase().trim();
-      if (em && !custMap.has(em)) {
-        custMap.set(em, {
-          id: u.id || ('CUST-' + Math.floor(1000 + Math.random() * 9000)),
-          name: u.name || 'Valued Patron',
-          email: u.email,
-          phone: u.phone || '+91 98765 43210',
-          address: u.address || 'Registered Online Customer',
-          ordersCount: u.ordersCount || 0,
-          totalSpent: u.totalSpent || 0,
-          status: 'Active'
-        });
+      if (!isFake(c)) {
+        const em = (c.email || '').toLowerCase().trim();
+        if (em) custMap.set(em, c);
       }
     });
 
-    const allOrders = [...orders, ...cloudOrders];
+    cloudUsers.forEach(u => {
+      if (!isFake(u)) {
+        const em = (u.email || '').toLowerCase().trim();
+        if (em && !custMap.has(em)) {
+          custMap.set(em, {
+            id: u.id || ('CUST-' + Math.floor(1000 + Math.random() * 9000)),
+            name: u.name || 'Valued Patron',
+            email: u.email,
+            phone: u.phone || '+91 98765 43210',
+            address: u.address || 'Registered Online Customer',
+            ordersCount: u.ordersCount || 0,
+            totalSpent: u.totalSpent || 0,
+            status: 'Active'
+          });
+        }
+      }
+    });
+
+    const allOrders = [...orders, ...cloudOrders].filter(o => !isFake(o));
     allOrders.forEach(o => {
       const em = (o.userEmail || o.email || '').toLowerCase().trim();
       if (em) {
@@ -285,11 +325,11 @@ export default function AdminDashboard() {
         const totalSpent = userOrds.reduce((s, x) => s + (x.grandTotal || x.total || 0), 0);
         const existing = custMap.get(em);
         custMap.set(em, {
-          id: existing ? existing.id : (o.id || Date.now()),
+          id: existing ? existing.id : (o.id || 'CUST-' + Math.floor(1000 + Math.random() * 9000)),
           name: existing && existing.name && existing.name !== 'Valued Patron' ? existing.name : (o.userName || o.customerName || 'Valued Patron'),
           email: em,
           phone: existing && existing.phone ? existing.phone : (o.userPhone || o.phone || '+91 98765 43210'),
-          address: existing && existing.address && existing.address !== 'Registered Online Customer' ? existing.address : (o.userAddress || o.address || 'Delivered Address'),
+          address: existing && existing.address ? existing.address : (o.userAddress || o.address || 'Delivered Address'),
           ordersCount: userOrds.length,
           totalSpent: totalSpent,
           status: 'Active'
@@ -297,7 +337,7 @@ export default function AdminDashboard() {
       }
     });
 
-    setCustomers(Array.from(custMap.values()));
+    setCustomers(Array.from(custMap.values()).filter(c => !isFake(c)));
   };
 
   const fetchLogs = async () => {

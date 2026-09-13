@@ -1077,9 +1077,45 @@ function setDB(table, data) {
     localStorage.setItem(table, JSON.stringify(data));
 }
 
+function isFakeRecord(o) {
+    if (!o) return true;
+    const id = String(o.id || o.orderId || o.dbId || '').toUpperCase().trim();
+    const name = String(o.userName || o.customerName || o.name || o.customer || (o.user ? o.user.name : '')).toLowerCase().trim();
+    const email = String(o.userEmail || o.email || (o.user ? o.user.email : '')).toLowerCase().trim();
+    
+    // Specifically exclude only the ancient legacy seed test IDs
+    const fakeIds = ['ACH-ALPHA-101', 'ACH-BETA-202', 'ACH-TEST-1', 'ACH-ORD-563640', 'ENQ-REAL-TEST-1', 'EQ-9231', 'EQ-1001', 'ACH-56', 'ACH-55', 'ACH-54', 'ACH-53', 'ACH-52', 'ACH-51', '56', '55', '54', '53', '52', '51'];
+    if (fakeIds.includes(id)) return true;
+    
+    // Specifically exclude only the hardcoded test names
+    const fakeNames = ['customer alpha', 'customer beta', 'customer test', 'kavita mehta', 'kavin mehta', 'priya roy', 'rahul sharma', 'ananya singhania', 'princess ananya rao', 'riya sen', 'meera singhania', 'devika kapadia', 'dhaval shah'];
+    if (fakeNames.includes(name)) return true;
+    
+    // Specifically exclude only the hardcoded test emails
+    const fakeEmails = ['customer_a@achira-test.com', 'customer_b@achira-test.com', 'alpha@test.com', 'beta@test.com', 'demo@example.com', 'test@example.com', 'couturepatron@couturepatron.com', 'princess.ananya@luxury.in', 'riya.sen@example.com', 'meera.singhania@singhania.org', 'devika.kapadia@example.com', 'kavita.mehta@example.com', 'kavin.mehta@example.com', 'priya.roy@example.com', 'rahul.sharma@example.com', 'dhaval.shah@example.com'];
+    if (fakeEmails.includes(email)) return true;
+    
+    return false;
+}
+
 // Initialise Database values
 function initDatabase() {
     getDB('admins', [{ username: 'admin', password: 'password' }]);
+    
+    // Automatic LocalStorage Auto-Purge to guarantee no stale demo records persist in browser storage
+    try {
+        ['admin_orders', 'orders', 'admin_customers', 'users', 'enquiries'].forEach(k => {
+            const val = localStorage.getItem(k);
+            if (val) {
+                const parsed = JSON.parse(val);
+                if (Array.isArray(parsed)) {
+                    const cleaned = parsed.filter(item => !isFakeRecord(item));
+                    localStorage.setItem(k, JSON.stringify(cleaned));
+                }
+            }
+        });
+    } catch (e) {}
+
     getDB('users', []);
     
     const cleanStraightFit = (typeof ACHIRA_PRODUCTS_DATA !== 'undefined' && Array.isArray(ACHIRA_PRODUCTS_DATA)) 
@@ -1895,6 +1931,26 @@ function onAuthSuccess(user, token, toastMsg) {
         localStorage.setItem('userEmail', user.email.toLowerCase().trim());
     }
     if (token) localStorage.setItem('userToken', token);
+    
+    // Auto-populate checkout inputs with newly authenticated user
+    const chkName = document.getElementById('checkoutName');
+    const chkPhone = document.getElementById('checkoutPhone');
+    const chkEmail = document.getElementById('checkoutEmail');
+    if (chkName && user.name) chkName.value = user.name;
+    if (chkPhone && user.phone) chkPhone.value = user.phone.replace('+91 ', '');
+    if (chkEmail && user.email) chkEmail.value = user.email;
+
+    // Broadcast user login/signup to admin panel in real-time
+    try {
+        if (typeof BroadcastChannel !== 'undefined') {
+            const channel = new BroadcastChannel('achira_store_channel');
+            channel.postMessage({ type: 'NEW_USER', user: user });
+            const globalChannel = new BroadcastChannel('ACHIRA_GLOBAL_DATA_BUS');
+            globalChannel.postMessage({ type: 'SYNC_ALL' });
+        }
+        localStorage.setItem('achira_sync_trigger', Date.now().toString());
+    } catch (e) {}
+
     showToast(toastMsg || `Welcome, ${user.name}!`);
     closeAuthModal();
     if (pendingCheckoutAfterLogin) {
@@ -2298,79 +2354,7 @@ function switchAuthTab(tab) {
     if (targetView) targetView.classList.add('active');
 }
 
-function handleUserLogin(e) {
-    if (e) e.preventDefault();
-    const emailEl = document.getElementById('loginEmail');
-    const passEl = document.getElementById('loginPassword');
-    const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
-    const pass = passEl ? passEl.value.trim() : '';
-
-    if (!email) {
-        showToast("Please enter your email address.");
-        return;
-    }
-
-    // Auto-detect existing patron or create login session
-    const existingUsers = getDB('users', []);
-    const user = existingUsers.find(u => (u.email || '').toLowerCase() === email) || {
-        name: email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-        email: email
-    };
-
-    currentUser = {
-        name: user.name || 'Valued Patron',
-        email: email,
-        phone: user.phone || '+91 98765 43210',
-        address: user.address || 'Delivered Address'
-    };
-
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    localStorage.setItem('userEmail', email);
-    localStorage.setItem('userToken', 'patron-token-' + Date.now());
-
-    closeAuthModal();
-    showToast(`✦ Welcome to Achira Atelier, ${currentUser.name}!`);
-    openProfileModal();
-}
-
-function handleUserSignup(e) {
-    if (e) e.preventDefault();
-    const nameEl = document.getElementById('signupName');
-    const emailEl = document.getElementById('signupEmail');
-    const passEl = document.getElementById('signupPassword');
-
-    const name = nameEl && nameEl.value.trim() ? nameEl.value.trim() : 'Valued Patron';
-    const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
-
-    if (!email) {
-        showToast("Please enter a valid email address.");
-        return;
-    }
-
-    currentUser = { name, email, phone: '+91 98765 43210', address: 'Registered Online Customer' };
-    const users = getDB('users', []);
-    if (!users.some(u => (u.email || '').toLowerCase() === email)) {
-        users.push({ id: Date.now(), name, email });
-        setDB('users', users);
-    }
-
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    localStorage.setItem('userEmail', email);
-    localStorage.setItem('userToken', 'patron-token-' + Date.now());
-
-    closeAuthModal();
-    showToast(`✦ Account created successfully! Welcome, ${name}.`);
-    openProfileModal();
-}
-
-function handleUserLogout() {
-    currentUser = null;
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userToken');
-    closeProfileModal();
-    showToast("Logged out successfully.");
-}
+// Auth modal tabs & helpers are declared above
 
 function handleForgotPassword(e) {
     if (e) e.preventDefault();
@@ -2424,181 +2408,87 @@ function switchProfileTab(tabId) {
     }
 }
 
-async function renderUserOrdersTable(overrideEmail) {
+async function renderUserOrdersTable() {
     const listWrap = document.getElementById('userOrdersList');
     if (!listWrap) return;
-    
-    const inputVal = document.getElementById('orderEmailLookupInput') ? document.getElementById('orderEmailLookupInput').value.trim() : '';
-    let currEmail = (overrideEmail !== undefined && typeof overrideEmail === 'string') 
-        ? overrideEmail.trim() 
-        : (inputVal ? inputVal.trim() : ((currentUser && currentUser.email) ? currentUser.email.trim() : (localStorage.getItem('userEmail') ? localStorage.getItem('userEmail').trim() : '')));
 
-    const cleanTargetEmail = currEmail.toLowerCase().trim();
-    const cleanPhone = cleanTargetEmail.replace(/\D/g, '');
-
-    listWrap.innerHTML = `
-        <div style="margin-bottom: 16px; background: #FAF6F0; padding: 14px 16px; border-radius: 8px; border: 1px solid #E5D5C0;">
-            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #3C0008; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Look Up Purchase History by Email / Phone / Order ID:</label>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <input type="text" id="orderEmailLookupInput" placeholder="Enter customer email (e.g. patron@gmail.com) or Order ID" value="${cleanTargetEmail}" style="flex: 1; min-width: 220px; padding: 10px 14px; border: 1.5px solid #B88A44; border-radius: 6px; font-size: 0.9rem; outline: none;" onkeydown="if(event.key==='Enter')renderUserOrdersTable(this.value)">
-                <button type="button" onclick="renderUserOrdersTable(document.getElementById('orderEmailLookupInput').value)" style="padding: 10px 18px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.88rem;">Find Orders</button>
-                <button type="button" onclick="renderUserOrdersTable('all')" style="padding: 10px 14px; background: #FFF; color: #3C0008; border: 1px solid #B88A44; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.82rem;">View All</button>
-            </div>
-        </div>
-        <p style="font-family: var(--font-body); font-size: 0.88rem; color: #666; text-align: center; padding: 20px;">Fetching purchase history from cloud database...</p>
-    `;
-
-    const SUPABASE_REST_URL = 'https://yixfebpbiqlhigunjbvt.supabase.co/rest/v1';
-    const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpeGZlYnBiaXFsaGlndW5qYnZ0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzE2MDkyOSwiZXhwIjoyMTAyNzM2OTI5fQ.ycIKFrEGvueg25UEntZE-4nQDIYz_QQB_5_zlTWf0sU';
-    const supabaseHeaders = {
-        'apikey': SUPABASE_API_KEY,
-        'Authorization': `Bearer ${SUPABASE_API_KEY}`,
-        'Content-Type': 'application/json'
-    };
-
-    let allCustomerOrders = [];
-    const seenOrderIds = new Set();
-
-    function addOrder(o) {
-        if (!o) return;
-        const oId = String(o.id || o.orderId || o.dbId || '');
-        if (!oId || seenOrderIds.has(oId)) return;
-        seenOrderIds.add(oId);
-        allCustomerOrders.push(o);
-    }
-
-    // 1. Direct Supabase Database Fetch
-    try {
-        const sRes = await fetch(`${SUPABASE_REST_URL}/orders?select=*&order=created_at.desc`, { headers: supabaseHeaders });
-        if (sRes.ok) {
-            const sOrders = await sRes.json();
-            if (Array.isArray(sOrders)) {
-                sOrders.forEach(so => {
-                    addOrder({
-                        id: so.id,
-                        userName: so.customer_name || 'Valued Patron',
-                        customerName: so.customer_name || 'Valued Patron',
-                        userEmail: so.email || '',
-                        email: so.email || '',
-                        userPhone: so.phone || '',
-                        phone: so.phone || '',
-                        userAddress: so.address || 'Standard Delivery Address',
-                        address: so.address || 'Standard Delivery Address',
-                        grandTotal: Number(so.grand_total || 0),
-                        total: Number(so.grand_total || 0),
-                        paymentMode: so.payment_method || 'UPI (QR)',
-                        paymentMethod: so.payment_method || 'UPI (QR)',
-                        status: so.order_status || 'Processing',
-                        orderStatus: so.order_status || 'Processing',
-                        itemsSummary: so.items_summary || '',
-                        itemsDetail: so.items_detail || [],
-                        date: so.created_at ? new Date(so.created_at).toLocaleDateString('en-IN') : 'Today',
-                        createdAt: so.created_at
-                    });
-                });
-            }
-        }
-    } catch(e) {}
-
-    // 2. Fetch from Backend API
-    try {
-        const res = await fetch(`${API_BASE}/api/user/orders?email=${encodeURIComponent(cleanTargetEmail)}`);
-        if (res.ok) {
-            const data = await res.json();
-            if (data && Array.isArray(data.orders)) {
-                data.orders.forEach(addOrder);
-            }
-        }
-    } catch(e) {}
-
-    try {
-        const aRes = await fetch(`${API_BASE}/api/admin/orders`);
-        if (aRes.ok) {
-            const aData = await aRes.json();
-            if (Array.isArray(aData)) aData.forEach(addOrder);
-        }
-    } catch(e) {}
-
-    // 3. Fetch from Multi-Bin Cloud Storage
-    for (const binUrl of STORE_CLOUD_BINS) {
-        try {
-            const cloudRes = await fetch(`${binUrl}?t=${Date.now()}`);
-            if (cloudRes.ok) {
-                const cData = await cloudRes.json();
-                if (cData && Array.isArray(cData.orders)) {
-                    cData.orders.forEach(addOrder);
-                }
-            }
-        } catch(e) {}
-    }
-
-    // 4. Fetch from Local Storage
-    const localOrders = [...getDB('orders', []), ...getDB('admin_orders', [])];
-    localOrders.forEach(addOrder);
-
-    // Filter matching orders
-    const matchedOrders = allCustomerOrders.filter(o => {
-        if (!o) return false;
-        if (cleanTargetEmail === 'all' || !cleanTargetEmail) return true;
-        const oId = String(o.id || '').toLowerCase().trim();
-        const oEmail = (o.userEmail || o.email || '').toLowerCase().trim();
-        const oPhone = (o.userPhone || o.phone || '').replace(/\D/g, '');
-        const oName = (o.userName || o.customerName || '').toLowerCase().trim();
-
-        return oEmail === cleanTargetEmail || 
-               (cleanTargetEmail.length >= 3 && oEmail.includes(cleanTargetEmail)) ||
-               (cleanPhone.length >= 7 && oPhone.includes(cleanPhone)) ||
-               oId === cleanTargetEmail ||
-               oId.includes(cleanTargetEmail) ||
-               oName.includes(cleanTargetEmail);
-    });
-
-    function parseOrderTimestamp(o) {
-        if (!o) return 0;
-        if (o.createdAt) {
-            const t = new Date(o.createdAt).getTime();
-            if (!isNaN(t) && t > 0) return t;
-        }
-        if (o.date && typeof o.date === 'string') {
-            const parts = o.date.split('/');
-            if (parts.length === 3) {
-                const d = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
-                if (!isNaN(d.getTime()) && d.getTime() > 0) return d.getTime();
-            }
-            const fallback = new Date(o.date).getTime();
-            if (!isNaN(fallback) && fallback > 0) return fallback;
-        }
-        return 0;
-    }
-
-    matchedOrders.sort((a, b) => parseOrderTimestamp(b) - parseOrderTimestamp(a));
-
-    const searchHeaderHtml = `
-        <div style="margin-bottom: 16px; background: #FAF6F0; padding: 14px 16px; border-radius: 8px; border: 1px solid #E5D5C0;">
-            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #3C0008; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Look Up Purchase History by Email / Phone / Order ID:</label>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <input type="text" id="orderEmailLookupInput" placeholder="Enter customer email (e.g. patron@gmail.com) or Order ID" value="${cleanTargetEmail === 'all' ? '' : cleanTargetEmail}" style="flex: 1; min-width: 220px; padding: 10px 14px; border: 1.5px solid #B88A44; border-radius: 6px; font-size: 0.9rem; outline: none;" onkeydown="if(event.key==='Enter')renderUserOrdersTable(this.value)">
-                <button type="button" onclick="renderUserOrdersTable(document.getElementById('orderEmailLookupInput').value)" style="padding: 10px 18px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.88rem;">Find Orders</button>
-                <button type="button" onclick="renderUserOrdersTable('all')" style="padding: 10px 14px; background: #FFF; color: #3C0008; border: 1px solid #B88A44; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.82rem;">View All</button>
-            </div>
-        </div>
-    `;
-
-    if (matchedOrders.length === 0) {
-        listWrap.innerHTML = searchHeaderHtml + `
-            <div style="text-align: center; padding: 35px 20px; background: #fff; border-radius: 8px; border: 1px dashed #B88A44;">
-                <p style="font-family: var(--font-body); font-size: 1rem; color: #3C0008; font-weight: 600; margin-bottom: 8px;">No orders found for "${cleanTargetEmail}".</p>
-                <p style="font-size: 0.84rem; color: #666; margin-bottom: 16px;">Make sure the email ID or Order ID matches your purchase details, or click "View All" to browse all orders.</p>
-                <button onclick="renderUserOrdersTable('all')" style="padding: 10px 24px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 20px; font-weight: 700; cursor: pointer;">Show All Customer Orders</button>
+    const token = localStorage.getItem('userToken');
+    if (!token) {
+        listWrap.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px; background: #FAF6F0; border-radius: 12px; border: 1px solid #E5D5C0;">
+                <p style="font-family: var(--font-brand); color: #3C0008; font-size: 1.1rem; margin-bottom: 10px; font-weight: 700;">Account Authentication Required</p>
+                <p style="font-size: 0.88rem; color: #666; margin-bottom: 20px;">Please log in to your Achira customer account to access your personal purchase history.</p>
+                <button type="button" onclick="closeProfileModal(); openAuthModal('login');" style="padding: 12px 28px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 24px; font-weight: 700; cursor: pointer; font-size: 0.9rem;">SIGN IN TO VIEW ORDERS</button>
             </div>
         `;
         return;
     }
 
-    let html = searchHeaderHtml + `
+    listWrap.innerHTML = `
+        <div style="text-align: center; padding: 30px; color: #666; font-size: 0.9rem;">
+            <p>✦ Fetching your secure purchase history from atelier database...</p>
+        </div>
+    `;
+
+    let customerOrders = [];
+    try {
+        const res = await fetch(`${API_BASE}/api/user/orders`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('currentUser');
+            listWrap.innerHTML = `
+                <div style="text-align: center; padding: 35px 20px; background: #FAF6F0; border-radius: 12px; border: 1px solid #E5D5C0;">
+                    <p style="font-family: var(--font-brand); color: #3C0008; font-size: 1rem; margin-bottom: 8px; font-weight: 700;">Session Expired</p>
+                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 16px;">Your session has expired. Please sign in again to view your order history.</p>
+                    <button type="button" onclick="closeProfileModal(); openAuthModal('login');" style="padding: 10px 24px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 20px; font-weight: 700; cursor: pointer;">Sign In</button>
+                </div>
+            `;
+            return;
+        }
+
+        if (res.ok) {
+            const data = await res.json();
+            if (data && Array.isArray(data.orders)) {
+                customerOrders = data.orders;
+            }
+        }
+    } catch (err) {
+        console.warn('[ORDER HISTORY API ERROR]', err);
+    }
+
+    if (customerOrders.length === 0) {
+        const activeEmail = (currentUser && currentUser.email ? currentUser.email : localStorage.getItem('userEmail') || '').toLowerCase().trim();
+        if (activeEmail) {
+            const local = getDB('orders', []).filter(o => {
+                const oEmail = (o.userEmail || o.email || '').toLowerCase().trim();
+                return oEmail === activeEmail && !isFakeRecord(o);
+            });
+            if (local.length > 0) {
+                customerOrders = local;
+            }
+        }
+    }
+
+    if (customerOrders.length === 0) {
+        listWrap.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px; background: #FFF; border-radius: 12px; border: 1px dashed #B88A44;">
+                <p style="font-family: var(--font-brand); font-size: 1.1rem; color: #3C0008; font-weight: 700; margin-bottom: 8px;">No Orders Placed Yet</p>
+                <p style="font-size: 0.86rem; color: #666; margin-bottom: 20px;">You haven't placed any orders with this account yet. Explore our royal collections to place your first couture order.</p>
+                <button type="button" onclick="closeProfileModal(); window.location.href='collections.html';" style="padding: 10px 26px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 20px; font-weight: 700; cursor: pointer;">EXPLORE COUTURE</button>
+            </div>
+        `;
+        return;
+    }
+
+    let html = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
-            <strong style="font-family: var(--font-brand); color: #3C0008; font-size: 1.05rem;">Purchase History (${matchedOrders.length} Order${matchedOrders.length === 1 ? '' : 's'})</strong>
-            <span style="font-size: 0.8rem; color: #777; background: #FAF6F0; padding: 3px 10px; border-radius: 12px; border: 1px solid #E5D5C0;">Filter: ${cleanTargetEmail === 'all' ? 'All Orders' : cleanTargetEmail}</span>
+            <strong style="font-family: var(--font-brand); color: #3C0008; font-size: 1.05rem;">My Purchase History (${customerOrders.length} Order${customerOrders.length === 1 ? '' : 's'})</strong>
+            <span style="font-size: 0.8rem; color: #006633; background: rgba(0,102,51,0.08); padding: 3px 10px; border-radius: 12px; border: 1px solid rgba(0,102,51,0.2); font-weight: 600;">🔒 Verified Account History</span>
         </div>
         <div style="overflow-x: auto;">
         <table class="admin-table" style="width: 100%; border-collapse: collapse;">
@@ -2615,10 +2505,10 @@ async function renderUserOrdersTable(overrideEmail) {
             <tbody>
     `;
 
-    matchedOrders.forEach(o => {
+    customerOrders.forEach(o => {
         const st = o.orderStatus || o.status || 'Processing';
-        const uEmail = o.userEmail || o.email || '';
-        const uName = o.userName || o.customerName || 'Valued Patron';
+        const uEmail = o.email || o.userEmail || '';
+        const uName = o.customerName || o.userName || 'Valued Patron';
         const grandTotal = (o.grandTotal || o.total || 0).toLocaleString('en-IN');
         const displayDate = o.date || (o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-IN') : 'Recent');
 
@@ -2640,7 +2530,7 @@ async function renderUserOrdersTable(overrideEmail) {
                     </span>
                 </td>
                 <td style="padding: 12px 10px; text-align: center;">
-                    <button onclick="switchProfileTab('profile-track'); document.getElementById('trackOrderId').value='${o.id}'; handleTrackOrder();" style="padding: 6px 12px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 4px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">Track</button>
+                    <button type="button" onclick="switchProfileTab('profile-track'); document.getElementById('trackOrderId').value='${o.id}'; handleTrackOrder();" style="padding: 6px 12px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 4px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">Track</button>
                 </td>
             </tr>
         `;
@@ -3078,7 +2968,7 @@ function togglePaymentViews(mode) {
     if (card) card.style.display = (mode === 'card' || mode === 'online') ? 'block' : 'none';
 }
 
-function handlePlaceOrder(e) {
+async function handlePlaceOrder(e) {
     e.preventDefault();
     const nameEl = document.getElementById('checkoutName');
     const phoneEl = document.getElementById('checkoutPhone');
@@ -3130,7 +3020,6 @@ function handlePlaceOrder(e) {
     
     let cart = getDB('cart');
     if (!cart || cart.length === 0) {
-        // Fallback to default couture item if cart was empty during checkout
         const defaultProd = getDB('products')[0] || { id: 101, name: 'Noor-e-Kashmir Midnight Black Embroidered Anarkali Set', price: 3999, image: 'anarkali1.jpg' };
         cart = [{ productId: defaultProd.id, qty: 1, selectedSize: 'M', selectedColor: 'Standard', name: defaultProd.name, price: defaultProd.price, image: defaultProd.image }];
         setDB('cart', cart);
@@ -3198,81 +3087,35 @@ function handlePlaceOrder(e) {
     const submitBtn = document.querySelector('#checkoutForm button[type="submit"]') || document.getElementById('checkoutSubmitBtn');
     if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerText = 'Order Placed ✓';
+        submitBtn.innerText = 'Processing Order...';
     }
 
-    // Complete order placement immediately
-    completeOrderPlacement(formattedOrder);
+    try {
+        await completeOrderPlacement(formattedOrder);
+    } catch (err) {
+        console.error('[ORDER ERROR]', err);
+    }
 
-    // Background sync to server API if available (multi-target sync)
-    const userToken = localStorage.getItem('userToken') || '';
-    const checkoutPayload = {
-        id: formattedOrder.id,
-        orderId: formattedOrder.id,
-        name: name,
-        customerName: name,
-        email: email,
-        phone: formattedPhone,
-        address: fullAddress,
-        city: city || '',
-        state: state || '',
-        pincode: pincode || '',
-        paymentMethod: payMode,
-        paymentMode: payMode,
-        subtotal: subtotal,
-        discount: discount,
-        tax: tax,
-        shipping: shipping,
-        grandTotal: grandTotal,
-        total: grandTotal,
-        itemsSummary: itemsSummary,
-        itemsDetail: formattedOrder.itemsDetail,
-        items: formattedOrder.itemsDetail
-    };
-
-    const apiEndpoints = [
-        `${API_BASE}/api/user/checkout`,
-        'http://localhost:5001/api/user/checkout',
-        '/api/user/checkout',
-        'http://localhost:5001/api/orders'
-    ].filter(Boolean);
-
-    (async () => {
-        for (const ep of apiEndpoints) {
-            try {
-                const res = await fetch(ep, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        ...(userToken ? { 'Authorization': `Bearer ${userToken}` } : {})
-                    },
-                    body: JSON.stringify(checkoutPayload)
-                });
-                if (res.ok) {
-                    console.log('[BACKEND ORDER SYNC OK]', ep);
-                    break;
-                }
-            } catch (e) {}
-        }
-    })();
-
-    setTimeout(() => {
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerText = 'CONFIRM & PLACE ORDER';
-        }
-    }, 1000);
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'CONFIRM & PLACE ORDER';
+    }
 }
 
-function completeOrderPlacement(realServerOrder) {
-    const orders = getDB('orders');
-    // Deduplicate by ID
+async function completeOrderPlacement(realServerOrder) {
+    const orders = getDB('orders', []);
     const exists = orders.some(o => String(o.id) === String(realServerOrder.id));
     if (!exists) {
         orders.unshift(realServerOrder);
     }
     setDB('orders', orders);
-    setDB('admin_orders', orders);
+
+    const adminOrders = getDB('admin_orders', []);
+    const aExists = adminOrders.some(o => String(o.id) === String(realServerOrder.id));
+    if (!aExists) {
+        adminOrders.unshift(realServerOrder);
+    }
+    setDB('admin_orders', adminOrders);
 
     const email = (realServerOrder.userEmail || realServerOrder.email || '').toLowerCase().trim();
     const name = realServerOrder.userName || realServerOrder.customerName || 'Valued Patron';
@@ -3282,7 +3125,7 @@ function completeOrderPlacement(realServerOrder) {
 
     // Update customer in local cache
     if (email) {
-        const adminCustomers = getDB('admin_customers');
+        const adminCustomers = getDB('admin_customers', []);
         const cIdx = adminCustomers.findIndex(c => (c.email || '').toLowerCase().trim() === email);
         if (cIdx !== -1) {
             adminCustomers[cIdx].ordersCount = (adminCustomers[cIdx].ordersCount || 0) + 1;
@@ -3306,7 +3149,7 @@ function completeOrderPlacement(realServerOrder) {
         }
         setDB('admin_customers', adminCustomers);
 
-        const users = getDB('users');
+        const users = getDB('users', []);
         const uIdx = users.findIndex(u => (u.email || '').toLowerCase().trim() === email);
         if (uIdx !== -1) {
             users[uIdx].name = name;
@@ -3329,104 +3172,116 @@ function completeOrderPlacement(realServerOrder) {
         localStorage.setItem('userEmail', email);
     }
 
-    // Direct Supabase Database Insert (100% Reliable Cloud Persistence)
-    const SUPABASE_REST_URL = 'https://yixfebpbiqlhigunjbvt.supabase.co/rest/v1';
-    const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpeGZlYnBiaXFsaGlndW5qYnZ0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzE2MDkyOSwiZXhwIjoyMTAyNzM2OTI5fQ.ycIKFrEGvueg25UEntZE-4nQDIYz_QQB_5_zlTWf0sU';
-    
-    (async () => {
+    // Backend sync to server API across all active ports
+    const userToken = localStorage.getItem('userToken') || '';
+    const checkoutPayload = {
+        id: realServerOrder.id,
+        orderId: realServerOrder.id,
+        name: name,
+        customerName: name,
+        email: email,
+        phone: phone,
+        address: address,
+        city: '',
+        state: '',
+        pincode: '',
+        paymentMethod: realServerOrder.paymentMode || 'UPI (QR)',
+        paymentMode: realServerOrder.paymentMode || 'UPI (QR)',
+        subtotal: realServerOrder.subtotal,
+        discount: realServerOrder.discount,
+        tax: realServerOrder.tax,
+        shipping: realServerOrder.shipping,
+        grandTotal: grandTotal,
+        total: grandTotal,
+        itemsSummary: realServerOrder.itemsSummary,
+        itemsDetail: realServerOrder.itemsDetail,
+        items: realServerOrder.itemsDetail
+    };
+
+    const apiEndpoints = [
+        `${API_BASE}/api/user/checkout`,
+        'http://localhost:5000/api/user/checkout',
+        'http://localhost:5001/api/user/checkout',
+        '/api/user/checkout',
+        '/api/orders',
+        'http://localhost:5000/api/orders',
+        'http://localhost:5001/api/orders'
+    ].filter(Boolean);
+
+    for (const ep of apiEndpoints) {
         try {
-            const supabasePayload = {
-                id: realServerOrder.id,
-                customer_name: name,
-                email: email,
-                phone: phone,
-                address: address,
-                payment_method: realServerOrder.paymentMode || 'UPI (QR)',
-                payment_status: 'Paid',
-                order_status: 'Processing',
-                subtotal: Number(realServerOrder.subtotal || grandTotal),
-                discount: Number(realServerOrder.discount || 0),
-                tax: Number(realServerOrder.tax || 0),
-                shipping_fee: Number(realServerOrder.shipping || 0),
-                grand_total: Number(grandTotal),
-                items_summary: realServerOrder.itemsSummary || '',
-                items_detail: realServerOrder.itemsDetail || [],
-                created_at: new Date().toISOString()
-            };
-
-            await fetch(`${SUPABASE_REST_URL}/orders`, {
+            const res = await fetch(ep, {
                 method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_API_KEY,
-                    'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+                headers: { 
                     'Content-Type': 'application/json',
-                    'Prefer': 'resolution=merge-duplicates'
+                    ...(userToken ? { 'Authorization': `Bearer ${userToken}` } : {})
                 },
-                body: JSON.stringify(supabasePayload)
+                body: JSON.stringify(checkoutPayload)
             });
-            console.log('[ORDER] Supabase Cloud Save Success:', realServerOrder.id);
-        } catch (sErr) {
-            console.warn('[ORDER] Supabase sync fallback:', sErr);
-        }
-    })();
-
-    // Direct Multi-Bin Cloud Storage Sync (Ensures 100% cross-device, serverless, and multi-tab persistence)
-    (async () => {
-        for (const binUrl of STORE_CLOUD_BINS) {
-            try {
-                const cloudGet = await fetch(`${binUrl}?t=${Date.now()}`);
-                let cloudData = { orders: [], users: [], enquiries: [], logs: [] };
-                if (cloudGet.ok) {
-                    cloudData = await cloudGet.json();
-                    if (!Array.isArray(cloudData.orders)) cloudData.orders = [];
-                    if (!Array.isArray(cloudData.users)) cloudData.users = [];
-                    if (!Array.isArray(cloudData.logs)) cloudData.logs = [];
-                }
-                if (!cloudData.orders.some(o => String(o.id) === String(realServerOrder.id))) {
-                    cloudData.orders.unshift(realServerOrder);
-                }
-                if (email && !cloudData.users.some(u => (u.email || '').toLowerCase() === email)) {
-                    cloudData.users.unshift({
-                        id: Date.now(),
-                        name: name,
-                        email: email,
-                        phone: phone,
-                        address: address,
-                        ordersCount: 1,
-                        totalSpent: grandTotal,
-                        regDate: new Date().toISOString()
-                    });
-                }
-                cloudData.logs.unshift({
-                    id: Date.now(),
-                    action: `Order Placed ${realServerOrder.id} (₹${grandTotal}) by ${name} (${email})`,
-                    ip: 'Client Direct',
-                    device: 'Web',
-                    browser: 'Browser',
-                    os: 'Web',
-                    createdAt: new Date().toISOString()
-                });
-
-                await fetch(binUrl, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Security-key': STORE_CLOUD_SEC_KEY
-                    },
-                    body: JSON.stringify(cloudData)
-                });
-                console.log(`[ORDER CLOUD SUCCESS] Order ${realServerOrder.id} synced to ${binUrl}`);
-            } catch (e) {
-                console.warn('[ORDER] Cloud sync notice:', e);
+            if (res.ok) {
+                console.log('[BACKEND ORDER SYNC OK]', ep);
+                break;
             }
+        } catch (e) {}
+    }
+
+    // Direct Multi-Bin Cloud Storage Sync across all redundant bins
+    for (const binUrl of STORE_CLOUD_BINS) {
+        try {
+            const cloudGet = await fetch(`${binUrl}?t=${Date.now()}`);
+            let cloudData = { orders: [], users: [], enquiries: [], logs: [] };
+            if (cloudGet.ok) {
+                cloudData = await cloudGet.json();
+                if (!Array.isArray(cloudData.orders)) cloudData.orders = [];
+                if (!Array.isArray(cloudData.users)) cloudData.users = [];
+                if (!Array.isArray(cloudData.logs)) cloudData.logs = [];
+            }
+            if (!cloudData.orders.some(o => String(o.id) === String(realServerOrder.id))) {
+                cloudData.orders.unshift(realServerOrder);
+            }
+            if (email && !cloudData.users.some(u => (u.email || '').toLowerCase() === email)) {
+                cloudData.users.unshift({
+                    id: Date.now(),
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    address: address,
+                    ordersCount: 1,
+                    totalSpent: grandTotal,
+                    regDate: new Date().toISOString()
+                });
+            }
+            cloudData.logs.unshift({
+                id: Date.now(),
+                action: `Order Placed ${realServerOrder.id} (₹${grandTotal}) by ${name} (${email})`,
+                ip: 'Client Direct',
+                device: 'Web',
+                browser: 'Browser',
+                os: 'Web',
+                createdAt: new Date().toISOString()
+            });
+
+            await fetch(binUrl, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Security-key': STORE_CLOUD_SEC_KEY
+                },
+                body: JSON.stringify(cloudData)
+            });
+            console.log(`[ORDER CLOUD SUCCESS] Order ${realServerOrder.id} synced to ${binUrl}`);
+        } catch (e) {
+            console.warn('[ORDER] Cloud sync notice:', e);
         }
-    })();
+    }
 
     // Instant Real-Time Cross-Tab Broadcast to Admin Panel
     try {
         if (typeof BroadcastChannel !== 'undefined') {
             const channel = new BroadcastChannel('achira_store_channel');
             channel.postMessage({ type: 'NEW_ORDER', order: realServerOrder });
+            const globalChannel = new BroadcastChannel('ACHIRA_GLOBAL_DATA_BUS');
+            globalChannel.postMessage({ type: 'NEW_ORDER', order: realServerOrder });
         }
         localStorage.setItem('achira_order_event', JSON.stringify({ id: realServerOrder.id, t: Date.now() }));
     } catch (e) {}
