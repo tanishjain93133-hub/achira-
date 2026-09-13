@@ -601,7 +601,7 @@ const checkoutHandler = async (req, res) => {
   const body = req.body || {};
   const items = (Array.isArray(body.items) && body.items.length > 0) ? body.items : ((Array.isArray(body.itemsDetail) && body.itemsDetail.length > 0) ? body.itemsDetail : (body.cart || []));
   const name = body.name || body.customerName || body.userName || '';
-  const email = body.email || body.userEmail || '';
+  const email = body.email || body.customerEmail || body.userEmail || '';
   const phone = body.phone || body.userPhone || body.contactPhone || '';
   const address = body.address || body.userAddress || '';
   const city = body.city || '';
