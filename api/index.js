@@ -12,9 +12,25 @@ module.exports = (req, res) => {
     if (!fixedPath.startsWith('/api')) {
       fixedPath = '/api' + (fixedPath.startsWith('/') ? fixedPath : '/' + fixedPath);
     }
-    // If path is just '/api' or '/api/' or '/api/index.js', route to /api/health
-    if (fixedPath === '/api' || fixedPath === '/api/' || fixedPath === '/api/index.js' || fixedPath === '/api/index') {
-      fixedPath = '/api/health';
+    // Check if a path parameter was supplied via query string (?path=... or ?route=...)
+    let queryPath = null;
+    if (search) {
+      try {
+        const sp = new URLSearchParams(search);
+        queryPath = sp.get('path') || sp.get('route') || sp.get('url');
+      } catch (e) {}
+    }
+
+    if (queryPath) {
+      if (!queryPath.startsWith('/api')) {
+        queryPath = '/api' + (queryPath.startsWith('/') ? queryPath : '/' + queryPath);
+      }
+      fixedPath = queryPath;
+    } else {
+      // If path is just '/api' or '/api/' or '/api/index.js', route to /api/health
+      if (fixedPath === '/api' || fixedPath === '/api/' || fixedPath === '/api/index.js' || fixedPath === '/api/index') {
+        fixedPath = '/api/health';
+      }
     }
     req.url = fixedPath + (search ? '?' + search : '');
   }
