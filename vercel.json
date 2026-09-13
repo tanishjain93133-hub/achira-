@@ -2,6 +2,9 @@
   "version": 2,
   "cleanUrls": true,
   "functions": {
+    "api/**/*.js": {
+      "includeFiles": "admin-backend/**"
+    },
     "api/*.js": {
       "includeFiles": "admin-backend/**"
     }
