@@ -4,7 +4,15 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const path = require('path');
-const { PrismaClient } = require('@prisma/client');
+
+// Prisma Client - wrapped in try-catch because @prisma/client may not be installed
+// (e.g. on Vercel serverless where the root package.json doesn't include it)
+let PrismaClient = null;
+try {
+  PrismaClient = require('@prisma/client').PrismaClient;
+} catch (e) {
+  console.warn('[PRISMA MODULE NOTICE] @prisma/client not available:', e.message);
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -49,10 +57,14 @@ try {
 let prisma = null;
 let isDbConnected = false;
 
-try {
-  prisma = new PrismaClient();
-} catch (e) {
-  console.error('[DATABASE INIT ERROR]', e.message);
+if (PrismaClient) {
+  try {
+    prisma = new PrismaClient();
+  } catch (e) {
+    console.error('[DATABASE INIT ERROR]', e.message);
+  }
+} else {
+  console.warn('[DATABASE] Prisma not available, using memory store + Supabase + cloud bins.');
 }
 
 // In-Memory Resilient Cache Store (for zero-crash failover if PostgreSQL is temporarily offline)
