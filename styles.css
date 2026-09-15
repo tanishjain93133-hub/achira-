@@ -259,7 +259,7 @@ body::before {
     top: 100%;
     left: 50%;
     transform: translateX(-50%) translateY(15px);
-    width: 900px;
+    width: 680px;
     max-width: 92vw;
     background: rgba(250, 247, 242, 0.98);
     backdrop-filter: blur(20px);
@@ -285,7 +285,7 @@ body::before {
 
 .mega-menu-wrapper {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: 1fr 1fr;
     gap: 32px;
 }
 

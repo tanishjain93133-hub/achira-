@@ -1407,7 +1407,7 @@ function renderFeaturedProducts(products) {
                     <button class="wishlist-heart-btn" aria-label="Add to Wishlist" onclick="event.stopPropagation(); toggleFeaturedWishlist(this, '${p.id}')">♥</button>
                 </div>
                 <div class="featured-card-info">
-                    <span class="info-meta">${(p.category || 'Straight Fit').toUpperCase()} • SIZE: ${sizeLabel}</span>
+                    <span class="info-meta">${(isJewel ? (p.parentCategory || 'FINE JEWELLERY') : (p.category || 'STRAIGHT FIT')).toUpperCase()}${sizeLabel ? ` • SIZE: ${sizeLabel}` : ''}</span>
                     <h4 class="info-title" onclick="openQuickView('${p.id}')">${p.name}</h4>
                     ${priceHTML}
                     <button class="add-bag-pill-btn" style="background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border-color: #B88A44; font-weight: 700; margin-top: 6px;" onclick="openQuickView('${p.id}')">VIEW PRODUCT</button>
@@ -1444,6 +1444,9 @@ function switchFeaturedTab(tab) {
     
     const btnClothing = document.getElementById('tabClothingBtn');
     const btnJewellery = document.getElementById('tabJewelleryBtn');
+    const clothingCat = document.getElementById('featCategory');
+    const jewelCat = document.getElementById('featJewelCategory');
+    const sizeGroup = document.getElementById('featSizeGroup');
     
     if (btnClothing && btnJewellery) {
         if (tab === 'clothing') {
@@ -1454,6 +1457,10 @@ function switchFeaturedTab(tab) {
             btnJewellery.style.background = 'transparent';
             btnJewellery.style.color = '#3C0008';
             btnJewellery.style.boxShadow = 'none';
+
+            if (clothingCat) clothingCat.style.display = 'block';
+            if (jewelCat) jewelCat.style.display = 'none';
+            if (sizeGroup) sizeGroup.style.display = 'block';
         } else {
             btnJewellery.style.background = 'linear-gradient(135deg, #3C0008, #680010)';
             btnJewellery.style.color = '#D4AF37';
@@ -1462,6 +1469,10 @@ function switchFeaturedTab(tab) {
             btnClothing.style.background = 'transparent';
             btnClothing.style.color = '#3C0008';
             btnClothing.style.boxShadow = 'none';
+
+            if (clothingCat) clothingCat.style.display = 'none';
+            if (jewelCat) jewelCat.style.display = 'block';
+            if (sizeGroup) sizeGroup.style.display = 'none';
         }
     }
 
@@ -1475,7 +1486,8 @@ function applyFeaturedFilters() {
     const priceEl = document.getElementById('featPrice');
     const maxPrice = priceEl ? parseInt(priceEl.value) : 250000;
 
-    const categories = Array.from(document.querySelectorAll('#featCategory input:checked')).map(el => el.value);
+    const clothingCategories = Array.from(document.querySelectorAll('#featCategory input:checked')).map(el => el.value);
+    const jewelCategories = Array.from(document.querySelectorAll('#featJewelCategory input:checked')).map(el => el.value);
     const fabrics = Array.from(document.querySelectorAll('#featFabric input:checked')).map(el => el.value);
     const colors = Array.from(document.querySelectorAll('#featColor input:checked')).map(el => el.value);
     const sizes = Array.from(document.querySelectorAll('#featSize input:checked')).map(el => el.value);
@@ -1488,11 +1500,30 @@ function applyFeaturedFilters() {
         if (activeFeaturedTab === 'jewellery' && !isJewel) return false;
 
         if (searchVal && !p.name.toLowerCase().includes(searchVal)) return false;
-        if (p.price > maxPrice) return false;
-        if (categories.length > 0 && !categories.includes(p.category)) return false;
+        if (p.price && p.price > maxPrice) return false;
+
+        if (activeFeaturedTab === 'clothing') {
+            if (clothingCategories.length > 0 && !clothingCategories.includes(p.category)) return false;
+            if (sizes.length > 0 && Array.isArray(p.size) && !p.size.some(s => sizes.includes(s))) return false;
+        } else if (activeFeaturedTab === 'jewellery') {
+            if (jewelCategories.length > 0) {
+                const name = (p.name || '').toLowerCase();
+                const cat = (p.category || '').toLowerCase();
+                const matched = jewelCategories.some(jc => {
+                    const jcLower = jc.toLowerCase();
+                    if (jcLower === 'rings') return name.includes('ring') || cat.includes('ring');
+                    if (jcLower === 'earrings') return name.includes('earring') || name.includes('stud') || name.includes('jhumka') || name.includes('hoop');
+                    if (jcLower === 'necklaces') return name.includes('necklace') || name.includes('strand') || name.includes('choker') || name.includes('riviera');
+                    if (jcLower === 'bangles') return name.includes('bangle') || name.includes('bracelet');
+                    if (jcLower === 'pendants') return name.includes('pendant');
+                    return false;
+                });
+                if (!matched) return false;
+            }
+        }
+
         if (fabrics.length > 0 && !fabrics.includes(p.fabric)) return false;
         if (colors.length > 0 && !colors.includes(p.color)) return false;
-        if (sizes.length > 0 && Array.isArray(p.size) && !p.size.some(s => sizes.includes(s))) return false;
         return true;
     });
 
