@@ -248,81 +248,97 @@
     },
     {
       "id": "ACH-700399",
-      "userId": 2,
+      "userId": null,
       "customerName": "Harshil",
-      "userName": "Harshil",
       "email": "harshil.patel@gmail.com",
-      "userEmail": "harshil.patel@gmail.com",
       "phone": "+91 98234 56789",
-      "userPhone": "+91 98234 56789",
       "address": "14 Bodakdev Heritage, Ahmedabad - 380054",
-      "userAddress": "14 Bodakdev Heritage, Ahmedabad - 380054",
-      "city": "Ahmedabad",
-      "state": "Gujarat",
-      "pincode": "380054",
+      "city": "",
+      "state": "",
+      "pincode": "",
       "paymentMethod": "UPI (QR)",
-      "paymentMode": "UPI (QR)",
       "paymentStatus": "Paid",
       "orderStatus": "Processing",
-      "status": "Processing",
-      "invoiceNumber": "INV-1789278108334-5265",
+      "invoiceNumber": "INV-1789573345671-8561",
       "subtotal": 4719,
       "discount": 0,
       "tax": 849,
       "shippingFee": 0,
-      "shipping": 0,
       "grandTotal": 4719,
-      "total": 4719,
       "itemsSummary": "Nazneen Deep Wine Magenta Silk Kurti with Palazzo (x1)",
-      "createdAt": "2026-09-13T05:41:48.335Z",
-      "date": "13/9/2026",
+      "createdAt": "2026-09-16T15:42:25.671Z",
+      "updatedAt": "2026-09-16T15:42:25.671Z",
+      "userName": "Harshil",
+      "userEmail": "harshil.patel@gmail.com",
+      "userPhone": "+91 98234 56789",
+      "userAddress": "14 Bodakdev Heritage, Ahmedabad - 380054",
+      "total": 4719,
       "itemsDetail": [
         {
           "productId": 102,
           "name": "Nazneen Deep Wine Magenta Silk Kurti with Palazzo",
           "qty": 1,
-          "price": 4719
+          "price": 4719,
+          "size": "L"
         }
-      ]
+      ],
+      "items": [
+        {
+          "productId": 102,
+          "name": "Nazneen Deep Wine Magenta Silk Kurti with Palazzo",
+          "qty": 1,
+          "price": 4719,
+          "size": "L"
+        }
+      ],
+      "date": "16/9/2026"
     },
     {
       "id": "ACH-637758",
-      "userId": 1,
+      "userId": null,
       "customerName": "Tanish Jain",
-      "userName": "Tanish Jain",
       "email": "tanish.jain@gmail.com",
-      "userEmail": "tanish.jain@gmail.com",
       "phone": "+91 98765 12345",
-      "userPhone": "+91 98765 12345",
       "address": "Penthouse 402, Altamount Road, Mumbai - 400026",
-      "userAddress": "Penthouse 402, Altamount Road, Mumbai - 400026",
-      "city": "Mumbai",
-      "state": "Maharashtra",
-      "pincode": "400026",
+      "city": "",
+      "state": "",
+      "pincode": "",
       "paymentMethod": "UPI (QR)",
-      "paymentMode": "UPI (QR)",
       "paymentStatus": "Paid",
       "orderStatus": "Processing",
-      "status": "Processing",
-      "invoiceNumber": "INV-1789278106890-6138",
+      "invoiceNumber": "INV-1789573343912-3309",
       "subtotal": 4719,
       "discount": 0,
       "tax": 849,
       "shippingFee": 0,
-      "shipping": 0,
       "grandTotal": 4719,
-      "total": 4719,
       "itemsSummary": "Mehrunissa Deep Royal Purple Silk Kurta Set (x1)",
-      "createdAt": "2026-09-13T05:41:46.890Z",
-      "date": "13/9/2026",
+      "createdAt": "2026-09-16T15:42:23.912Z",
+      "updatedAt": "2026-09-16T15:42:23.912Z",
+      "userName": "Tanish Jain",
+      "userEmail": "tanish.jain@gmail.com",
+      "userPhone": "+91 98765 12345",
+      "userAddress": "Penthouse 402, Altamount Road, Mumbai - 400026",
+      "total": 4719,
       "itemsDetail": [
         {
           "productId": 101,
           "name": "Mehrunissa Deep Royal Purple Silk Kurta Set",
           "qty": 1,
-          "price": 4719
+          "price": 4719,
+          "size": "M"
         }
-      ]
+      ],
+      "items": [
+        {
+          "productId": 101,
+          "name": "Mehrunissa Deep Royal Purple Silk Kurta Set",
+          "qty": 1,
+          "price": 4719,
+          "size": "M"
+        }
+      ],
+      "date": "16/9/2026"
     },
     {
       "id": "ACH-468420",
@@ -362,6 +378,157 @@
           "price": 4719
         }
       ]
+    },
+    {
+      "id": "ACH-442081",
+      "userId": null,
+      "customerName": "ank",
+      "email": "2401031800021@silveroakuni.ac.in",
+      "phone": "+91 70598 45457",
+      "address": "101, silver oak university, Ahmedabad, Gujarat - 381585",
+      "city": "",
+      "state": "",
+      "pincode": "",
+      "paymentMethod": "UPI (QR)",
+      "paymentStatus": "Paid",
+      "orderStatus": "Processing",
+      "invoiceNumber": "INV-1789288730356-8197",
+      "subtotal": 3999,
+      "discount": 0,
+      "tax": 720,
+      "shippingFee": 0,
+      "grandTotal": 4719,
+      "itemsSummary": "Gulaal Berry Pink Mirror Medallion Strappy Kurta Set (Size: XS, Color: Berry Pink) x1",
+      "createdAt": "2026-09-13T08:38:50.356Z",
+      "updatedAt": "2026-09-13T08:38:50.356Z",
+      "userName": "ank",
+      "userEmail": "2401031800021@silveroakuni.ac.in",
+      "userPhone": "+91 70598 45457",
+      "userAddress": "101, silver oak university, Ahmedabad, Gujarat - 381585",
+      "total": 4719,
+      "itemsDetail": [
+        {
+          "productId": "207",
+          "name": "Gulaal Berry Pink Mirror Medallion Strappy Kurta Set",
+          "qty": 1,
+          "price": 3700,
+          "image": "kurtaset7.jpg",
+          "selectedSize": "XS",
+          "selectedColor": "Berry Pink"
+        }
+      ],
+      "items": [
+        {
+          "productId": "207",
+          "name": "Gulaal Berry Pink Mirror Medallion Strappy Kurta Set",
+          "qty": 1,
+          "price": 3700,
+          "image": "kurtaset7.jpg",
+          "selectedSize": "XS",
+          "selectedColor": "Berry Pink"
+        }
+      ],
+      "date": "13/9/2026"
+    },
+    {
+      "id": "ACH-903980",
+      "userId": null,
+      "customerName": "Jimesh BHai",
+      "email": "dshaharchitects@gmail.com",
+      "phone": "+91 99099 83376",
+      "address": "101, 1001, Vasant Enclave, Opp. Amrapali Flats, Sukhipura, Paldi, AHMEDABAD, Gujarat - 380001",
+      "city": "",
+      "state": "",
+      "pincode": "",
+      "paymentMethod": "UPI (QR)",
+      "paymentStatus": "Paid",
+      "orderStatus": "Processing",
+      "invoiceNumber": "INV-1789288668136-4022",
+      "subtotal": 3999,
+      "discount": 0,
+      "tax": 720,
+      "shippingFee": 0,
+      "grandTotal": 4719,
+      "itemsSummary": "Vanyashri Olive Green Tiered Embroidered Cotton Anarkali Suit (Size: XS, Color: Olive Green) x1",
+      "createdAt": "2026-09-13T08:37:48.136Z",
+      "updatedAt": "2026-09-13T08:37:48.136Z",
+      "userName": "Jimesh BHai",
+      "userEmail": "dshaharchitects@gmail.com",
+      "userPhone": "+91 99099 83376",
+      "userAddress": "101, 1001, Vasant Enclave, Opp. Amrapali Flats, Sukhipura, Paldi, AHMEDABAD, Gujarat - 380001",
+      "total": 4719,
+      "itemsDetail": [
+        {
+          "productId": "107",
+          "name": "Vanyashri Olive Green Tiered Embroidered Cotton Anarkali Suit",
+          "qty": 1,
+          "price": 3950,
+          "image": "anarkali7.jpg",
+          "selectedSize": "XS",
+          "selectedColor": "Olive Green"
+        }
+      ],
+      "items": [
+        {
+          "productId": "107",
+          "name": "Vanyashri Olive Green Tiered Embroidered Cotton Anarkali Suit",
+          "qty": 1,
+          "price": 3950,
+          "image": "anarkali7.jpg",
+          "selectedSize": "XS",
+          "selectedColor": "Olive Green"
+        }
+      ],
+      "date": "13/9/2026"
+    },
+    {
+      "id": "ACH-325593",
+      "userId": null,
+      "customerName": "Tanish Verification Customer",
+      "email": "tanish.realverification@achira.com",
+      "phone": "+91 98765 43210",
+      "address": "Standard Delivery Address",
+      "city": "",
+      "state": "",
+      "pincode": "",
+      "paymentMethod": "UPI (QR)",
+      "paymentStatus": "Paid",
+      "orderStatus": "Processing",
+      "invoiceNumber": "INV-1789288564917-3652",
+      "subtotal": 3999,
+      "discount": 0,
+      "tax": 720,
+      "shippingFee": 150,
+      "grandTotal": 4149,
+      "itemsSummary": "Noor-e-Kashmir Midnight Black Embroidered Anarkali Set (x1)",
+      "createdAt": "2026-09-13T08:36:04.917Z",
+      "updatedAt": "2026-09-13T08:36:04.917Z",
+      "userName": "Tanish Verification Customer",
+      "userEmail": "tanish.realverification@achira.com",
+      "userPhone": "+91 98765 43210",
+      "userAddress": "Standard Delivery Address",
+      "total": 4149,
+      "itemsDetail": [
+        {
+          "id": 101,
+          "name": "Noor-e-Kashmir Midnight Black Embroidered Anarkali Set",
+          "price": 3999,
+          "quantity": 1,
+          "selectedSize": "M",
+          "image": "anarkali1.jpg"
+        }
+      ],
+      "items": [
+        {
+          "id": 101,
+          "name": "Noor-e-Kashmir Midnight Black Embroidered Anarkali Set",
+          "price": 3999,
+          "quantity": 1,
+          "selectedSize": "M",
+          "image": "anarkali1.jpg"
+        }
+      ],
+      "date": "13/9/2026"
     }
   ],
   "users": [
@@ -371,8 +538,8 @@
       "email": "tanish.jain@gmail.com",
       "phone": "+91 98765 12345",
       "address": "Penthouse 402, Altamount Road, Mumbai - 400026",
-      "ordersCount": 2,
-      "totalSpent": 9438,
+      "ordersCount": 4,
+      "totalSpent": 18876,
       "status": "Active"
     },
     {
@@ -381,8 +548,8 @@
       "email": "harshil.patel@gmail.com",
       "phone": "+91 98234 56789",
       "address": "14 Bodakdev Heritage, Ahmedabad - 380054",
-      "ordersCount": 1,
-      "totalSpent": 4719,
+      "ordersCount": 3,
+      "totalSpent": 14157,
       "status": "Active"
     },
     {
@@ -454,6 +621,36 @@
       "createdAt": "2026-09-13T07:36:25.382Z",
       "ordersCount": 1,
       "totalSpent": 3999
+    },
+    {
+      "id": 1789288730540,
+      "name": "ank",
+      "email": "2401031800021@silveroakuni.ac.in",
+      "phone": "+91 70598 45457",
+      "address": "101, silver oak university, Ahmedabad, Gujarat - 381585",
+      "ordersCount": 1,
+      "totalSpent": 4719,
+      "regDate": "2026-09-13T08:38:50.540Z"
+    },
+    {
+      "id": 1789288668321,
+      "name": "Jimesh BHai",
+      "email": "dshaharchitects@gmail.com",
+      "phone": "+91 99099 83376",
+      "address": "101, 1001, Vasant Enclave, Opp. Amrapali Flats, Sukhipura, Paldi, AHMEDABAD, Gujarat - 380001",
+      "ordersCount": 1,
+      "totalSpent": 4719,
+      "regDate": "2026-09-13T08:37:48.321Z"
+    },
+    {
+      "id": 1789288565323,
+      "name": "Tanish Verification Customer",
+      "email": "tanish.realverification@achira.com",
+      "phone": "+91 98765 43210",
+      "address": "Standard Delivery Address",
+      "ordersCount": 1,
+      "totalSpent": 4149,
+      "regDate": "2026-09-13T08:36:05.323Z"
     }
   ],
   "products": [
@@ -995,5 +1192,5 @@
     "phone": "+91 98765 43210",
     "adminUsername": "admin2"
   },
-  "lastUpdated": "2026-09-13T07:36:29.638Z"
+  "lastUpdated": "2026-09-16T15:42:25.673Z"
 }

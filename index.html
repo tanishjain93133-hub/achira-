@@ -258,7 +258,16 @@
         <!-- 1. SHOP BY CATEGORY (UPPER CIRCULAR CATEGORIES) -->
         <section class="shop-by-category-circular sub-hero-collections fade-in-onload" id="collections" style="padding: 28px 0 20px 0; background: #F9F6F1; border-bottom: 1px solid rgba(200, 155, 74, 0.15);">
             <div class="circular-category-container">
-                <!-- 1: Cotton Kurtas -->
+                <!-- 1: Straight Fit Dresses -->
+                <div class="circular-cat-card" onclick="filterByCategory('Straight Fit')">
+                    <div class="circular-img-wrap">
+                        <img src="products/straight-fit/product-01/front.jpg" alt="Straight Fit Dresses">
+                        <div class="circular-gold-border"></div>
+                    </div>
+                    <span class="circular-cat-title">Straight Fit</span>
+                </div>
+
+                <!-- 2: Cotton Kurtas -->
                 <div class="circular-cat-card" onclick="filterByCategory('Cotton Kurtas')">
                     <div class="circular-img-wrap">
                         <img src="cat_circle_1.jpg?v=1.0" alt="Cotton Kurtas">
@@ -267,7 +276,7 @@
                     <span class="circular-cat-title">Cotton Kurtas</span>
                 </div>
 
-                <!-- 2: Necklaces -->
+                <!-- 3: Necklaces -->
                 <div class="circular-cat-card" onclick="location.href='jewellery.html?category=Necklaces'">
                     <div class="circular-img-wrap">
                         <img src="cat_circle_10.jpg?v=2.0" alt="Necklaces">
@@ -642,7 +651,7 @@
                     </div>
 
                     <!-- Price Filter -->
-                    <div class="filter-group">
+                    <div class="filter-group" id="featPriceGroup">
                         <h5 class="filter-title" onclick="toggleFeaturedFilter(this)">Price Range</h5>
                         <div class="filter-options">
                             <div class="price-slider-wrap">

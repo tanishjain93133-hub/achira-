@@ -1447,6 +1447,7 @@ function switchFeaturedTab(tab) {
     const clothingCat = document.getElementById('featCategory');
     const jewelCat = document.getElementById('featJewelCategory');
     const sizeGroup = document.getElementById('featSizeGroup');
+    const priceGroup = document.getElementById('featPriceGroup');
     
     if (btnClothing && btnJewellery) {
         if (tab === 'clothing') {
@@ -1461,6 +1462,7 @@ function switchFeaturedTab(tab) {
             if (clothingCat) clothingCat.style.display = 'block';
             if (jewelCat) jewelCat.style.display = 'none';
             if (sizeGroup) sizeGroup.style.display = 'block';
+            if (priceGroup) priceGroup.style.display = 'block';
         } else {
             btnJewellery.style.background = 'linear-gradient(135deg, #3C0008, #680010)';
             btnJewellery.style.color = '#D4AF37';
@@ -1473,6 +1475,7 @@ function switchFeaturedTab(tab) {
             if (clothingCat) clothingCat.style.display = 'none';
             if (jewelCat) jewelCat.style.display = 'block';
             if (sizeGroup) sizeGroup.style.display = 'none';
+            if (priceGroup) priceGroup.style.display = 'none';
         }
     }
 
@@ -1500,7 +1503,7 @@ function applyFeaturedFilters() {
         if (activeFeaturedTab === 'jewellery' && !isJewel) return false;
 
         if (searchVal && !p.name.toLowerCase().includes(searchVal)) return false;
-        if (p.price && p.price > maxPrice) return false;
+        if (activeFeaturedTab === 'clothing' && p.price && p.price > maxPrice) return false;
 
         if (activeFeaturedTab === 'clothing') {
             if (clothingCategories.length > 0 && !clothingCategories.includes(p.category)) return false;
@@ -4734,7 +4737,9 @@ function filterByCategory(categoryLabel) {
     }
 
     let matchedCheckbox = null;
-    if (categoryLabel === 'Kurta Sets' || categoryLabel === 'Kurta Set') {
+    if (categoryLabel === 'Straight Fit' || categoryLabel === 'Straight Fit Dresses') {
+        matchedCheckbox = Array.from(checkboxes).find(cb => cb.value === 'Straight Fit');
+    } else if (categoryLabel === 'Kurta Sets' || categoryLabel === 'Kurta Set') {
         matchedCheckbox = Array.from(checkboxes).find(cb => cb.value === 'Kurta Sets' || cb.value === 'Kurta Set');
     } else if (categoryLabel === 'Anarkali' || categoryLabel === 'Anarkali Dresses') {
         matchedCheckbox = Array.from(checkboxes).find(cb => cb.value === 'Anarkali' || cb.value === 'Anarkali Kurti' || cb.value === 'Anarkali Dresses');

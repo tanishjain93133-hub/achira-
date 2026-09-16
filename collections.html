@@ -557,7 +557,7 @@
     <!-- PRODUCT COUNT & SORT BAR -->
     <div class="product-count-bar">
         <div class="product-count">
-            Showing <span id="displayedCount">12</span> of 120 Products
+            Showing <span id="displayedCount">140</span> of <span id="totalCatalogCount">140</span> Products
         </div>
         <div class="sort-dropdown">
             <select id="sortBy" onchange="sortProducts()">
@@ -989,6 +989,9 @@
 
         // Initial execution with URL category auto-filtering
         window.addEventListener('DOMContentLoaded', () => {
+            const totalCountEl = document.getElementById('totalCatalogCount');
+            if (totalCountEl) totalCountEl.textContent = productsData.length;
+
             const params = new URLSearchParams(window.location.search);
             const cat = params.get('category') || params.get('collection') || params.get('type') || params.get('cat');
             if (cat) {
