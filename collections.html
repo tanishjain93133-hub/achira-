@@ -815,18 +815,26 @@
     <script src="products_data.js?v=5.0"></script>
     <script>
         // Use authentic centralized catalog
-        let productsData = (typeof ACHIRA_PRODUCTS_DATA !== 'undefined' && Array.isArray(ACHIRA_PRODUCTS_DATA)) 
+        const cleanCatalog = (typeof ACHIRA_PRODUCTS_DATA !== 'undefined' && Array.isArray(ACHIRA_PRODUCTS_DATA)) 
             ? JSON.parse(JSON.stringify(ACHIRA_PRODUCTS_DATA)) 
             : [];
 
-        // Check if fresh admin updates exist in localStorage
+        let productsData = [...cleanCatalog];
+
+        // Check if fresh admin updates exist in localStorage and merge seamlessly
         try {
             const localSaved = localStorage.getItem('products');
             if (localSaved) {
                 const parsed = JSON.parse(localSaved);
                 if (Array.isArray(parsed) && parsed.length > 0) {
-                    // Overwrite if valid products exist
-                    productsData = parsed;
+                    parsed.forEach(lp => {
+                        const idx = productsData.findIndex(p => String(p.id) === String(lp.id) || String(p.sku) === String(lp.sku));
+                        if (idx !== -1) {
+                            productsData[idx] = { ...productsData[idx], ...lp };
+                        } else {
+                            productsData.push(lp);
+                        }
+                    });
                 }
             }
         } catch (e) {}
@@ -1011,6 +1019,6 @@
             }
         });
     </script>
-    <script src="script.js?v=5.0"></script>
+    <script src="script.js?v=5.1"></script>
 </body>
 </html>

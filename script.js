@@ -1128,6 +1128,12 @@ function initDatabase() {
         if (stored) products = JSON.parse(stored);
     } catch(e) {}
 
+    if (!Array.isArray(products) || products.length === 0) {
+        products = (typeof initialProducts !== 'undefined' && Array.isArray(initialProducts))
+            ? JSON.parse(JSON.stringify(initialProducts))
+            : [];
+    }
+
     // Purge legacy mock products and ensure jewellery prices are null
     products = products.map(p => {
         if (!p) return p;
@@ -1139,15 +1145,17 @@ function initDatabase() {
         return p;
     }).filter(p => {
         if (!p) return false;
-        if ([1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210].includes(p.id)) return false;
-        if (p.category === 'Straight Fit') return false;
-        if (typeof p.id === 'string' && p.id.startsWith('straight-')) return false;
+        if ([1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13].includes(p.id)) return false;
         return true;
     });
 
+    // Merge all 140 Straight Fit products into the catalog
     if (cleanStraightFit.length > 0) {
-        cleanStraightFit.slice().reverse().forEach(sf => {
-            products.unshift(sf);
+        cleanStraightFit.forEach(sf => {
+            const exists = products.some(p => String(p.id) === String(sf.id) || String(p.sku) === String(sf.sku));
+            if (!exists) {
+                products.push(sf);
+            }
         });
     }
 
@@ -1489,11 +1497,11 @@ function applyFeaturedFilters() {
     const priceEl = document.getElementById('featPrice');
     const maxPrice = priceEl ? parseInt(priceEl.value) : 250000;
 
-    const clothingCategories = Array.from(document.querySelectorAll('#featCategory input:checked')).map(el => el.value);
-    const jewelCategories = Array.from(document.querySelectorAll('#featJewelCategory input:checked')).map(el => el.value);
-    const fabrics = Array.from(document.querySelectorAll('#featFabric input:checked')).map(el => el.value);
-    const colors = Array.from(document.querySelectorAll('#featColor input:checked')).map(el => el.value);
-    const sizes = Array.from(document.querySelectorAll('#featSize input:checked')).map(el => el.value);
+    const clothingCategories = Array.from(document.querySelectorAll('#featCategory input:checked')).map(el => el.value.toLowerCase());
+    const jewelCategories = Array.from(document.querySelectorAll('#featJewelCategory input:checked')).map(el => el.value.toLowerCase());
+    const fabrics = Array.from(document.querySelectorAll('#featFabric input:checked')).map(el => el.value.toLowerCase());
+    const colors = Array.from(document.querySelectorAll('#featColor input:checked')).map(el => el.value.toLowerCase());
+    const sizes = Array.from(document.querySelectorAll('#featSize input:checked')).map(el => el.value.toLowerCase());
 
     const filtered = getDB('products').filter(p => {
         const isJewel = isJewelleryProduct(p);
@@ -1502,31 +1510,38 @@ function applyFeaturedFilters() {
         if (activeFeaturedTab === 'clothing' && isJewel) return false;
         if (activeFeaturedTab === 'jewellery' && !isJewel) return false;
 
-        if (searchVal && !p.name.toLowerCase().includes(searchVal)) return false;
+        if (searchVal && !(p.name || '').toLowerCase().includes(searchVal)) return false;
         if (activeFeaturedTab === 'clothing' && p.price && p.price > maxPrice) return false;
 
         if (activeFeaturedTab === 'clothing') {
-            if (clothingCategories.length > 0 && !clothingCategories.includes(p.category)) return false;
-            if (sizes.length > 0 && Array.isArray(p.size) && !p.size.some(s => sizes.includes(s))) return false;
+            if (clothingCategories.length > 0) {
+                const prodCat = (p.category || '').toLowerCase();
+                const matches = clothingCategories.some(c => prodCat === c || prodCat.includes(c) || c.includes(prodCat));
+                if (!matches) return false;
+            }
+            if (sizes.length > 0) {
+                const prodSizes = Array.isArray(p.size) ? p.size.map(s => s.toLowerCase()) : [(p.size || 'l').toLowerCase()];
+                const matchesSize = sizes.some(s => prodSizes.includes(s));
+                if (!matchesSize) return false;
+            }
         } else if (activeFeaturedTab === 'jewellery') {
             if (jewelCategories.length > 0) {
                 const name = (p.name || '').toLowerCase();
                 const cat = (p.category || '').toLowerCase();
                 const matched = jewelCategories.some(jc => {
-                    const jcLower = jc.toLowerCase();
-                    if (jcLower === 'rings') return name.includes('ring') || cat.includes('ring');
-                    if (jcLower === 'earrings') return name.includes('earring') || name.includes('stud') || name.includes('jhumka') || name.includes('hoop');
-                    if (jcLower === 'necklaces') return name.includes('necklace') || name.includes('strand') || name.includes('choker') || name.includes('riviera');
-                    if (jcLower === 'bangles') return name.includes('bangle') || name.includes('bracelet');
-                    if (jcLower === 'pendants') return name.includes('pendant');
+                    if (jc === 'rings') return name.includes('ring') || cat.includes('ring');
+                    if (jc === 'earrings') return name.includes('earring') || name.includes('stud') || name.includes('jhumka') || name.includes('hoop');
+                    if (jc === 'necklaces') return name.includes('necklace') || name.includes('strand') || name.includes('choker') || name.includes('riviera');
+                    if (jc === 'bangles') return name.includes('bangle') || name.includes('bracelet');
+                    if (jc === 'pendants') return name.includes('pendant');
                     return false;
                 });
                 if (!matched) return false;
             }
         }
 
-        if (fabrics.length > 0 && !fabrics.includes(p.fabric)) return false;
-        if (colors.length > 0 && !colors.includes(p.color)) return false;
+        if (fabrics.length > 0 && !fabrics.includes((p.fabric || '').toLowerCase())) return false;
+        if (colors.length > 0 && !colors.includes((p.color || '').toLowerCase())) return false;
         return true;
     });
 
@@ -1706,6 +1721,36 @@ function changeCartQty(productId, change, size = null, color = null) {
     setDB('cart', cart);
     updateHeaderBadges();
     renderCartDrawer();
+}
+
+// --- Product Images Extraction Helper ---
+function getProductImagesList(p) {
+    if (!p) return [{ url: 'products/straight-fit/product-01/front.jpg', label: 'Front View' }];
+    if (Array.isArray(p.images) && p.images.length > 0) {
+        return p.images.map((img, i) => ({
+            url: typeof img === 'string' ? img : (img.url || img.src || 'products/straight-fit/product-01/front.jpg'),
+            label: (typeof img === 'object' && img.label) ? img.label : `View ${i + 1}`
+        }));
+    }
+    if (p.images && typeof p.images === 'object') {
+        const list = [];
+        const labels = {
+            front: 'Front View',
+            side: 'Side View',
+            zoom: 'Zoom Detail',
+            palazzo: 'Bottom / Palazzo',
+            dupatta: 'Dupatta Styling',
+            back: 'Back View'
+        };
+        for (const [key, val] of Object.entries(p.images)) {
+            if (val && typeof val === 'string' && val.trim()) {
+                list.push({ url: val.trim(), label: labels[key] || key.toUpperCase() });
+            }
+        }
+        if (list.length > 0) return list;
+    }
+    const defaultImg = p.image || (p.images && p.images.front) || 'products/straight-fit/product-01/front.jpg';
+    return [{ url: defaultImg, label: 'Front View' }];
 }
 
 // --- Interactive Product Gallery & Lightbox Controller ---
@@ -4699,12 +4744,28 @@ async function loadLiveProducts() {
     try {
         const res = await fetch(`${API_BASE}/api/admin/products`);
         const data = await res.json();
-        if (res.ok && data.length > 0) {
-            setDB('products', data);
+        if (res.ok && Array.isArray(data) && data.length > 0) {
+            const cleanStraightFit = (typeof ACHIRA_PRODUCTS_DATA !== 'undefined' && Array.isArray(ACHIRA_PRODUCTS_DATA)) 
+                ? JSON.parse(JSON.stringify(ACHIRA_PRODUCTS_DATA)) 
+                : [];
             
-            // Re-render catalog displays
-            const featuredGrid = document.getElementById('featuredGrid');
-            if (featuredGrid) renderFeaturedProducts(data);
+            // Merge to ensure all 140 straight fit items are never dropped
+            let merged = [...data];
+            cleanStraightFit.forEach(sf => {
+                if (!merged.some(p => String(p.id) === String(sf.id) || String(p.sku) === String(sf.sku))) {
+                    merged.push(sf);
+                }
+            });
+
+            setDB('products', merged);
+            
+            // Re-render catalog displays with active filter rules
+            if (typeof applyFeaturedFilters === 'function') {
+                applyFeaturedFilters();
+            } else {
+                const featuredGrid = document.getElementById('featuredGrid');
+                if (featuredGrid) renderFeaturedProducts(merged);
+            }
             
             const bestSellerSlider = document.getElementById('bestSellersSlider');
             if (bestSellerSlider && typeof renderBestSellers === 'function') renderBestSellers();
@@ -4731,6 +4792,13 @@ function logSearchKeyword(keyword) {
 
 // Custom Category Filter for Homepage Circular Cards
 function filterByCategory(categoryLabel) {
+    // If selecting a clothing category, ensure Luxury Clothing tab is active
+    if (['Straight Fit', 'Straight Fit Dresses', 'Kurta Sets', 'Kurta Set', 'Anarkali', 'Anarkali Dresses', 'Cotton Kurtas', 'Cotton Dresses', 'Designer Sarees', 'Bridal Lehengas'].includes(categoryLabel)) {
+        if (activeFeaturedTab !== 'clothing' && typeof switchFeaturedTab === 'function') {
+            switchFeaturedTab('clothing');
+        }
+    }
+
     const checkboxes = document.querySelectorAll('#featCategory input[type="checkbox"]');
     if (checkboxes.length > 0) {
         checkboxes.forEach(cb => cb.checked = false);
@@ -4761,21 +4829,21 @@ function filterByCategory(categoryLabel) {
         const allProducts = getDB('products');
         
         if (categoryLabel.toLowerCase().includes('earring')) {
-            filteredProducts = allProducts.filter(p => p.name.toLowerCase().includes('earring') || p.category.toLowerCase().includes('earring'));
+            filteredProducts = allProducts.filter(p => (p.name || '').toLowerCase().includes('earring') || (p.category || '').toLowerCase().includes('earring'));
         } else if (categoryLabel.toLowerCase().includes('ring')) {
-            filteredProducts = allProducts.filter(p => p.name.toLowerCase().includes('ring') || p.category.toLowerCase().includes('ring'));
+            filteredProducts = allProducts.filter(p => (p.name || '').toLowerCase().includes('ring') || (p.category || '').toLowerCase().includes('ring'));
         } else if (categoryLabel.toLowerCase().includes('necklace')) {
-            filteredProducts = allProducts.filter(p => p.name.toLowerCase().includes('necklace') || p.category.toLowerCase().includes('necklace'));
+            filteredProducts = allProducts.filter(p => (p.name || '').toLowerCase().includes('necklace') || (p.category || '').toLowerCase().includes('necklace'));
         } else if (categoryLabel.toLowerCase().includes('bangle')) {
-            filteredProducts = allProducts.filter(p => p.name.toLowerCase().includes('bangle') || p.category.toLowerCase().includes('bangle'));
+            filteredProducts = allProducts.filter(p => (p.name || '').toLowerCase().includes('bangle') || (p.category || '').toLowerCase().includes('bangle'));
         } else if (categoryLabel.toLowerCase().includes('bracelet')) {
-            filteredProducts = allProducts.filter(p => p.name.toLowerCase().includes('bracelet') || p.category.toLowerCase().includes('bracelet'));
+            filteredProducts = allProducts.filter(p => (p.name || '').toLowerCase().includes('bracelet') || (p.category || '').toLowerCase().includes('bracelet'));
         } else if (categoryLabel.toLowerCase().includes('pendant')) {
-            filteredProducts = allProducts.filter(p => p.name.toLowerCase().includes('pendant') || p.category.toLowerCase().includes('pendant'));
+            filteredProducts = allProducts.filter(p => (p.name || '').toLowerCase().includes('pendant') || (p.category || '').toLowerCase().includes('pendant'));
         } else if (categoryLabel === 'New Arrivals') {
             filteredProducts = allProducts.filter(p => p.availability === 'New Arrival');
         } else {
-            filteredProducts = allProducts.filter(p => p.category === categoryLabel || p.name.toLowerCase().includes(categoryLabel.toLowerCase()));
+            filteredProducts = allProducts.filter(p => p.category === categoryLabel || (p.name || '').toLowerCase().includes(categoryLabel.toLowerCase()));
         }
         
         if (typeof renderFeaturedProducts === 'function') {

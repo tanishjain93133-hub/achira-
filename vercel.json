@@ -3,7 +3,7 @@
   "cleanUrls": true,
   "functions": {
     "api/*.js": {
-      "includeFiles": "admin-backend/**"
+      "includeFiles": "{admin-backend/**,products_data.js}"
     }
   },
   "rewrites": [
