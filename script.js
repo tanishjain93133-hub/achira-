@@ -1141,6 +1141,9 @@ function initDatabase() {
             p.price = null;
             p.originalPrice = null;
             p.discountPrice = null;
+            p.size = ['Adjustable', 'Standard'];
+        } else {
+            p.size = ['M', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL', 'XXXXXL'];
         }
         return p;
     }).filter(p => {
@@ -1152,8 +1155,11 @@ function initDatabase() {
     // Merge all 140 Straight Fit products into the catalog
     if (cleanStraightFit.length > 0) {
         cleanStraightFit.forEach(sf => {
-            const exists = products.some(p => String(p.id) === String(sf.id) || String(p.sku) === String(sf.sku));
-            if (!exists) {
+            sf.size = ['M', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL', 'XXXXXL'];
+            const existsIdx = products.findIndex(p => String(p.id) === String(sf.id) || String(p.sku) === String(sf.sku));
+            if (existsIdx !== -1) {
+                products[existsIdx] = sf;
+            } else {
                 products.push(sf);
             }
         });
@@ -1866,18 +1872,26 @@ function openQuickView(productId) {
     currentQuickViewQty = 1;
 
     let availableSizes = [];
-    if (Array.isArray(p.size) && p.size.length > 0) availableSizes = p.size;
-    else if (typeof p.size === 'string' && p.size.trim()) availableSizes = p.size.split(',').map(s => s.trim());
-    else if (p.category === 'Straight Fit') availableSizes = ['L'];
-    else if (p.category === 'Jewellery' || (p.name && p.name.toLowerCase().includes('earring'))) availableSizes = ['Adjustable', 'Standard'];
-    else availableSizes = ['L'];
+    if (isJewelleryProduct(p) || p.category === 'Jewellery' || (p.name && p.name.toLowerCase().includes('earring'))) {
+        availableSizes = ['Adjustable', 'Standard'];
+    } else {
+        // Standard Couture Dress Sizes (S removed)
+        if (Array.isArray(p.size) && p.size.length > 0) {
+            availableSizes = p.size.filter(s => s !== 'S' && s !== 'XS');
+        } else if (typeof p.size === 'string' && p.size.trim()) {
+            availableSizes = p.size.split(',').map(s => s.trim()).filter(s => s !== 'S' && s !== 'XS');
+        }
+        if (availableSizes.length === 0) {
+            availableSizes = ['M', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL', 'XXXXXL'];
+        }
+    }
 
     let availableColors = [];
     if (Array.isArray(p.color)) availableColors = p.color;
     else if (typeof p.color === 'string' && p.color.trim()) availableColors = p.color.split(',').map(c => c.trim());
     else availableColors = ['Classic Shade', 'Festive Gold', 'Royal Jewel'];
 
-    currentQuickViewSize = availableSizes[0] || 'L';
+    currentQuickViewSize = availableSizes[0] || 'M';
     currentQuickViewColor = availableColors[0] || 'Standard';
 
     const sizesHTML = availableSizes.map((sz, idx) => `
