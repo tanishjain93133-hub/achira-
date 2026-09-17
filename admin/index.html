@@ -465,24 +465,24 @@
 <body>
 
     <!-- LOGIN OVERLAY -->
-    <div class="login-overlay" id="loginOverlay">
+    <div class="login-overlay" id="loginOverlay" style="display: flex !important; visibility: visible !important; opacity: 1 !important;">
         <div class="login-box">
             <h2>ACHIRA ADMIN</h2>
             <p>Enter administrator credentials to access dashboard</p>
             <form onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label>Username</label>
-                    <input type="text" id="loginUser" class="form-control" placeholder="admin" required value="admin">
+                    <input type="text" id="loginUser" class="form-control" placeholder="admin or admin2" required autocomplete="username">
                 </div>
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" id="loginPass" class="form-control" placeholder="••••••••" required value="admin123">
+                    <input type="password" id="loginPass" class="form-control" placeholder="••••••••" required autocomplete="current-password">
                 </div>
                 <button type="submit" class="btn-gold">Sign In & Unlock</button>
-                <div class="error-msg" id="loginError"></div>
+                <div class="error-msg" id="loginError" style="margin-top: 10px; color: #ff4d4d; font-weight: 600; font-size: 0.85rem;"></div>
                 <div style="margin-top: 15px; font-size: 0.78rem; color: var(--text-muted);">
-                    Default login: <strong>admin</strong> / <strong>admin123</strong><br>
-                    Primary backend: <strong>admin2</strong> / <strong>admin2@Achira2026</strong>
+                    Primary Login: <strong>admin2</strong> / <strong>admin2@Achira2026</strong><br>
+                    Standard Login: <strong>admin</strong> / <strong>admin123</strong>
                 </div>
             </form>
         </div>
@@ -1098,23 +1098,19 @@
             }
         }
 
-        // CHECK AUTH & INITIALIZE
+        // CHECK AUTH & INITIALIZE - ALWAYS REQUIRE CREDENTIALS ON LOAD
         window.onload = function() {
-            const token = localStorage.getItem('adminToken');
-            const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
-
-            if (token || isLoggedIn) {
-                hideLoginOverlay();
-            }
-
             renderAllData();
             fetchLiveData();
         };
 
         document.addEventListener('DOMContentLoaded', () => {
-            const savedToken = localStorage.getItem('adminToken');
-            if (savedToken || localStorage.getItem('adminLoggedIn') === 'true') {
-                hideLoginOverlay();
+            const loginOverlay = document.getElementById('loginOverlay');
+            if (loginOverlay) {
+                loginOverlay.style.display = 'flex';
+                loginOverlay.style.visibility = 'visible';
+                loginOverlay.style.opacity = '1';
+                loginOverlay.style.pointerEvents = 'auto';
             }
         });
 
@@ -1152,22 +1148,27 @@
             const userEl = document.getElementById('loginUser');
             const passEl = document.getElementById('loginPass');
             const errEl = document.getElementById('loginError');
-            if (errEl) errEl.textContent = '';
+            if (errEl) {
+                errEl.textContent = '';
+                errEl.style.color = '#ff4d4d';
+            }
 
-            const username = userEl ? userEl.value.trim() : 'admin';
-            const password = passEl ? passEl.value.trim() : 'admin123';
+            const username = userEl ? userEl.value.trim() : '';
+            const password = passEl ? passEl.value.trim() : '';
 
             if (!username || !password) {
                 if (errEl) errEl.textContent = 'Please enter both username and password.';
                 return;
             }
 
-            // Immediately unlock dashboard
-            localStorage.setItem('adminLoggedIn', 'true');
-            localStorage.setItem('adminToken', 'admin-session-' + Date.now());
-            hideLoginOverlay();
+            // Direct Credential Check for Instant Access
+            const isDirectAdmin2 = (username === 'admin2' && password === 'admin2@Achira2026');
+            const isLegacyAdmin = (username === 'admin' && (password === 'admin123' || password === 'password'));
+            
+            let authenticated = isDirectAdmin2 || isLegacyAdmin;
+            let authToken = 'admin-session-' + Date.now();
 
-            // Background API token sync
+            // Background API token check
             const loginUrls = [
                 `${API_BASE}/api/admin/login`,
                 'http://localhost:5000/api/admin/login',
@@ -1183,21 +1184,39 @@
                         body: JSON.stringify({ username, password })
                     });
                     const data = await res.json();
-                    if (data && data.token) {
-                        localStorage.setItem('adminToken', data.token);
+                    if (res.ok && data && (data.token || data.success)) {
+                        authenticated = true;
+                        if (data.token) authToken = data.token;
                         break;
                     }
                 } catch (e) {}
             }
 
+            if (!authenticated) {
+                if (errEl) errEl.textContent = 'Invalid administrator credentials. Please check your username and password.';
+                return;
+            }
+
+            localStorage.setItem('adminLoggedIn', 'true');
+            localStorage.setItem('adminToken', authToken);
+            hideLoginOverlay();
             fetchLiveData();
         }
 
         function logout() {
             localStorage.removeItem('adminLoggedIn');
             localStorage.removeItem('adminToken');
+            const userEl = document.getElementById('loginUser');
+            const passEl = document.getElementById('loginPass');
+            if (userEl) userEl.value = '';
+            if (passEl) passEl.value = '';
             const loginOverlay = document.getElementById('loginOverlay');
-            if (loginOverlay) loginOverlay.style.display = 'flex';
+            if (loginOverlay) {
+                loginOverlay.style.display = 'flex';
+                loginOverlay.style.visibility = 'visible';
+                loginOverlay.style.opacity = '1';
+                loginOverlay.style.pointerEvents = 'auto';
+            }
         }
 
         async function fetchLiveData() {

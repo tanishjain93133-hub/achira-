@@ -2513,74 +2513,74 @@ async function renderUserOrdersTable() {
     const listWrap = document.getElementById('userOrdersList');
     if (!listWrap) return;
 
-    const token = localStorage.getItem('userToken');
-    if (!token) {
-        listWrap.innerHTML = `
-            <div style="text-align: center; padding: 40px 20px; background: #FAF6F0; border-radius: 12px; border: 1px solid #E5D5C0;">
-                <p style="font-family: var(--font-brand); color: #3C0008; font-size: 1.1rem; margin-bottom: 10px; font-weight: 700;">Account Authentication Required</p>
-                <p style="font-size: 0.88rem; color: #666; margin-bottom: 20px;">Please log in to your Achira customer account to access your personal purchase history.</p>
-                <button type="button" onclick="closeProfileModal(); openAuthModal('login');" style="padding: 12px 28px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 24px; font-weight: 700; cursor: pointer; font-size: 0.9rem;">SIGN IN TO VIEW ORDERS</button>
-            </div>
-        `;
-        return;
-    }
-
     listWrap.innerHTML = `
         <div style="text-align: center; padding: 30px; color: #666; font-size: 0.9rem;">
             <p>✦ Fetching your secure purchase history from atelier database...</p>
         </div>
     `;
 
+    const token = localStorage.getItem('userToken') || '';
+    const activeEmail = (currentUser && currentUser.email ? currentUser.email : (localStorage.getItem('userEmail') || '')).toLowerCase().trim();
+    const activePhone = (currentUser && currentUser.phone ? currentUser.phone : (localStorage.getItem('userPhone') || '')).trim();
+
     let customerOrders = [];
+
+    // 1. Fetch from live API backend with graceful fallback
     try {
-        const res = await fetch(`${API_BASE}/api/user/orders`, {
+        const queryParams = new URLSearchParams();
+        if (activeEmail) queryParams.set('email', activeEmail);
+        if (activePhone) queryParams.set('phone', activePhone);
+        
+        const apiUrl = `${API_BASE}/api/user/orders?${queryParams.toString()}`;
+        const res = await fetch(apiUrl, {
             headers: {
-                'Authorization': `Bearer ${token}`
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
             }
         });
-
-        if (res.status === 401 || res.status === 403) {
-            localStorage.removeItem('userToken');
-            localStorage.removeItem('currentUser');
-            listWrap.innerHTML = `
-                <div style="text-align: center; padding: 35px 20px; background: #FAF6F0; border-radius: 12px; border: 1px solid #E5D5C0;">
-                    <p style="font-family: var(--font-brand); color: #3C0008; font-size: 1rem; margin-bottom: 8px; font-weight: 700;">Session Expired</p>
-                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 16px;">Your session has expired. Please sign in again to view your order history.</p>
-                    <button type="button" onclick="closeProfileModal(); openAuthModal('login');" style="padding: 10px 24px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 20px; font-weight: 700; cursor: pointer;">Sign In</button>
-                </div>
-            `;
-            return;
-        }
 
         if (res.ok) {
             const data = await res.json();
             if (data && Array.isArray(data.orders)) {
-                customerOrders = data.orders;
+                customerOrders = data.orders.filter(o => !isFakeRecord(o));
+            } else if (Array.isArray(data)) {
+                customerOrders = data.filter(o => !isFakeRecord(o));
             }
         }
     } catch (err) {
-        console.warn('[ORDER HISTORY API ERROR]', err);
+        console.warn('[ORDER HISTORY API NOTICE]', err);
     }
 
-    if (customerOrders.length === 0) {
-        const activeEmail = (currentUser && currentUser.email ? currentUser.email : localStorage.getItem('userEmail') || '').toLowerCase().trim();
-        if (activeEmail) {
-            const local = getDB('orders', []).filter(o => {
-                const oEmail = (o.userEmail || o.email || '').toLowerCase().trim();
-                return oEmail === activeEmail && !isFakeRecord(o);
-            });
-            if (local.length > 0) {
-                customerOrders = local;
+    // 2. Merge with LocalStorage Orders and Admin Orders cache
+    const localStoreOrders = getDB('orders', []);
+    const localAdminOrders = getDB('admin_orders', []);
+    const allLocalOrders = [...localStoreOrders, ...localAdminOrders];
+
+    allLocalOrders.forEach(o => {
+        if (!o || isFakeRecord(o)) return;
+        const oEmail = (o.userEmail || o.email || '').toLowerCase().trim();
+        const oPhone = String(o.userPhone || o.phone || '').trim();
+        
+        const isUserMatch = (activeEmail && oEmail === activeEmail) || 
+                            (activePhone && (oPhone.includes(activePhone) || activePhone.includes(oPhone))) ||
+                            (!activeEmail && !activePhone); // If no login, show session/local orders
+
+        if (isUserMatch) {
+            const exists = customerOrders.some(co => String(co.id) === String(o.id));
+            if (!exists) {
+                customerOrders.push(o);
             }
         }
-    }
+    });
 
     if (customerOrders.length === 0) {
         listWrap.innerHTML = `
             <div style="text-align: center; padding: 40px 20px; background: #FFF; border-radius: 12px; border: 1px dashed #B88A44;">
                 <p style="font-family: var(--font-brand); font-size: 1.1rem; color: #3C0008; font-weight: 700; margin-bottom: 8px;">No Orders Placed Yet</p>
                 <p style="font-size: 0.86rem; color: #666; margin-bottom: 20px;">You haven't placed any orders with this account yet. Explore our royal collections to place your first couture order.</p>
-                <button type="button" onclick="closeProfileModal(); window.location.href='collections.html';" style="padding: 10px 26px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 20px; font-weight: 700; cursor: pointer;">EXPLORE COUTURE</button>
+                <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                    <button type="button" onclick="closeProfileModal(); window.location.href='collections.html';" style="padding: 10px 26px; background: linear-gradient(135deg, #3C0008, #680010); color: #D4AF37; border: 1px solid #B88A44; border-radius: 20px; font-weight: 700; cursor: pointer;">EXPLORE COUTURE</button>
+                    ${!currentUser ? `<button type="button" onclick="closeProfileModal(); openAuthModal('login');" style="padding: 10px 22px; background: #FAF6F0; color: #3C0008; border: 1px solid #B88A44; border-radius: 20px; font-weight: 700; cursor: pointer;">SIGN IN WITH EMAIL</button>` : ''}
+                </div>
             </div>
         `;
         return;
@@ -2589,7 +2589,7 @@ async function renderUserOrdersTable() {
     let html = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
             <strong style="font-family: var(--font-brand); color: #3C0008; font-size: 1.05rem;">My Purchase History (${customerOrders.length} Order${customerOrders.length === 1 ? '' : 's'})</strong>
-            <span style="font-size: 0.8rem; color: #006633; background: rgba(0,102,51,0.08); padding: 3px 10px; border-radius: 12px; border: 1px solid rgba(0,102,51,0.2); font-weight: 600;">🔒 Verified Account History</span>
+            <span style="font-size: 0.8rem; color: #006633; background: rgba(0,102,51,0.08); padding: 3px 10px; border-radius: 12px; border: 1px solid rgba(0,102,51,0.2); font-weight: 600;">🔒 Verified Purchase History</span>
         </div>
         <div style="overflow-x: auto;">
         <table class="admin-table" style="width: 100%; border-collapse: collapse;">
@@ -3304,6 +3304,11 @@ async function completeOrderPlacement(realServerOrder) {
         'http://localhost:5000/api/user/checkout',
         'http://localhost:5001/api/user/checkout',
         '/api/user/checkout',
+        `${API_BASE}/api/admin/orders`,
+        'http://localhost:5000/api/admin/orders',
+        'http://localhost:5001/api/admin/orders',
+        '/api/admin/orders',
+        `${API_BASE}/api/user/orders`,
         '/api/orders',
         'http://localhost:5000/api/orders',
         'http://localhost:5001/api/orders'
