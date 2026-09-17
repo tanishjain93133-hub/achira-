@@ -7209,5 +7209,20 @@ img, video, iframe, canvas, svg {
     }
 }
 
+/* --- ULTRA-FAST IMAGE RENDERING & SKELETON PERFORMANCE --- */
+.card-image-wrap,
+.featured-card-img-wrap,
+.gallery-hero-wrapper {
+    background: #FAF7F2 linear-gradient(135deg, rgba(232, 211, 167, 0.25) 0%, rgba(184, 138, 68, 0.08) 100%);
+    content-visibility: auto;
+    contain-intrinsic-size: 300px 420px;
+}
 
-
+.card-image-wrap img,
+.featured-card-img-wrap img,
+.gallery-hero-img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: auto;
+    will-change: transform;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
