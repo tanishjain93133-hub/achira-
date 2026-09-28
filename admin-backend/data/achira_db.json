@@ -259,15 +259,15 @@
       "paymentMethod": "UPI (QR)",
       "paymentStatus": "Paid",
       "orderStatus": "Processing",
-      "invoiceNumber": "INV-1790570818943-3544",
+      "invoiceNumber": "INV-1790571109256-9368",
       "subtotal": 4719,
       "discount": 0,
       "tax": 849,
       "shippingFee": 0,
       "grandTotal": 4719,
       "itemsSummary": "Nazneen Deep Wine Magenta Silk Kurti with Palazzo (x1)",
-      "createdAt": "2026-09-28T04:46:58.943Z",
-      "updatedAt": "2026-09-28T04:46:58.943Z",
+      "createdAt": "2026-09-28T04:51:49.256Z",
+      "updatedAt": "2026-09-28T04:51:49.256Z",
       "userName": "Harshil",
       "userEmail": "harshil.patel@gmail.com",
       "userPhone": "+91 98234 56789",
@@ -306,15 +306,15 @@
       "paymentMethod": "UPI (QR)",
       "paymentStatus": "Paid",
       "orderStatus": "Processing",
-      "invoiceNumber": "INV-1790570817164-3284",
+      "invoiceNumber": "INV-1790571107439-7048",
       "subtotal": 4719,
       "discount": 0,
       "tax": 849,
       "shippingFee": 0,
       "grandTotal": 4719,
       "itemsSummary": "Mehrunissa Deep Royal Purple Silk Kurta Set (x1)",
-      "createdAt": "2026-09-28T04:46:57.164Z",
-      "updatedAt": "2026-09-28T04:46:57.164Z",
+      "createdAt": "2026-09-28T04:51:47.439Z",
+      "updatedAt": "2026-09-28T04:51:47.439Z",
       "userName": "Tanish Jain",
       "userEmail": "tanish.jain@gmail.com",
       "userPhone": "+91 98765 12345",
@@ -811,8 +811,8 @@
       "email": "tanish.jain@gmail.com",
       "phone": "+91 98765 12345",
       "address": "Penthouse 402, Altamount Road, Mumbai - 400026",
-      "ordersCount": 6,
-      "totalSpent": 28314,
+      "ordersCount": 7,
+      "totalSpent": 33033,
       "status": "Active"
     },
     {
@@ -821,8 +821,8 @@
       "email": "harshil.patel@gmail.com",
       "phone": "+91 98234 56789",
       "address": "14 Bodakdev Heritage, Ahmedabad - 380054",
-      "ordersCount": 5,
-      "totalSpent": 23595,
+      "ordersCount": 6,
+      "totalSpent": 28314,
       "status": "Active"
     },
     {
@@ -7430,5 +7430,5 @@
     "phone": "+91 98765 43210",
     "adminUsername": "admin2"
   },
-  "lastUpdated": "2026-09-28T04:46:58.946Z"
+  "lastUpdated": "2026-09-28T04:51:49.259Z"
 }
